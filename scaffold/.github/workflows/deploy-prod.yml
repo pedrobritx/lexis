@@ -1,0 +1,126 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # Guard: only deploy if CI passed on this exact SHA
+  verify-ci:
+    name: Verify CI passed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CI status for this SHA
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+            });
+            const ciRun = checks.check_runs.find(r => r.name === 'CI passed');
+            if (!ciRun || ciRun.conclusion !== 'success') {
+              core.setFailed('CI has not passed for this SHA. Aborting production deploy.');
+            }
+            console.log(`CI status: ${ciRun?.conclusion}. Proceeding.`);
+
+  # Production deploy
+  deploy-production:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    needs: verify-ci
+    environment:
+      name: production
+      url: https://lexis.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # MIGRATIONS FIRST — before any code deploys
+      # Uses DIRECT_URL to bypass PgBouncer
+      - name: Run migrations on production DB
+        run: pnpm db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.PROD_DIRECT_URL }}
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli@latest
+
+      # Rolling deploy — Railway starts new container, health check passes, then kills old one
+      - name: Deploy API to production
+        run: |
+          railway deploy \
+            --service lexis-api \
+            --environment production \
+            --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # Socket.IO graceful shutdown — 30s drain before kill
+      - name: Deploy RT server to production
+        run: |
+          railway deploy \
+            --service lexis-realtime \
+            --environment production \
+            --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      # Vercel deploys automatically via Git integration — no action needed
+      # But we wait for Railway to finish before smoke testing
+      - name: Wait for Railway deploys to complete
+        run: sleep 45
+
+      # Smoke test all 3 services
+      - name: Smoke test production
+        run: |
+          echo "Testing API..."
+          curl -sf https://api.lexis.app/health | jq .
+          echo "Testing RT server..."
+          curl -sf https://rt.lexis.app/health | jq .
+          echo "Testing web..."
+          curl -sf -o /dev/null -w "%{http_code}" https://lexis.app | grep 200
+          echo "All production services healthy."
+
+      # Tag the release
+      - name: Create git tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}-$(date +%Y%m%d%H%M)" -m "Production deploy $(date -u)"
+          git push origin --tags
+
+      # Notify on success
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "✅ Production deploy complete"
+          echo "API: https://api.lexis.app"
+          echo "RT:  https://rt.lexis.app"
+          echo "Web: https://lexis.app"
+
+      # Notify on failure
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Production deploy FAILED"
+          echo "Check Railway logs and Sentry for details"
+          echo "Rollback: railway rollback --service lexis-api --environment production"

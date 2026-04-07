@@ -1,0 +1,15 @@
+# apps/realtime/railway.toml
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm build:realtime"
+
+[deploy]
+startCommand = "node dist/apps/realtime/src/main.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 3
+# Socket.IO graceful shutdown:
+# SIGTERM received → stop accepting connections → drain active sessions → flush stroke buffers → exit
+# 30 seconds matches the SIGTERM handler timeout in apps/realtime/src/server.ts
+shutdownDelay = 30

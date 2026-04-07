@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+
+# Prisma
+packages/db/prisma/migrations/**/migration_lock.toml
+
+# Logs
+*.log
+
+# Turbo (if added later)
+.turbo/
+
+# Generated clients
+apps/ios/Sources/LexisAPI/
+apps/android/
+
+# Temporary
+tmp/

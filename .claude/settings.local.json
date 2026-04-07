@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm --version)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(chmod +x /Users/pedr/Developer/Claude/Projects/Lexis/.husky/pre-commit)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(node -e \"const m = require\\(''ioredis''\\); console.log\\(typeof m, typeof m.default, typeof m.Redis\\)\")",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm --filter @lexis/logger typecheck)",
+      "Bash(pnpm --filter \"@lexis/logger\" --filter \"@lexis/types\" --filter \"@lexis/cache\" --filter \"@lexis/events\" --filter \"@lexis/ai-prompts\" --filter \"@lexis/db\" build)",
+      "Bash(pnpm --filter \"@lexis/api\" --filter \"@lexis/realtime\" typecheck)",
+      "Bash(pnpm --filter \"@lexis/api\" typecheck)",
+      "Bash(pnpm --filter \"@lexis/web\" typecheck)",
+      "Bash(pnpm lint:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

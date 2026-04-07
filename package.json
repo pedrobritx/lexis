@@ -1,0 +1,58 @@
+{
+  "name": "lexis",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:api": "pnpm --filter @lexis/api build",
+    "build:realtime": "pnpm --filter @lexis/realtime build",
+    "build:web": "pnpm --filter @lexis/web build",
+    "dev": "pnpm -r --parallel dev",
+    "dev:api": "pnpm --filter @lexis/api dev",
+    "dev:realtime": "pnpm --filter @lexis/realtime dev",
+    "dev:web": "pnpm --filter @lexis/web dev",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "test": "pnpm test:unit && pnpm test:integration && pnpm test:realtime",
+    "test:unit": "vitest run --project packages --project api-unit --project realtime",
+    "test:integration": "vitest run --project api-integration",
+    "test:realtime": "vitest run --project realtime-events",
+    "test:e2e": "playwright test",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "db:migrate": "pnpm --filter @lexis/db exec prisma migrate dev",
+    "db:migrate:deploy": "pnpm --filter @lexis/db exec prisma migrate deploy",
+    "db:seed": "pnpm --filter @lexis/db exec prisma db seed",
+    "db:studio": "pnpm --filter @lexis/db exec prisma studio",
+    "db:generate": "pnpm --filter @lexis/db exec prisma generate",
+    "generate:clients": "pnpm generate:swift && pnpm generate:kotlin",
+    "generate:swift": "openapi-generator-cli generate -i http://localhost:3000/openapi.json -g swift5 -o apps/ios/Sources/LexisAPI",
+    "generate:kotlin": "openapi-generator-cli generate -i http://localhost:3000/openapi.json -g kotlin -o apps/android/src/main/kotlin/app/lexis/api",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:test:up": "docker compose -f docker-compose.test.yml up -d",
+    "docker:test:down": "docker compose -f docker-compose.test.yml down"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.0",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0",
+    "@vitest/coverage-v8": "^1.4.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yaml,yml}": ["prettier --write"]
+  }
+}

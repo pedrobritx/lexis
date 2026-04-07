@@ -1,0 +1,256 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ─── Stage 1: Type check + lint (~30s) ──────────────────
+  lint:
+    name: Type check + lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+  # ─── Stage 2: Unit tests + coverage gates (~1 min) ──────
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run unit tests with coverage
+        run: pnpm test:coverage
+        env:
+          NODE_ENV: test
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+
+  # ─── Stage 3: Integration + RT tests (~3 min) ───────────
+  integration-tests:
+    name: Integration + RT tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    services:
+      postgres:
+        image: postgres:16-alpine
+        ports:
+          - "5433:5432"
+        env:
+          POSTGRES_DB: lexis_test
+          POSTGRES_USER: lexis
+          POSTGRES_PASSWORD: lexis_test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - "6380:6379"
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Prisma migrations on test DB
+        run: pnpm db:migrate:deploy
+        env:
+          DATABASE_URL: postgresql://lexis:lexis_test_password@localhost:5433/lexis_test
+          DIRECT_URL: postgresql://lexis:lexis_test_password@localhost:5433/lexis_test
+
+      - name: Seed test database
+        run: pnpm db:seed
+        env:
+          DATABASE_URL: postgresql://lexis:lexis_test_password@localhost:5433/lexis_test
+          DIRECT_URL: postgresql://lexis:lexis_test_password@localhost:5433/lexis_test
+
+      - name: Run integration tests
+        run: pnpm test:integration
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://lexis:lexis_test_password@localhost:5433/lexis_test
+          DIRECT_URL: postgresql://lexis:lexis_test_password@localhost:5433/lexis_test
+          REDIS_URL: redis://localhost:6380
+          JWT_SECRET: test-secret-minimum-32-characters-long
+          WEBAUTHN_RP_ID: localhost
+          WEBAUTHN_RP_ORIGIN: http://localhost:3000
+
+      - name: Run RT event tests
+        run: pnpm test:realtime
+        env:
+          NODE_ENV: test
+          REDIS_URL: redis://localhost:6380
+          JWT_SECRET: test-secret-minimum-32-characters-long
+
+  # ─── Stage 4: Deploy to staging (~2 min) ────────────────
+  deploy-staging:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run migrations on staging DB
+        run: pnpm db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_URL }}
+          DIRECT_URL: ${{ secrets.STAGING_DIRECT_URL }}
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli@latest
+
+      - name: Deploy API to staging
+        run: |
+          railway deploy \
+            --service lexis-api \
+            --environment staging \
+            --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deploy RT server to staging
+        run: |
+          railway deploy \
+            --service lexis-realtime \
+            --environment staging \
+            --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Wait for staging to be ready
+        run: sleep 30
+
+      - name: Smoke test staging
+        run: |
+          curl -f https://api.staging.lexis.app/health
+          curl -f https://rt.staging.lexis.app/health
+
+  # ─── Stage 5: E2E tests on staging (~2 min) ─────────────
+  e2e-tests:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm playwright install --with-deps chromium webkit
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+        env:
+          BASE_URL: https://staging.lexis.app
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_OTP_SECRET: ${{ secrets.E2E_ADMIN_OTP_SECRET }}
+
+      - name: Upload Playwright report on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ─── Merge gate summary ─────────────────────────────────
+  ci-success:
+    name: CI passed
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, integration-tests, e2e-tests]
+    if: always()
+    steps:
+      - name: Check all jobs succeeded
+        run: |
+          if [[ "${{ needs.lint.result }}" != "success" ]] ||
+             [[ "${{ needs.unit-tests.result }}" != "success" ]] ||
+             [[ "${{ needs.integration-tests.result }}" != "success" ]] ||
+             [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+            echo "One or more required jobs failed"
+            exit 1
+          fi
+          echo "All CI checks passed"

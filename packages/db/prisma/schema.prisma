@@ -1,0 +1,909 @@
+// Lexis — Complete Prisma Schema
+// All phases. Run: prisma migrate dev --name init
+// Use --create-only first, review SQL, then apply.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── ENUMS ──────────────────────────────────────────────
+
+enum Role {
+  teacher
+  student
+  system
+}
+
+enum AgeGroup {
+  adult
+  minor
+}
+
+enum PlanSlug {
+  free
+  pro
+  growth
+}
+
+enum Visibility {
+  private
+  public_template
+}
+
+enum CourseStatus {
+  draft
+  active
+  archived
+}
+
+enum Framework {
+  cefr
+  jlpt
+  hsk
+  custom
+}
+
+enum CefrLevel {
+  a1
+  a2
+  b1
+  b2
+  c1
+  c2
+}
+
+enum ActivityType {
+  cloze
+  mcq
+  matching
+  ordering
+  open_writing
+  listening
+}
+
+enum SrsMode {
+  flashcard
+  mini_lesson
+}
+
+enum ClassroomStatus {
+  active
+  paused
+  archived
+}
+
+enum SessionStatus {
+  scheduled
+  active
+  completed
+  cancelled
+}
+
+enum ParticipantStatus {
+  invited
+  joined
+  absent
+}
+
+enum LessonProgressStatus {
+  not_started
+  in_progress
+  completed
+}
+
+enum SubmissionStatus {
+  pending
+  graded
+  returned
+}
+
+enum BoardPattern {
+  blank
+  dotted
+  squared
+}
+
+enum BoardObjectType {
+  sticky
+  text
+  shape
+  activity
+  pdf
+  image
+  video
+}
+
+enum AssetType {
+  image
+  pdf
+  audio
+  video_embed
+}
+
+enum CommandType {
+  object_create
+  object_update
+  object_delete
+  stroke_add
+  stroke_erase
+}
+
+enum AnnotationType {
+  stroke
+  comment
+  highlight
+}
+
+enum AiCapability {
+  full_lesson
+  activity
+  rubric
+  adapt_lesson
+  personalised_review
+  suggest_next
+}
+
+enum DraftStatus {
+  pending_review
+  approved
+  discarded
+}
+
+enum SuggestionTrigger {
+  auto
+  manual
+}
+
+enum SuggestionStatus {
+  ready
+  accepted
+  dismissed
+}
+
+enum UpgradeRequestStatus {
+  pending
+  approved
+  rejected
+}
+
+enum TenantMemberRole {
+  owner
+  teacher
+  admin
+}
+
+enum TenantMemberStatus {
+  invited
+  active
+  removed
+}
+
+enum BadgeRarity {
+  common
+  rare
+  legendary
+}
+
+enum BadgeIconType {
+  svg_key
+  emoji
+}
+
+// ─── TENANT + SUBSCRIPTION ──────────────────────────────
+
+model Tenant {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  stripeCustomerId String?  @map("stripe_customer_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  subscription    Subscription?
+  members         TenantMember[]
+  upgradeRequests UpgradeRequest[]
+  billingEvents   BillingEvent[]
+  usageSnapshots  UsageSnapshot[]
+  users           User[]
+  courses         Course[]
+  classrooms      Classroom[]
+  enrollments     Enrollment[]
+  sessions        Session[]
+  srsItems        SrsItem[]
+  mediaAssets     MediaAsset[]
+  aiDrafts          AiDraft[]
+  aiGenerationLogs  AiGenerationLog[]
+  aiSuggestions     AiSuggestion[]
+  errorPatterns     ErrorPattern[]
+  certificates      Certificate[]
+
+  @@map("tenants")
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  tenantId             String   @unique @map("tenant_id")
+  planSlug             PlanSlug @default(free) @map("plan_slug")
+  studentLimit         Int?     @map("student_limit")
+  lessonPlanLimit      Int?     @map("lesson_plan_limit")
+  aiCreditsRemaining   Int      @default(0) @map("ai_credits_remaining")
+  storageLimitBytes    BigInt?  @map("storage_limit_bytes")
+  featureFlags         Json     @default("{}") @map("feature_flags")
+  renewsAt             DateTime? @map("renews_at")
+  gracePeriodUntil     DateTime? @map("grace_period_until")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("subscriptions")
+}
+
+// ─── AUTH ────────────────────────────────────────────────
+
+model User {
+  id        String    @id @default(uuid())
+  tenantId  String?   @map("tenant_id")
+  email     String    @unique
+  role      Role      @default(student)
+  ageGroup  AgeGroup? @map("age_group")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  tenant          Tenant?          @relation(fields: [tenantId], references: [id])
+  passkeyCredentials PasskeyCredential[]
+  consentRecords  ConsentRecord[]
+  teacherProfile  TeacherProfile?
+  studentProfile  StudentProfile?
+  tenantMemberships TenantMember[]
+
+  @@map("users")
+}
+
+model PasskeyCredential {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  credentialId Bytes    @unique @map("credential_id")
+  publicKey    Bytes    @map("public_key")
+  signCount    Int      @map("sign_count")
+  deviceLabel  String?  @map("device_label")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("passkey_credentials")
+}
+
+model ConsentRecord {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  acceptedAt    DateTime @map("accepted_at")
+  policyVersion String   @map("policy_version")
+  ipAddress     String   @map("ip_address")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("consent_records")
+}
+
+// ─── PROFILES ────────────────────────────────────────────
+
+model TeacherProfile {
+  id              String  @id @default(uuid())
+  userId          String  @unique @map("user_id")
+  tenantId        String  @map("tenant_id")
+  displayName     String  @map("display_name")
+  teacherLanguage String? @map("teacher_language")
+  bio             String?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("teacher_profiles")
+}
+
+model StudentProfile {
+  id                  String    @id @default(uuid())
+  userId              String    @unique @map("user_id")
+  tenantId            String    @map("tenant_id")
+  displayName         String    @map("display_name")
+  cefrLevel           CefrLevel? @map("cefr_level")
+  streakDays          Int       @default(0) @map("streak_days")
+  streakGraceUsedAt   DateTime? @map("streak_grace_used_at")
+  disengagementFlag   Boolean   @default(false) @map("disengagement_flag")
+  timezone            String    @default("UTC")
+  xpTotal             Int       @default(0) @map("xp_total")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("student_profiles")
+}
+
+// ─── CONTENT ─────────────────────────────────────────────
+
+model Course {
+  id             String       @id @default(uuid())
+  tenantId       String       @map("tenant_id")
+  createdBy      String       @map("created_by")
+  title          String
+  description    String?
+  targetLanguage String       @default("en") @map("target_language")
+  framework      Framework    @default(cefr)
+  targetLevel    String       @default("b1") @map("target_level")
+  teacherLanguage String?     @map("teacher_language")
+  visibility     Visibility   @default(private)
+  status         CourseStatus @default(draft)
+  version        Int          @default(1)
+  deletedAt      DateTime?    @map("deleted_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  units    Unit[]
+  clonedFrom TemplateClone[] @relation("sourceClones")
+  clonedTo   TemplateClone[] @relation("destClones")
+
+  @@index([tenantId, visibility])
+  @@map("courses")
+}
+
+model Unit {
+  id        String    @id @default(uuid())
+  courseId  String    @map("course_id")
+  tenantId  String    @map("tenant_id")
+  title     String
+  position  Int
+  deletedAt DateTime? @map("deleted_at")
+
+  course  Course   @relation(fields: [courseId], references: [id])
+  lessons Lesson[]
+
+  @@map("units")
+}
+
+model Lesson {
+  id               String    @id @default(uuid())
+  unitId           String    @map("unit_id")
+  tenantId         String    @map("tenant_id")
+  title            String
+  objective        String?
+  position         Int
+  estimatedMinutes Int?      @map("estimated_minutes")
+  deletedAt        DateTime? @map("deleted_at")
+
+  unit       Unit       @relation(fields: [unitId], references: [id])
+  activities Activity[]
+  progress   LessonProgress[]
+
+  @@map("lessons")
+}
+
+model Activity {
+  id               String       @id @default(uuid())
+  lessonId         String       @map("lesson_id")
+  tenantId         String       @map("tenant_id")
+  type             ActivityType
+  title            String
+  content          Json
+  scoringRules     Json?        @map("scoring_rules")
+  skillTags        String[]     @map("skill_tags")
+  srsMode          SrsMode?     @map("srs_mode")
+  mediaAssetId     String?      @map("media_asset_id")
+  rubricTemplateId String?      @map("rubric_template_id")
+  imageUrl         String?      @map("image_url")
+  visibility       Visibility   @default(private)
+  version          Int          @default(1)
+  deletedAt        DateTime?    @map("deleted_at")
+
+  lesson   Lesson    @relation(fields: [lessonId], references: [id])
+  srsItems SrsItem[]
+  attempts ActivityAttempt[]
+
+  @@map("activities")
+}
+
+model TemplateClone {
+  id              String   @id @default(uuid())
+  sourceCourseId  String   @map("source_course_id")
+  clonedCourseId  String   @map("cloned_course_id")
+  clonedByTenant  String   @map("cloned_by_tenant")
+  clonedAt        DateTime @default(now()) @map("cloned_at")
+
+  source Course @relation("sourceClones", fields: [sourceCourseId], references: [id])
+  dest   Course @relation("destClones",   fields: [clonedCourseId], references: [id])
+
+  @@map("template_clones")
+}
+
+// ─── CLASSROOMS + SESSIONS ───────────────────────────────
+
+model Classroom {
+  id        String          @id @default(uuid())
+  tenantId  String          @map("tenant_id")
+  teacherId String          @map("teacher_id")
+  name      String
+  courseId  String?         @map("course_id")
+  status    ClassroomStatus @default(active)
+
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  enrollments Enrollment[]
+  sessions    Session[]
+
+  @@map("classrooms")
+}
+
+model Enrollment {
+  id          String   @id @default(uuid())
+  classroomId String   @map("classroom_id")
+  studentId   String   @map("student_id")
+  tenantId    String   @map("tenant_id")
+  enrolledAt  DateTime @default(now()) @map("enrolled_at")
+
+  classroom Classroom @relation(fields: [classroomId], references: [id])
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@unique([classroomId, studentId])
+  @@map("enrollments")
+}
+
+model Session {
+  id          String        @id @default(uuid())
+  tenantId    String        @map("tenant_id")
+  teacherId   String        @map("teacher_id")
+  studentId   String?       @map("student_id")
+  classroomId String?       @map("classroom_id")
+  status      SessionStatus @default(scheduled)
+  startedAt   DateTime?     @map("started_at")
+  endedAt     DateTime?     @map("ended_at")
+  durationSecs Int?         @map("duration_secs")
+
+  tenant       Tenant               @relation(fields: [tenantId], references: [id])
+  classroom    Classroom?           @relation(fields: [classroomId], references: [id])
+  participants SessionParticipant[]
+  boardPages   BoardPage[]
+  followSessions FollowSession[]
+
+  @@map("sessions")
+}
+
+model SessionParticipant {
+  id        String            @id @default(uuid())
+  sessionId String            @map("session_id")
+  studentId String            @map("student_id")
+  tenantId  String            @map("tenant_id")
+  joinedAt  DateTime?         @map("joined_at")
+  leftAt    DateTime?         @map("left_at")
+  status    ParticipantStatus @default(invited)
+
+  session Session @relation(fields: [sessionId], references: [id])
+
+  @@map("session_participants")
+}
+
+// ─── PROGRESS ────────────────────────────────────────────
+
+model LessonProgress {
+  id          String               @id @default(uuid())
+  studentId   String               @map("student_id")
+  lessonId    String               @map("lesson_id")
+  tenantId    String               @map("tenant_id")
+  status      LessonProgressStatus @default(not_started)
+  scorePct    Float?               @map("score_pct")
+  completedAt DateTime?            @map("completed_at")
+
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([studentId, lessonId])
+  @@map("lesson_progress")
+}
+
+model ActivityAttempt {
+  id                   String    @id @default(uuid())
+  studentId            String    @map("student_id")
+  activityId           String    @map("activity_id")
+  tenantId             String    @map("tenant_id")
+  correct              Boolean
+  score                Float?
+  response             Json?
+  attemptedAt          DateTime  @default(now()) @map("attempted_at")
+  annotationStrokeKey  String?   @map("annotation_stroke_key")
+  annotationComments   Json?     @map("annotation_comments")
+
+  activity    Activity     @relation(fields: [activityId], references: [id])
+  submission  Submission?
+
+  @@index([studentId, attemptedAt, correct])
+  @@map("activity_attempts")
+}
+
+// ─── SRS ─────────────────────────────────────────────────
+
+model SrsItem {
+  id              String    @id @default(uuid())
+  studentId       String    @map("student_id")
+  activityId      String    @map("activity_id")
+  tenantId        String    @map("tenant_id")
+  srsMode         SrsMode   @map("srs_mode")
+  easeFactor      Float     @default(2.5) @map("ease_factor")
+  intervalDays    Int       @default(1) @map("interval_days")
+  nextReview      DateTime  @map("next_review") @db.Date
+  activityVersion Int       @map("activity_version")
+  repetitions     Int       @default(0)
+
+  activity Activity @relation(fields: [activityId], references: [id])
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([studentId, nextReview])
+  @@map("srs_items")
+}
+
+// ─── PLACEMENT TEST ──────────────────────────────────────
+
+model PlacementTest {
+  id              String    @id @default(uuid())
+  studentId       String    @map("student_id")
+  tenantId        String    @map("tenant_id")
+  score           Int
+  resultLevel     CefrLevel @map("result_level")
+  questionVersions Json     @map("question_versions")
+  takenAt         DateTime  @default(now()) @map("taken_at")
+
+  @@map("placement_tests")
+}
+
+// ─── BILLING ─────────────────────────────────────────────
+
+model UpgradeRequest {
+  id          String               @id @default(uuid())
+  tenantId    String               @map("tenant_id")
+  targetPlan  PlanSlug             @map("target_plan")
+  motivation  String
+  status      UpgradeRequestStatus @default(pending)
+  reviewedBy  String?              @map("reviewed_by")
+  reviewedAt  DateTime?            @map("reviewed_at")
+  createdAt   DateTime             @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("upgrade_requests")
+}
+
+model BillingEvent {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  stripeEventId String   @unique @map("stripe_event_id")
+  eventType     String   @map("event_type")
+  payload       Json
+  processedAt   DateTime @default(now()) @map("processed_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("billing_events")
+}
+
+model UsageSnapshot {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  snapshotDate  DateTime @map("snapshot_date") @db.Date
+  studentCount  Int      @map("student_count")
+  courseCount   Int      @map("course_count")
+  storageBytes  BigInt   @map("storage_bytes")
+  aiCreditsUsed Int      @map("ai_credits_used")
+  sessionsCount Int      @map("sessions_count")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, snapshotDate])
+  @@map("usage_snapshots")
+}
+
+model TenantMember {
+  id         String            @id @default(uuid())
+  tenantId   String            @map("tenant_id")
+  userId     String            @map("user_id")
+  role       TenantMemberRole  @default(teacher)
+  invitedBy  String?           @map("invited_by")
+  joinedAt   DateTime?         @map("joined_at")
+  status     TenantMemberStatus @default(invited)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("tenant_members")
+}
+
+// ─── ASSESSMENTS (Phase 2) ───────────────────────────────
+
+model Submission {
+  id                String           @id @default(uuid())
+  activityAttemptId String           @unique @map("activity_attempt_id")
+  studentId         String           @map("student_id")
+  tenantId          String           @map("tenant_id")
+  status            SubmissionStatus @default(pending)
+  response          Json
+  submittedAt       DateTime         @default(now()) @map("submitted_at")
+
+  activityAttempt ActivityAttempt @relation(fields: [activityAttemptId], references: [id])
+  grade           Grade?
+
+  @@map("submissions")
+}
+
+model Grade {
+  id           String   @id @default(uuid())
+  submissionId String   @unique @map("submission_id")
+  gradedBy     String   @map("graded_by")
+  score        Float
+  rubricScores Json?    @map("rubric_scores")
+  feedbackText String?  @map("feedback_text")
+  gradedAt     DateTime @default(now()) @map("graded_at")
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+
+  @@map("grades")
+}
+
+model RubricTemplate {
+  id         String     @id @default(uuid())
+  tenantId   String     @map("tenant_id")
+  name       String
+  criteria   Json
+  visibility Visibility @default(private)
+
+  @@map("rubric_templates")
+}
+
+model MediaAsset {
+  id         String    @id @default(uuid())
+  tenantId   String    @map("tenant_id")
+  uploaderId String    @map("uploader_id")
+  assetType  AssetType @map("asset_type")
+  s3Key      String?   @map("s3_key")
+  sizeBytes  BigInt    @default(0) @map("size_bytes")
+  metadata   Json      @default("{}")
+  deletedAt  DateTime? @map("deleted_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("media_assets")
+}
+
+// ─── WHITEBOARD (Phase 2) ────────────────────────────────
+
+model BoardPage {
+  id              String       @id @default(uuid())
+  sessionId       String?      @map("session_id")
+  tenantId        String       @map("tenant_id")
+  title           String?
+  pattern         BoardPattern @default(dotted)
+  backgroundColor String?      @map("background_color")
+  rulerInterval   Int?         @map("ruler_interval")
+  position        Int          @default(0)
+
+  session  Session?      @relation(fields: [sessionId], references: [id])
+  objects  BoardObject[]
+  strokes  BoardStroke?
+  commands BoardCommand[]
+
+  @@map("board_pages")
+}
+
+model BoardObject {
+  id               String          @id @default(uuid())
+  pageId           String          @map("page_id")
+  tenantId         String          @map("tenant_id")
+  objectType       BoardObjectType @map("object_type")
+  content          Json
+  x                Float           @default(0)
+  y                Float           @default(0)
+  width            Float           @default(200)
+  height           Float           @default(150)
+  rotation         Float           @default(0)
+  locked           Boolean         @default(false)
+  zIndex           Int             @default(0) @map("z_index")
+  connectorFrom    String?         @map("connector_from")
+  connectorTo      String?         @map("connector_to")
+  connectorAnchors Json?           @map("connector_anchors")
+  hasAnnotations   Boolean         @default(false) @map("has_annotations")
+  annotationCount  Int             @default(0) @map("annotation_count")
+  currentPageNum   Int?            @map("current_page_num")
+  deletedAt        DateTime?       @map("deleted_at")
+
+  page        BoardPage       @relation(fields: [pageId], references: [id])
+  annotations PdfAnnotation[]
+  annoStrokes AnnotationStroke[]
+
+  @@map("board_objects")
+}
+
+model BoardStroke {
+  id            String    @id @default(uuid())
+  pageId        String    @unique @map("page_id")
+  strokesUrl    String?   @map("strokes_url")
+  redisKey      String?   @map("redis_key")
+  lastFlushedAt DateTime? @map("last_flushed_at")
+
+  page BoardPage @relation(fields: [pageId], references: [id])
+
+  @@map("board_strokes")
+}
+
+model FollowSession {
+  id          String    @id @default(uuid())
+  sessionId   String    @map("session_id")
+  teacherId   String    @map("teacher_id")
+  startedAt   DateTime  @default(now()) @map("started_at")
+  endedAt     DateTime? @map("ended_at")
+  breaksCount Int       @default(0) @map("breaks_count")
+
+  session Session @relation(fields: [sessionId], references: [id])
+
+  @@map("follow_sessions")
+}
+
+// ─── PHASE 3 — RT COLLABORATION ──────────────────────────
+
+model BoardCommand {
+  id             String      @id @default(uuid())
+  pageId         String      @map("page_id")
+  authorId       String      @map("author_id")
+  sequenceNum    BigInt      @map("sequence_num")
+  commandType    CommandType @map("command_type")
+  forwardPayload Json        @map("forward_payload")
+  reversePayload Json        @map("reverse_payload")
+  undoneAt       DateTime?   @map("undone_at")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  page BoardPage @relation(fields: [pageId], references: [id])
+
+  @@index([pageId, sequenceNum])
+  @@map("board_commands")
+}
+
+model PdfAnnotation {
+  id             String         @id @default(uuid())
+  objectId       String         @map("object_id")
+  authorId       String         @map("author_id")
+  tenantId       String         @map("tenant_id")
+  pageNum        Int            @map("page_num")
+  annotationType AnnotationType @map("annotation_type")
+  content        Json
+  pdfCoords      Json           @map("pdf_coords")
+  deletedAt      DateTime?      @map("deleted_at")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  object BoardObject @relation(fields: [objectId], references: [id])
+
+  @@map("pdf_annotations")
+}
+
+model AnnotationStroke {
+  id            String    @id @default(uuid())
+  objectId      String    @map("object_id")
+  authorId      String    @map("author_id")
+  pageNum       Int?      @map("page_num")
+  s3Key         String?   @map("s3_key")
+  redisKey      String?   @map("redis_key")
+  lastFlushedAt DateTime? @map("last_flushed_at")
+
+  object BoardObject @relation(fields: [objectId], references: [id])
+
+  @@map("annotation_strokes")
+}
+
+// ─── PHASE 4 — AI + ANALYTICS + GAMIFICATION ─────────────
+
+model AiDraft {
+  id            String       @id @default(uuid())
+  tenantId      String       @map("tenant_id")
+  createdBy     String       @map("created_by")
+  capability    AiCapability
+  brief         Json
+  output        Json
+  status        DraftStatus  @default(pending_review)
+  promptVersion String       @map("prompt_version")
+  tokensUsed    Int          @map("tokens_used")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  log    AiGenerationLog?
+
+  @@map("ai_drafts")
+}
+
+model AiGenerationLog {
+  id          String       @id @default(uuid())
+  tenantId    String       @map("tenant_id")
+  draftId     String?      @unique @map("draft_id")
+  capability  AiCapability
+  model       String
+  inputTokens Int          @map("input_tokens")
+  outputTokens Int         @map("output_tokens")
+  latencyMs   Int          @map("latency_ms")
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  tenant Tenant   @relation(fields: [tenantId], references: [id])
+  draft  AiDraft? @relation(fields: [draftId], references: [id])
+
+  @@map("ai_generation_logs")
+}
+
+model AiSuggestion {
+  id            String            @id @default(uuid())
+  tenantId      String            @map("tenant_id")
+  studentId     String            @map("student_id")
+  suggestions   Json
+  trigger       SuggestionTrigger
+  status        SuggestionStatus  @default(ready)
+  acceptedIndex Int?              @map("accepted_index")
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("ai_suggestions")
+}
+
+model ErrorPattern {
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  studentId    String   @map("student_id")
+  skillTag     String   @map("skill_tag")
+  attemptCount Int      @map("attempt_count")
+  accuracyPct  Float    @map("accuracy_pct")
+  windowDays   Int      @default(30) @map("window_days")
+  lastComputed DateTime @map("last_computed")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, studentId, skillTag])
+  @@map("error_patterns")
+}
+
+model Badge {
+  id              String       @id @default(uuid())
+  slug            String       @unique
+  name            String
+  description     String
+  triggerType     String       @map("trigger_type")
+  triggerCriteria Json         @map("trigger_criteria")
+  iconType        BadgeIconType @map("icon_type")
+  rarity          BadgeRarity  @default(common)
+  xpReward        Int          @default(0) @map("xp_reward")
+  visibleToStudent Boolean     @default(true) @map("visible_to_student")
+
+  studentBadges StudentBadge[]
+
+  @@map("badges")
+}
+
+model StudentBadge {
+  id        String   @id @default(uuid())
+  studentId String   @map("student_id")
+  badgeId   String   @map("badge_id")
+  tenantId  String   @map("tenant_id")
+  earnedAt  DateTime @default(now()) @map("earned_at")
+
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([studentId, badgeId])
+  @@map("student_badges")
+}
+
+model Certificate {
+  id             String   @id @default(uuid())
+  publicId       String   @unique @map("public_id")
+  tenantId       String   @map("tenant_id")
+  studentId      String   @map("student_id")
+  issuedBy       String   @map("issued_by")
+  cefrLevel      String   @map("cefr_level")
+  targetLanguage String   @map("target_language")
+  teacherNote    String?  @map("teacher_note")
+  pdfS3Key       String?  @map("pdf_s3_key")
+  issuedAt       DateTime @default(now()) @map("issued_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("certificates")
+}

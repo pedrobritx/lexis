@@ -1,0 +1,41 @@
+# docker-compose.yml — Development environment
+# Run: docker compose up -d
+# PostgreSQL on 5432, Redis on 6379
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lexis-postgres-dev
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: lexis_dev
+      POSTGRES_USER: lexis
+      POSTGRES_PASSWORD: lexis_dev_password
+    volumes:
+      - lexis_postgres_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lexis -d lexis_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: lexis-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - lexis_redis_dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  lexis_postgres_dev:
+  lexis_redis_dev:
