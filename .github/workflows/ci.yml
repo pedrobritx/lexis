@@ -28,6 +28,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm -r --filter "./packages/**" build
       - run: pnpm typecheck
       - run: pnpm lint
 
