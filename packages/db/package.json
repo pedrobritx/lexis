@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "prisma": "^5.11.0",
-    "tsx": "^4.7.0"
+    "tsx": "^4.7.0",
+    "vitest": "^1.4.0"
   }
 }
