@@ -1,5 +1,5 @@
 # docker-compose.test.yml — Test environment
-# Separate ports from dev (5433/6380) — never conflicts with running dev environment
+# Separate ports from dev (5434/6380) — never conflicts with running dev environment
 # Run automatically by vitest globalSetup. Manual: docker compose -f docker-compose.test.yml up -d
 # Uses tmpfs for postgres — in-memory, fast, no disk writes
 
@@ -8,7 +8,7 @@ services:
     image: postgres:16-alpine
     container_name: lexis-postgres-test
     ports:
-      - "5433:5432"
+      - "5434:5432"
     environment:
       POSTGRES_DB: lexis_test
       POSTGRES_USER: lexis

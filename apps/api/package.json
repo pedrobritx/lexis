@@ -24,12 +24,16 @@
     "@fastify/swagger": "^8.14.0",
     "@fastify/swagger-ui": "^3.0.0",
     "@simplewebauthn/server": "^9.0.0",
+    "@simplewebauthn/types": "^9.0.0",
     "jsonwebtoken": "^9.0.0",
     "nanoid": "^5.0.0",
+    "resend": "^3.0.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.0",
+    "@types/supertest": "^6.0.0",
+    "supertest": "^7.0.0",
     "tsx": "^4.7.0"
   }
 }
