@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:    #0F1620;
+  --bg-surface: #16202C;
+  --bg-raised:  #1D2A3A;
+  --bg-hover:   #223040;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.11);
+
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.13);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+
+  --text-1:     #EDE8DF;
+  --text-2:     #8A95A3;
+  --text-3:     #4A5768;
+
+  --font: 'DM Sans', sans-serif;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --r-card: 16px;
+  --r-sm:   10px;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-base);
+  color: var(--text-1);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 0 0 40px;
+}
+
+/* Phone shell */
+.phone {
+  width: 390px;
+  min-height: 844px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px 0;
+  flex-shrink: 0;
+}
+.status-time { font-size: 15px; font-weight: 500; color: var(--text-1); letter-spacing: -0.02em; }
+.status-icons { display: flex; align-items: center; gap: 6px; }
+
+/* Top nav */
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px 10px;
+  flex-shrink: 0;
+}
+.nav-logo {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0;
+  text-decoration: none;
+}
+.nav-logo-word {
+  font-size: 20px; font-weight: 500;
+  letter-spacing: -0.03em; color: var(--parchment); line-height: 1;
+}
+.nav-logo-blob { margin-left: 2px; padding-bottom: 1px; display: inline-flex; align-items: flex-end; }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.notif-btn {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--bg-raised); border: 0.5px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-2); cursor: pointer; position: relative;
+}
+.notif-dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); border: 1.5px solid var(--bg-base); }
+.student-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(122,170,212,0.35), rgba(141,181,160,0.25));
+  border: 1.5px solid rgba(122,170,212,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500; color: #7AAAD4;
+}
+
+/* Scroll content */
+.scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-content::-webkit-scrollbar { display: none; }
+
+/* Section */
+.section { padding: 10px 20px 0; }
+.section-label {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 10px;
+}
+
+/* ── Hero greeting ── */
+.hero {
+  padding: 8px 20px 16px;
+}
+.hero-greeting {
+  font-size: 26px; font-weight: 500;
+  letter-spacing: -0.02em; color: var(--text-1); line-height: 1.2;
+}
+.hero-sub {
+  font-size: 13px; color: var(--text-2);
+  margin-top: 4px; line-height: 1.5;
+}
+.hero-sub em { color: var(--amber-lt); font-style: normal; }
+
+/* ── Continue card ── */
+.continue-card {
+  margin: 0 20px;
+  background: linear-gradient(135deg, #1D2E42 0%, #1A2838 100%);
+  border: 0.5px solid rgba(192,123,58,0.25);
+  border-radius: var(--r-card);
+  padding: 18px 18px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.continue-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192,123,58,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.continue-eyebrow {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--amber-lt); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.continue-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+.continue-title {
+  font-size: 17px; font-weight: 500;
+  color: var(--text-1); letter-spacing: -0.01em;
+  line-height: 1.3; margin-bottom: 4px;
+}
+.continue-meta {
+  font-size: 12px; color: var(--text-2); margin-bottom: 14px;
+}
+.continue-progress {
+  height: 3px; background: rgba(255,255,255,0.08);
+  border-radius: 99px; overflow: hidden; margin-bottom: 14px;
+}
+.continue-progress-fill {
+  height: 100%; width: 40%;
+  background: linear-gradient(90deg, var(--amber), var(--sage));
+  border-radius: 99px;
+}
+.continue-footer {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.continue-step { font-size: 11px; color: var(--text-3); }
+.continue-btn {
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  padding: 9px 20px; border-radius: 10px;
+  background: var(--parchment); color: var(--bg-base);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.15s;
+}
+.continue-btn:hover { background: #F5ECD7; }
+
+/* ── CEFR / Level progress ── */
+.level-card {
+  margin: 14px 20px 0;
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: var(--r-card);
+  padding: 16px 18px;
+}
+.level-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 14px;
+}
+.level-left { display: flex; align-items: center; gap: 10px; }
+.level-badge {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: rgba(192,123,58,0.15);
+  border: 0.5px solid rgba(192,123,58,0.32);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 500; color: var(--amber-lt);
+  letter-spacing: -0.02em; flex-shrink: 0;
+}
+.level-info-title { font-size: 14px; font-weight: 500; color: var(--text-1); }
+.level-info-sub   { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.level-pct        { font-size: 20px; font-weight: 500; color: var(--text-1); letter-spacing: -0.02em; }
+.level-pct-sub    { font-size: 10px; color: var(--text-3); text-align: right; margin-top: 1px; }
+
+/* Unit progress row */
+.unit-list { display: flex; flex-direction: column; gap: 9px; }
+.unit-row  { display: flex; align-items: center; gap: 10px; }
+.unit-name { font-size: 12px; color: var(--text-2); min-width: 70px; }
+.unit-bar  { flex: 1; height: 4px; background: var(--border-mid); border-radius: 99px; overflow: hidden; }
+.unit-fill { height: 100%; border-radius: 99px; }
+.unit-pct  { font-size: 10px; color: var(--text-3); min-width: 28px; text-align: right; }
+
+/* CEFR scale */
+.cefr-scale {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 14px; padding-top: 14px;
+  border-top: 0.5px solid var(--border);
+}
+.cefr-step {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+}
+.cefr-bar  { width: 100%; height: 4px; border-radius: 99px; background: var(--border-mid); }
+.cefr-label { font-size: 9px; color: var(--text-3); font-weight: 500; }
+.cefr-step.done  .cefr-bar { background: var(--sage-dk); }
+.cefr-step.active .cefr-bar { background: var(--amber); }
+.cefr-step.done   .cefr-label,
+.cefr-step.active .cefr-label { color: var(--text-2); }
+
+/* ── Upcoming session card ── */
+.session-card {
+  margin: 14px 20px 0;
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.session-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 0.5px solid var(--border);
+}
+.session-card-title { font-size: 12px; font-weight: 500; color: var(--text-1); }
+.session-view-all   { font-size: 11px; color: var(--text-3); cursor: pointer; transition: color 0.15s; background: none; border: none; font-family: var(--font); }
+.session-view-all:hover { color: var(--amber-lt); }
+
+.session-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--border);
+}
+.session-item:last-child { border-bottom: none; }
+.session-dot-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.sess-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.sess-line { width: 1px; height: 20px; background: var(--border-mid); margin-top: 3px; }
+.session-info { flex: 1; min-width: 0; }
+.session-when { font-size: 10px; color: var(--text-3); margin-bottom: 2px; }
+.session-topic { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.session-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+.session-cta {
+  font-family: var(--font); font-size: 11px; font-weight: 500;
+  padding: 5px 12px; border-radius: 8px; border: 0.5px solid var(--border-mid);
+  background: transparent; color: var(--amber-lt); cursor: pointer;
+  white-space: nowrap; transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.session-cta:hover { background: var(--amber-glow); border-color: rgba(192,123,58,0.35); }
+
+/* ── Spaced review ── */
+.review-card {
+  margin: 14px 20px 0;
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: var(--r-card);
+  padding: 16px 18px;
+}
+.review-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.review-title { font-size: 12px; font-weight: 500; color: var(--text-1); }
+
+/* Streak display */
+.streak-row { display: flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+.streak-days {
+  display: flex; align-items: center; gap: 3px;
+}
+.streak-day {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 500; letter-spacing: 0.02em;
+}
+.streak-day.done    { background: rgba(141,181,160,0.18); color: var(--sage); border: 0.5px solid rgba(141,181,160,0.28); }
+.streak-day.today   { background: var(--amber-glow); color: var(--amber-lt); border: 0.5px solid rgba(192,123,58,0.35); }
+.streak-day.pending { background: var(--bg-raised); color: var(--text-3); border: 0.5px solid var(--border-mid); }
+.streak-count { margin-left: 6px; }
+.streak-count-num { font-size: 18px; font-weight: 500; color: var(--text-1); letter-spacing: -0.02em; line-height: 1; }
+.streak-count-sub { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+/* Review queue items */
+.review-queue { display: flex; flex-direction: column; gap: 8px; }
+.rq-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-raised);
+  border: 0.5px solid var(--border-mid);
+  border-radius: var(--r-sm);
+  cursor: pointer; transition: background 0.15s;
+}
+.rq-item:hover { background: var(--bg-hover); }
+.rq-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.rq-body { flex: 1; min-width: 0; }
+.rq-title { font-size: 12px; font-weight: 500; color: var(--text-1); }
+.rq-meta  { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+.rq-badge {
+  font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px;
+  border: 0.5px solid; white-space: nowrap; flex-shrink: 0;
+}
+.rq-due   { background: rgba(192,123,58,0.12); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.rq-new   { background: rgba(141,181,160,0.1);  color: var(--sage);     border-color: rgba(141,181,160,0.25); }
+
+.review-start-btn {
+  width: 100%; margin-top: 12px;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  padding: 11px; border-radius: 11px;
+  background: var(--bg-raised); color: var(--amber-lt);
+  border: 0.5px solid rgba(192,123,58,0.28);
+  cursor: pointer; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.review-start-btn:hover { background: var(--amber-glow); }
+
+/* ── Achievements / XP ── */
+.xp-card {
+  margin: 14px 20px 0;
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: var(--r-card);
+  padding: 16px 18px;
+}
+.xp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.xp-title  { font-size: 12px; font-weight: 500; color: var(--text-1); }
+
+/* XP bar */
+.xp-bar-wrap { margin-bottom: 16px; }
+.xp-bar-top  { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.xp-total    { font-size: 22px; font-weight: 500; color: var(--text-1); letter-spacing: -0.02em; line-height: 1; }
+.xp-unit     { font-size: 12px; color: var(--amber-lt); margin-left: 3px; }
+.xp-next     { font-size: 10px; color: var(--text-3); }
+.xp-bar      { height: 6px; background: var(--border-mid); border-radius: 99px; overflow: hidden; }
+.xp-fill     { height: 100%; width: 68%; background: linear-gradient(90deg, var(--amber), var(--sage)); border-radius: 99px; }
+
+/* Badge grid */
+.badge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.badge-item {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 10px 6px;
+  background: var(--bg-raised); border: 0.5px solid var(--border-mid);
+  border-radius: 11px; cursor: pointer; transition: background 0.15s;
+}
+.badge-item.earned { border-color: rgba(141,181,160,0.28); background: rgba(141,181,160,0.07); }
+.badge-item.locked { opacity: 0.4; }
+.badge-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.badge-name { font-size: 9px; color: var(--text-2); text-align: center; line-height: 1.3; font-weight: 500; }
+.badge-item.earned .badge-name { color: var(--sage); }
+
+/* ── Bottom tab bar ── */
+.tab-bar {
+  position: sticky; bottom: 0;
+  background: var(--bg-surface);
+  border-top: 0.5px solid var(--border);
+  display: flex; align-items: center;
+  padding: 10px 0 24px;
+  flex-shrink: 0;
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  cursor: pointer; transition: color 0.15s;
+  color: var(--text-3);
+  border: none; background: transparent;
+  font-family: var(--font);
+}
+.tab-item.active { color: var(--amber-lt); }
+.tab-item-label { font-size: 9px; font-weight: 500; letter-spacing: 0.03em; }
+
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0" y="4" width="3" height="7" rx="0.8" fill="currentColor" opacity="0.3"/><rect x="4.5" y="2.5" width="3" height="8.5" rx="0.8" fill="currentColor" opacity="0.5"/><rect x="9" y="1" width="3" height="10" rx="0.8" fill="currentColor" opacity="0.7"/><rect x="13.5" y="0" width="2.5" height="11" rx="0.8" fill="currentColor"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 2.5C9.8 2.5 11.8 3.5 13.2 5L14.5 3.5C12.7 1.8 10.2 0.5 7.5 0.5C4.8 0.5 2.3 1.8 0.5 3.5L1.8 5C3.2 3.5 5.2 2.5 7.5 2.5Z" fill="currentColor" opacity="0.4"/><path d="M7.5 5.5C9 5.5 10.3 6.1 11.3 7.1L12.6 5.6C11.2 4.3 9.4 3.5 7.5 3.5C5.6 3.5 3.8 4.3 2.4 5.6L3.7 7.1C4.7 6.1 6 5.5 7.5 5.5Z" fill="currentColor" opacity="0.7"/><circle cx="7.5" cy="9.5" r="1.5" fill="currentColor"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" opacity="0.35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" opacity="0.4"/></svg>
+    </div>
+  </div>
+
+  <!-- Top nav -->
+  <div class="topnav">
+    <a class="nav-logo" href="#">
+      <span class="nav-logo-word">lexis</span>
+      <span class="nav-logo-blob">
+        <svg width="9" height="11" viewBox="0 0 18 22" fill="none">
+          <defs>
+            <linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#D4924F"/>
+              <stop offset="100%" stop-color="#A8CCBB"/>
+            </linearGradient>
+          </defs>
+          <path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/>
+        </svg>
+      </span>
+    </a>
+    <div class="nav-right">
+      <div class="notif-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5a4.5 4.5 0 014.5 4.5c0 2.5.5 4 1.5 5H2c1-1 1.5-2.5 1.5-5A4.5 4.5 0 018 1.5z" stroke="currentColor" stroke-width="1.2"/><path d="M6.5 12.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span class="notif-dot"></span>
+      </div>
+      <div class="student-avatar">JL</div>
+    </div>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="scroll-content">
+
+    <!-- Greeting -->
+    <div class="hero">
+      <div class="hero-greeting">Good morning,<br/>João.</div>
+      <div class="hero-sub">You're on a <em>8-day streak</em> — keep it going.</div>
+    </div>
+
+    <!-- Continue card -->
+    <div class="continue-card">
+      <div class="continue-eyebrow">
+        <span class="continue-eyebrow-dot"></span>
+        Continue lesson
+      </div>
+      <div class="continue-title">Second conditional — fill in the blank</div>
+      <div class="continue-meta">B1 · Unit 3 · Activity 2 of 5</div>
+      <div class="continue-progress">
+        <div class="continue-progress-fill"></div>
+      </div>
+      <div class="continue-footer">
+        <span class="continue-step">2 of 5 activities</span>
+        <button class="continue-btn">
+          Continue
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6h7M6.5 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Level progress -->
+    <div class="level-card">
+      <div class="level-header">
+        <div class="level-left">
+          <div class="level-badge">B1</div>
+          <div>
+            <div class="level-info-title">Intermediate</div>
+            <div class="level-info-sub">Unit 3 of 10 · Grammar focus</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="level-pct">55%</div>
+          <div class="level-pct-sub">this level</div>
+        </div>
+      </div>
+
+      <div class="unit-list">
+        <div class="unit-row">
+          <span class="unit-name">Unit 1</span>
+          <div class="unit-bar"><div class="unit-fill" style="width:100%;background:var(--sage-dk);"></div></div>
+          <span class="unit-pct" style="color:var(--sage-dk);">100%</span>
+        </div>
+        <div class="unit-row">
+          <span class="unit-name">Unit 2</span>
+          <div class="unit-bar"><div class="unit-fill" style="width:100%;background:var(--sage-dk);"></div></div>
+          <span class="unit-pct" style="color:var(--sage-dk);">100%</span>
+        </div>
+        <div class="unit-row">
+          <span class="unit-name">Unit 3</span>
+          <div class="unit-bar"><div class="unit-fill" style="width:40%;background:var(--amber);"></div></div>
+          <span class="unit-pct" style="color:var(--amber-lt);">40%</span>
+        </div>
+        <div class="unit-row">
+          <span class="unit-name">Unit 4 – 10</span>
+          <div class="unit-bar"><div class="unit-fill" style="width:0%;"></div></div>
+          <span class="unit-pct">0%</span>
+        </div>
+      </div>
+
+      <div class="cefr-scale">
+        <div class="cefr-step done">
+          <div class="cefr-bar"></div>
+          <span class="cefr-label">A1</span>
+        </div>
+        <div class="cefr-step done">
+          <div class="cefr-bar"></div>
+          <span class="cefr-label">A2</span>
+        </div>
+        <div class="cefr-step active">
+          <div class="cefr-bar"></div>
+          <span class="cefr-label">B1</span>
+        </div>
+        <div class="cefr-step">
+          <div class="cefr-bar"></div>
+          <span class="cefr-label">B2</span>
+        </div>
+        <div class="cefr-step">
+          <div class="cefr-bar"></div>
+          <span class="cefr-label">C1</span>
+        </div>
+        <div class="cefr-step">
+          <div class="cefr-bar"></div>
+          <span class="cefr-label">C2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming session -->
+    <div class="session-card">
+      <div class="session-card-header">
+        <span class="session-card-title">Upcoming sessions</span>
+        <button class="session-view-all">View all</button>
+      </div>
+      <div class="session-item">
+        <div class="session-dot-col">
+          <div class="sess-dot" style="background:var(--amber);"></div>
+          <div class="sess-line"></div>
+        </div>
+        <div class="session-info">
+          <div class="session-when">Today · 14:00</div>
+          <div class="session-topic">Second conditional</div>
+          <div class="session-sub">with Pedro · B1 Unit 3</div>
+        </div>
+        <button class="session-cta">Join</button>
+      </div>
+      <div class="session-item">
+        <div class="session-dot-col">
+          <div class="sess-dot" style="background:var(--sage-dk);"></div>
+        </div>
+        <div class="session-info">
+          <div class="session-when">Thu · 14:00</div>
+          <div class="session-topic">Passive voice intro</div>
+          <div class="session-sub">with Pedro · B1 Unit 3</div>
+        </div>
+        <button class="session-cta">Prepare</button>
+      </div>
+    </div>
+
+    <!-- Spaced review -->
+    <div class="review-card">
+      <div class="review-header">
+        <span class="review-title">Spaced review</span>
+        <div style="display:flex;align-items:baseline;gap:3px;">
+          <span style="font-size:18px;font-weight:500;color:var(--text-1);letter-spacing:-0.02em;">8</span>
+          <span style="font-size:10px;color:var(--text-3);">day streak</span>
+        </div>
+      </div>
+
+      <!-- Streak days -->
+      <div class="streak-row">
+        <div class="streak-days">
+          <div class="streak-day done">M</div>
+          <div class="streak-day done">T</div>
+          <div class="streak-day done">W</div>
+          <div class="streak-day done">T</div>
+          <div class="streak-day done">F</div>
+          <div class="streak-day today">S</div>
+          <div class="streak-day pending">S</div>
+        </div>
+      </div>
+
+      <!-- Review queue -->
+      <div class="review-queue">
+        <div class="rq-item">
+          <div class="rq-icon" style="background:rgba(192,123,58,0.12);border:0.5px solid rgba(192,123,58,0.25);">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h6" stroke="#D4924F" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="rq-body">
+            <div class="rq-title">First conditional vocab</div>
+            <div class="rq-meta">12 items · ~5 min</div>
+          </div>
+          <span class="rq-badge rq-due">Due today</span>
+        </div>
+        <div class="rq-item">
+          <div class="rq-icon" style="background:rgba(141,181,160,0.1);border:0.5px solid rgba(141,181,160,0.22);">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" stroke="#8DB5A0" stroke-width="1.2"/><path d="M4.5 7l2 2 3-3" stroke="#8DB5A0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="rq-body">
+            <div class="rq-title">Modal verbs flashcards</div>
+            <div class="rq-meta">8 items · ~3 min</div>
+          </div>
+          <span class="rq-badge rq-new">New</span>
+        </div>
+      </div>
+
+      <button class="review-start-btn">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.1"/><path d="M5 4.5l3.5 2L5 8.5V4.5z" fill="currentColor"/></svg>
+        Start review — 20 items
+      </button>
+    </div>
+
+    <!-- Achievements / XP -->
+    <div class="xp-card" style="margin-bottom: 8px;">
+      <div class="xp-header">
+        <span class="xp-title">XP & achievements</span>
+        <span style="font-size:10px;color:var(--text-3);">Level 6</span>
+      </div>
+
+      <div class="xp-bar-wrap">
+        <div class="xp-bar-top">
+          <div>
+            <span class="xp-total">1,240</span>
+            <span class="xp-unit">XP</span>
+          </div>
+          <span class="xp-next">360 XP to level 7</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill"></div></div>
+      </div>
+
+      <div class="badge-grid">
+        <div class="badge-item earned">
+          <div class="badge-icon" style="background:rgba(141,181,160,0.15);">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5L10.9 6.8H16.5L11.8 9.9L13.7 15.2L9 12.1L4.3 15.2L6.2 9.9L1.5 6.8H7.1L9 1.5Z" stroke="#8DB5A0" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="badge-name">Grammar Master</span>
+        </div>
+        <div class="badge-item earned">
+          <div class="badge-icon" style="background:rgba(192,123,58,0.13);">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v14M5 6l4-4 4 4" stroke="#D4924F" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="badge-name">7-Day Streak</span>
+        </div>
+        <div class="badge-item earned">
+          <div class="badge-icon" style="background:rgba(122,170,212,0.13);">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="#7AAAD4" stroke-width="1.3"/><path d="M6 9l2.5 2.5L12 6" stroke="#7AAAD4" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="badge-name">Unit 2 Complete</span>
+        </div>
+        <div class="badge-item locked">
+          <div class="badge-icon" style="background:var(--bg-raised);">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="4" y="8" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M6 8V6a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <span class="badge-name">B1 Complete</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-item active">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="6" height="6" rx="2" stroke="currentColor" stroke-width="1.4"/><rect x="12" y="2" width="6" height="6" rx="2" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="12" width="6" height="6" rx="2" stroke="currentColor" stroke-width="1.4"/><rect x="12" y="12" width="6" height="6" rx="2" stroke="currentColor" stroke-width="1.4"/></svg>
+      <span class="tab-item-label">Home</span>
+    </button>
+    <button class="tab-item">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <span class="tab-item-label">Lessons</span>
+    </button>
+    <button class="tab-item">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.4"/><path d="M10 6v4.5l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <span class="tab-item-label">Review</span>
+    </button>
+    <button class="tab-item">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M3 8h14M7 4V2M13 4V2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <span class="tab-item-label">Schedule</span>
+    </button>
+    <button class="tab-item">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 17c0-3.5 3-5.5 7-5.5s7 2 7 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <span class="tab-item-label">Profile</span>
+    </button>
+  </div>
+
+</div>
+
+</body>
+</html>

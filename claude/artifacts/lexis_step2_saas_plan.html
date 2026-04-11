@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Step 2: SaaS Scaling Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0F1620;
+  --surface:    #16202C;
+  --raised:     #1D2A3A;
+  --hover:      #223040;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.13);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+  --text-1:     #EDE8DF;
+  --text-2:     #8A95A3;
+  --text-3:     #4A5768;
+  --blue:       #7AAAD4;
+  --blue-bg:    rgba(122,170,212,0.08);
+  --blue-bd:    rgba(122,170,212,0.22);
+  --purple:     #B8A8D8;
+  --purple-bg:  rgba(184,168,216,0.08);
+  --purple-bd:  rgba(184,168,216,0.2);
+  --green-bg:   rgba(141,181,160,0.08);
+  --green-bd:   rgba(141,181,160,0.22);
+  --orange-bg:  rgba(212,146,79,0.08);
+  --orange-bd:  rgba(212,146,79,0.22);
+  --font:       'DM Sans', sans-serif;
+  --ease:       cubic-bezier(0.4,0,0.2,1);
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  padding: 48px 32px 80px;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+/* Header */
+.doc-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 24px;
+  margin-bottom: 36px; padding-bottom: 24px;
+  border-bottom: 0.5px solid var(--border-mid);
+}
+.doc-logo { display: flex; align-items: flex-end; }
+.logo-word { font-size: 22px; font-weight: 500; letter-spacing: -0.03em; color: var(--parchment); }
+.logo-blob { margin-left: 2px; padding-bottom: 2px; display: inline-flex; align-items: flex-end; }
+.doc-meta { text-align: right; }
+.doc-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.doc-sub   { font-size: 11px; color: var(--text-3); }
+
+/* Stat bar */
+.stat-bar {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 10px; margin-bottom: 36px;
+}
+.stat-card {
+  background: var(--surface); border: 0.5px solid var(--border-mid);
+  border-radius: 10px; padding: 13px 16px;
+}
+.sc-val { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+.sc-lab { font-size: 10px; color: var(--text-3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Section */
+.section { margin-bottom: 40px; }
+.section-title {
+  font-size: 16px; font-weight: 500; color: var(--text-1);
+  margin-bottom: 6px; letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-icon {
+  width: 24px; height: 24px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.section-sub { font-size: 12px; color: var(--text-3); margin-bottom: 20px; line-height: 1.6; }
+.section-divider { height: 0.5px; background: var(--border-mid); margin: 36px 0; }
+
+/* Info box */
+.info-box {
+  border-radius: 10px; padding: 16px 18px;
+  margin-bottom: 14px; border: 0.5px solid;
+}
+.info-box.blue    { background: var(--blue-bg);   border-color: var(--blue-bd); }
+.info-box.amber   { background: var(--amber-glow); border-color: rgba(192,123,58,0.28); }
+.info-box.green   { background: var(--green-bg);   border-color: var(--green-bd); }
+.info-box.purple  { background: var(--purple-bg);  border-color: var(--purple-bd); }
+.info-box.orange  { background: var(--orange-bg);  border-color: var(--orange-bd); }
+
+.ib-header { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.ib-icon {
+  width: 24px; height: 24px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.blue   .ib-icon { background: var(--blue-bg);   border: 0.5px solid var(--blue-bd); }
+.amber  .ib-icon { background: var(--amber-glow); border: 0.5px solid rgba(192,123,58,0.28); }
+.green  .ib-icon { background: var(--green-bg);   border: 0.5px solid var(--green-bd); }
+.purple .ib-icon { background: var(--purple-bg);  border: 0.5px solid var(--purple-bd); }
+.orange .ib-icon { background: var(--orange-bg);  border: 0.5px solid var(--orange-bd); }
+
+.ib-title { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.ib-sub   { font-size: 11px; margin-top: 1px; }
+.blue   .ib-sub { color: var(--blue); }
+.amber  .ib-sub { color: var(--amber-lt); }
+.green  .ib-sub { color: var(--sage); }
+.purple .ib-sub { color: var(--purple); }
+.orange .ib-sub { color: #E8A060; }
+
+.ib-body { font-size: 12px; color: var(--text-2); line-height: 1.65; }
+.ib-body strong { color: var(--text-1); font-weight: 500; }
+.ib-body code {
+  font-size: 11px; font-family: 'SF Mono','Fira Code',monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+
+/* Rule list */
+.rule-list { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.rule-item { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.r-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.rule-item strong { color: var(--text-1); font-weight: 500; }
+.rule-item code {
+  font-size: 11px; font-family: 'SF Mono','Fira Code',monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+
+/* Plan table */
+.plan-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+.plan-table th {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--text-3);
+  padding: 8px 14px; text-align: left;
+  border-bottom: 0.5px solid var(--border-mid);
+  background: var(--surface);
+}
+.plan-table td {
+  font-size: 12px; color: var(--text-2);
+  padding: 10px 14px; border-bottom: 0.5px solid var(--border);
+  vertical-align: top; line-height: 1.55;
+}
+.plan-table tr:last-child td { border-bottom: none; }
+.plan-table tr:hover td { background: var(--hover); }
+.plan-table td:first-child { color: var(--text-1); font-weight: 500; }
+.plan-table td code {
+  font-size: 10px; font-family: 'SF Mono','Fira Code',monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+
+/* Badge */
+.badge {
+  display: inline-block; font-size: 9px; font-weight: 500;
+  padding: 2px 7px; border-radius: 4px; border: 0.5px solid;
+  white-space: nowrap; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.badge-free   { background: var(--green-bg); color: var(--sage); border-color: var(--green-bd); }
+.badge-pro    { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.badge-growth { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.badge-new    { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.badge-system { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+
+/* Flow diagram */
+.flow {
+  display: flex; align-items: center; gap: 0;
+  flex-wrap: wrap; margin: 16px 0;
+}
+.flow-step {
+  background: var(--raised); border: 0.5px solid var(--border-mid);
+  border-radius: 8px; padding: 10px 14px; min-width: 130px;
+  flex: 1;
+}
+.fs-label { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 4px; }
+.fs-title { font-size: 12px; font-weight: 500; color: var(--text-1); margin-bottom: 2px; }
+.fs-sub   { font-size: 10px; color: var(--text-3); line-height: 1.4; }
+.flow-arrow {
+  color: var(--text-3); font-size: 18px; padding: 0 6px;
+  flex-shrink: 0;
+}
+.flow-step.highlight { border-color: rgba(192,123,58,0.35); background: var(--amber-glow); }
+.flow-step.highlight .fs-title { color: var(--amber-lt); }
+
+/* Entity card */
+.entity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.entity-card {
+  background: var(--surface); border: 0.5px solid var(--border-mid);
+  border-radius: 12px; overflow: hidden;
+}
+.entity-card.new-e { border-color: var(--blue-bd); }
+.entity-card.mod-e { border-color: rgba(192,123,58,0.28); }
+.entity-header-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-bottom: 0.5px solid var(--border);
+}
+.entity-name { font-size: 12px; font-weight: 500; color: var(--text-1); font-family: 'SF Mono','Fira Code',monospace; }
+.entity-badge { margin-left: auto; }
+.field-list { padding: 10px 14px; display: flex; flex-direction: column; gap: 3px; }
+.field-row {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 11px; padding: 3px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.field-row:last-child { border-bottom: none; }
+.field-row.f-new { background: rgba(122,170,212,0.05); border-radius: 3px; padding: 3px 4px; margin: 0 -4px; }
+.fn { font-family: 'SF Mono','Fira Code',monospace; color: var(--parchment); font-size: 11px; min-width: 160px; }
+.fn.pk { color: var(--amber-lt); }
+.fn.fk { color: var(--sage); }
+.ft { color: var(--blue); font-family: 'SF Mono','Fira Code',monospace; font-size: 10px; }
+.fnt { color: var(--text-3); font-size: 10px; margin-left: auto; }
+
+/* Tier comparison */
+.tier-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 0; border: 0.5px solid var(--border-mid); border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
+.tier-header {
+  padding: 10px 14px; background: var(--raised);
+  font-size: 11px; font-weight: 500; color: var(--text-2);
+  border-bottom: 0.5px solid var(--border-mid);
+  border-right: 0.5px solid var(--border);
+}
+.tier-header:last-child { border-right: none; }
+.tier-header.feature-col { color: var(--text-3); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+.tier-row { display: contents; }
+.tier-cell {
+  padding: 9px 14px; font-size: 12px; color: var(--text-2);
+  border-bottom: 0.5px solid var(--border);
+  border-right: 0.5px solid var(--border);
+}
+.tier-cell:last-child { border-right: none; }
+.tier-cell.feature-cell { color: var(--text-1); font-size: 12px; }
+.tier-row:last-child .tier-cell { border-bottom: none; }
+.check { color: var(--sage); font-size: 13px; }
+.cross { color: var(--text-3); font-size: 13px; }
+.limit { color: var(--amber-lt); font-size: 11px; font-weight: 500; }
+
+/* Build plan */
+.week-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; background: var(--surface);
+  border: 0.5px solid var(--border-mid); border-radius: 10px;
+  margin-bottom: 10px; cursor: pointer; user-select: none;
+  transition: background 0.15s;
+}
+.week-header:hover { background: var(--hover); }
+.week-num   { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); min-width: 52px; }
+.week-title { font-size: 14px; font-weight: 500; color: var(--text-1); flex: 1; }
+.week-range { font-size: 11px; color: var(--text-3); }
+.week-chevron { color: var(--text-3); transition: transform 0.2s; }
+.week-header.open .week-chevron { transform: rotate(90deg); }
+.wpill {
+  font-size: 9px; font-weight: 500; padding: 2px 8px;
+  border-radius: 4px; border: 0.5px solid; white-space: nowrap;
+}
+.week-body { display: none; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.week-body.open { display: flex; }
+
+.day-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.day-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; transition: background 0.15s; }
+.day-header:hover { background: var(--hover); }
+.day-num  { font-size: 11px; color: var(--text-3); min-width: 44px; }
+.day-name { font-size: 13px; font-weight: 500; color: var(--text-1); flex: 1; }
+.dtag {
+  font-size: 9px; font-weight: 500; padding: 2px 7px;
+  border-radius: 4px; border: 0.5px solid; white-space: nowrap;
+}
+.dtag-setup   { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+.dtag-backend { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.dtag-web     { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.dtag-billing { background: var(--green-bg); color: var(--sage); border-color: var(--green-bd); }
+.dtag-qa      { background: rgba(224,112,112,0.08); color: #E07070; border-color: rgba(224,112,112,0.22); }
+.day-hrs { font-size: 10px; color: var(--text-3); }
+
+.task-list { padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; border-top: 0.5px solid var(--border); }
+.task-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text-2); line-height: 1.55; }
+.t-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; background: var(--text-3); }
+.task-item.primary { color: var(--text-1); }
+.task-item.primary .t-dot { background: var(--amber); }
+.task-item code {
+  font-size: 11px; font-family: 'SF Mono','Fira Code',monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+
+.day-footer { padding: 8px 16px; border-top: 0.5px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.del-label { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
+.del-text  { font-size: 11px; color: var(--sage); }
+
+.milestone {
+  background: var(--green-bg); border: 0.5px solid var(--green-bd);
+  border-radius: 10px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px; margin-top: 4px;
+}
+.ms-icon {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: rgba(141,181,160,0.15); border: 0.5px solid var(--green-bd);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ms-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.ms-desc  { font-size: 11px; color: var(--sage); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="doc-header">
+  <div class="doc-logo">
+    <span class="logo-word">lexis</span>
+    <span class="logo-blob">
+      <svg width="10" height="13" viewBox="0 0 18 22" fill="none">
+        <defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4924F"/><stop offset="100%" stop-color="#A8CCBB"/></linearGradient></defs>
+        <path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/>
+      </svg>
+    </span>
+  </div>
+  <div class="doc-meta">
+    <div class="doc-title">Step 2 — SaaS scaling plan</div>
+    <div class="doc-sub">Multi-tenancy · Onboarding · Billing · Admin · Language-agnostic · Build plan</div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stat-bar">
+  <div class="stat-card"><div class="sc-val" style="color:var(--blue);">3</div><div class="sc-lab">Pricing tiers</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--amber-lt);">5</div><div class="sc-lab">New entities</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--sage);">4</div><div class="sc-lab">New modules</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--purple);">2</div><div class="sc-lab">Onboarding paths</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--parchment);">∞</div><div class="sc-lab">Languages</div></div>
+</div>
+
+
+<!-- ═══════════════════════
+     PART 1 — LANGUAGE-AGNOSTIC
+═══════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:var(--blue-bg);border:0.5px solid var(--blue-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="var(--blue)" stroke-width="1.1"/><path d="M6.5 1.5C6.5 1.5 4 4 4 6.5s2.5 5 2.5 5M6.5 1.5C6.5 1.5 9 4 9 6.5s-2.5 5-2.5 5M1.5 6.5h11" stroke="var(--blue)" stroke-width="1.1"/></svg>
+    </div>
+    Part 1 — Language-agnostic architecture
+  </div>
+  <div class="section-sub">Lexis starts as an English platform. But the infrastructure must never assume English. Every language-specific element is parameterised from day one so that adding Spanish, French, or Mandarin requires zero schema migrations.</div>
+
+  <div class="info-box blue">
+    <div class="ib-header">
+      <div class="ib-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1a5 5 0 100 10A5 5 0 006 1zM1 6h10M6 1c-1.5 1.5-2 3-2 5s.5 3.5 2 5M6 1c1.5 1.5 2 3 2 5s-.5 3.5-2 5" stroke="var(--blue)" stroke-width="1.1"/></svg></div>
+      <div><div class="ib-title">What changes when you go language-agnostic</div><div class="ib-sub">Three fields, one enum, one index — that's it</div></div>
+    </div>
+    <div class="ib-body">Making Lexis language-agnostic is not a rewrite — it's a parameterisation. The teaching logic, activity types, SRS algorithm, and whiteboard are all language-independent already. The only language-specific elements are the content (courses, lessons, activities) and the proficiency framework (CEFR for European languages, JLPT for Japanese, HSK for Mandarin, etc.).</div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="r-dot" style="background:var(--blue)"></div><div><strong>Add <code>target_language</code> to <code>courses</code>:</strong> ISO 639-1 code (<code>en</code>, <code>es</code>, <code>fr</code>, <code>zh</code>, <code>ja</code>, etc.). Default <code>en</code>. This is the language being taught — not the teacher's language. A Portuguese teacher teaching Spanish sets <code>target_language = 'es'</code>.</div></div>
+      <div class="rule-item"><div class="r-dot" style="background:var(--blue)"></div><div><strong>Add <code>framework</code> to <code>courses</code>:</strong> enum <code>cefr | jlpt | hsk | custom</code>. Default <code>cefr</code>. This controls which level system the course uses. JLPT goes N5→N1, HSK goes 1→6, custom allows the teacher to define their own levels. The <code>target_cefr</code> field is renamed <code>target_level</code> and stores the level within whichever framework is active.</div></div>
+      <div class="rule-item"><div class="r-dot" style="background:var(--blue)"></div><div><strong>Add <code>teacher_language</code> to <code>teacher_profiles</code>:</strong> the language the teacher uses to explain — used to localise the UI and any AI-generated grammar explanations. Separate from the language being taught.</div></div>
+      <div class="rule-item"><div class="r-dot" style="background:var(--blue)"></div><div><strong>The placement test becomes framework-aware:</strong> the CEFR question bank is one implementation. Adding JLPT means adding a second question bank tagged <code>framework = 'jlpt'</code>. The placement module routes to the correct bank based on the course's framework. No architectural change — just content addition.</div></div>
+      <div class="rule-item"><div class="r-dot" style="background:var(--blue)"></div><div><strong>Public templates are language-tagged:</strong> the template library is filterable by <code>target_language</code> and <code>framework</code>. A teacher looking for Spanish B2 templates sees only Spanish CEFR content — not English or Mandarin.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════
+     PART 2 — PRICING TIERS
+═══════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:var(--amber-glow);border:0.5px solid rgba(192,123,58,0.28);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1.5" stroke="var(--amber-lt)" stroke-width="1.1"/><path d="M1.5 6.5h10M4.5 9h1" stroke="var(--amber-lt)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    </div>
+    Part 2 — Pricing tiers
+  </div>
+  <div class="section-sub">Three tiers designed to convert solo teachers on free into paying professionals, with a growth tier for teachers running a school or large student base.</div>
+
+  <div class="tier-grid">
+    <div class="tier-header feature-col">Feature</div>
+    <div class="tier-header"><span class="badge badge-free">Free</span></div>
+    <div class="tier-header"><span class="badge badge-pro">Pro</span></div>
+    <div class="tier-header"><span class="badge badge-growth">Growth</span></div>
+
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Students</div>
+      <div class="tier-cell"><span class="limit">3 max</span></div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Lesson plans (courses)</div>
+      <div class="tier-cell"><span class="limit">5 max</span></div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Classrooms</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Whiteboard sessions</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Spaced review (SRS)</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">AI lesson generation</div>
+      <div class="tier-cell"><span class="cross">—</span></div>
+      <div class="tier-cell"><span class="limit">50 / month</span></div>
+      <div class="tier-cell"><span class="check">✓</span> Unlimited</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Analytics dashboard</div>
+      <div class="tier-cell"><span class="cross">—</span></div>
+      <div class="tier-cell"><span class="check">✓</span> Full</div>
+      <div class="tier-cell"><span class="check">✓</span> Full + export</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Multiple teachers (team)</div>
+      <div class="tier-cell"><span class="cross">—</span></div>
+      <div class="tier-cell"><span class="cross">—</span></div>
+      <div class="tier-cell"><span class="check">✓</span> Up to 5</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Custom branding</div>
+      <div class="tier-cell"><span class="cross">—</span></div>
+      <div class="tier-cell"><span class="cross">—</span></div>
+      <div class="tier-cell"><span class="check">✓</span> Logo + colours</div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Storage (media assets)</div>
+      <div class="tier-cell"><span class="limit">100 MB</span></div>
+      <div class="tier-cell"><span class="limit">5 GB</span></div>
+      <div class="tier-cell"><span class="limit">50 GB</span></div>
+    </div>
+    <div class="tier-row">
+      <div class="tier-cell feature-cell">Pro approval required</div>
+      <div class="tier-cell">Self-serve</div>
+      <div class="tier-cell">Manual review</div>
+      <div class="tier-cell">Manual review</div>
+    </div>
+  </div>
+
+  <div class="info-box amber">
+    <div class="ib-header">
+      <div class="ib-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3h3.5l-2.8 2 1.1 3.5L6 7.5 2.7 9.5 3.8 6 1 4h3.5L6 1z" stroke="var(--amber-lt)" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+      <div><div class="ib-title">Why manual approval for Pro</div><div class="ib-sub">Quality signal, not friction</div></div>
+    </div>
+    <div class="ib-body">Pro and Growth require a brief manual review — not to create friction, but to ensure quality. A spam teacher with 50 fake students breaks the platform's reputation. The review is lightweight: teacher submits a short profile (teaching subjects, experience, language), you approve within 24 hours. This also gives you a direct relationship with every paying teacher early on — invaluable for product feedback. Self-serve Pro can be enabled later when you have moderation tooling.</div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════
+     PART 3 — TEACHER ONBOARDING FLOW
+═══════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:var(--green-bg);border:0.5px solid var(--green-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="4.5" r="2.5" stroke="var(--sage)" stroke-width="1.1"/><path d="M2 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="var(--sage)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    </div>
+    Part 3 — Teacher onboarding flow
+  </div>
+  <div class="section-sub">Two parallel paths depending on the tier chosen. Both start at the same landing page and diverge after profile setup.</div>
+
+  <div style="margin-bottom:20px;">
+    <div style="font-size:11px;color:var(--text-3);margin-bottom:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;">Free path — self-serve, instant access</div>
+    <div class="flow">
+      <div class="flow-step"><div class="fs-label">Step 1</div><div class="fs-title">Landing page</div><div class="fs-sub">lexis.app/teach</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="fs-label">Step 2</div><div class="fs-title">Passkey / OTP</div><div class="fs-sub">Auth + consent</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="fs-label">Step 3</div><div class="fs-title">Profile setup</div><div class="fs-sub">Name · subject · language</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight"><div class="fs-label">Step 4</div><div class="fs-title">Dashboard</div><div class="fs-sub">Free tier · instant</div></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:20px;">
+    <div style="font-size:11px;color:var(--text-3);margin-bottom:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;">Pro / Growth path — review required</div>
+    <div class="flow">
+      <div class="flow-step"><div class="fs-label">Step 1</div><div class="fs-title">Free dashboard</div><div class="fs-sub">Hits limit trigger</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="fs-label">Step 2</div><div class="fs-title">Upgrade request</div><div class="fs-sub">Profile + motivation</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="fs-label">Step 3</div><div class="fs-title">Manual review</div><div class="fs-sub">You approve ≤24h</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="fs-label">Step 4</div><div class="fs-title">Stripe checkout</div><div class="fs-sub">Card + subscription</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight"><div class="fs-label">Step 5</div><div class="fs-title">Pro dashboard</div><div class="fs-sub">Limits removed</div></div>
+    </div>
+  </div>
+
+  <div class="info-box green">
+    <div class="ib-header">
+      <div class="ib-icon"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="1.5" width="9" height="9" rx="2" stroke="var(--sage)" stroke-width="1.1"/><path d="M4 6l2 2 3-3" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="ib-title">Upgrade request flow — implementation detail</div><div class="ib-sub">Simple admin email, no custom UI needed in Phase 2</div></div>
+    </div>
+    <div class="ib-body">The upgrade request is a <code>POST /v1/billing/upgrade-request</code> endpoint. It creates a <code>upgrade_requests</code> record and sends you (the admin) an email via Resend with the teacher's profile and a one-click approve link. Clicking approve calls <code>POST /v1/admin/upgrade-requests/:id/approve</code> which sets <code>subscription.status = 'pending_payment'</code> and sends the teacher a Stripe checkout link. No custom admin UI needed in Phase 2 — just an email + a URL. Build the admin dashboard in Phase 4.</div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════
+     PART 4 — SAAS DATA MODEL
+═══════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:var(--purple-bg);border:0.5px solid var(--purple-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><ellipse cx="6.5" cy="4" rx="5" ry="2" stroke="var(--purple)" stroke-width="1.1"/><path d="M1.5 4v5c0 1.1 2.2 2 5 2s5-.9 5-2V4" stroke="var(--purple)" stroke-width="1.1"/><path d="M1.5 6.5c0 1.1 2.2 2 5 2s5-.9 5-2" stroke="var(--purple)" stroke-width="1.1"/></svg>
+    </div>
+    Part 4 — SaaS data model additions
+  </div>
+  <div class="section-sub">Five new entities. All build on the tenant foundation from Step 1. No changes to existing Phase 1 entities.</div>
+
+  <div class="entity-grid">
+
+    <div class="entity-card new-e">
+      <div class="entity-header-row">
+        <span class="entity-name">upgrade_requests</span>
+        <span class="entity-badge badge badge-new">New</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="field-row"><span class="fn fk">tenant_id</span><span class="ft">uuid FK</span></div>
+        <div class="field-row"><span class="fn">target_plan</span><span class="ft">enum</span><span class="fnt">pro · growth</span></div>
+        <div class="field-row"><span class="fn">motivation</span><span class="ft">text</span><span class="fnt">teacher's message</span></div>
+        <div class="field-row"><span class="fn">status</span><span class="ft">enum</span><span class="fnt">pending·approved·rejected</span></div>
+        <div class="field-row"><span class="fn">reviewed_by</span><span class="ft">string?</span><span class="fnt">admin user</span></div>
+        <div class="field-row"><span class="fn">reviewed_at</span><span class="ft">timestamp?</span></div>
+        <div class="field-row"><span class="fn">created_at</span><span class="ft">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-e">
+      <div class="entity-header-row">
+        <span class="entity-name">billing_events</span>
+        <span class="entity-badge badge badge-new">New</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="field-row"><span class="fn fk">tenant_id</span><span class="ft">uuid FK</span></div>
+        <div class="field-row"><span class="fn">stripe_event_id</span><span class="ft">string unique</span><span class="fnt">idempotency key</span></div>
+        <div class="field-row"><span class="fn">event_type</span><span class="ft">string</span><span class="fnt">invoice.paid, etc.</span></div>
+        <div class="field-row"><span class="fn">payload</span><span class="ft">jsonb</span><span class="fnt">full Stripe event</span></div>
+        <div class="field-row"><span class="fn">processed_at</span><span class="ft">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-e">
+      <div class="entity-header-row">
+        <span class="entity-name">usage_snapshots</span>
+        <span class="entity-badge badge badge-new">New</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="field-row"><span class="fn fk">tenant_id</span><span class="ft">uuid FK</span></div>
+        <div class="field-row"><span class="fn">snapshot_date</span><span class="ft">date</span></div>
+        <div class="field-row"><span class="fn">student_count</span><span class="ft">int</span></div>
+        <div class="field-row"><span class="fn">course_count</span><span class="ft">int</span></div>
+        <div class="field-row"><span class="fn">storage_bytes</span><span class="ft">bigint</span></div>
+        <div class="field-row"><span class="fn">ai_credits_used</span><span class="ft">int</span></div>
+        <div class="field-row"><span class="fn">sessions_count</span><span class="ft">int</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-e">
+      <div class="entity-header-row">
+        <span class="entity-name">tenant_members</span>
+        <span class="entity-badge badge badge-new">New · Growth tier</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="field-row"><span class="fn fk">tenant_id</span><span class="ft">uuid FK</span></div>
+        <div class="field-row"><span class="fn fk">user_id</span><span class="ft">uuid FK</span></div>
+        <div class="field-row"><span class="fn">role</span><span class="ft">enum</span><span class="fnt">owner · teacher · admin</span></div>
+        <div class="field-row"><span class="fn">invited_by</span><span class="ft">uuid FK?</span></div>
+        <div class="field-row"><span class="fn">joined_at</span><span class="ft">timestamp?</span></div>
+        <div class="field-row"><span class="fn">status</span><span class="ft">enum</span><span class="fnt">invited · active · removed</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card mod-e" style="grid-column: span 2;">
+      <div class="entity-header-row">
+        <span class="entity-name">courses — language fields added</span>
+        <span class="entity-badge badge" style="background:var(--amber-glow);color:var(--amber-lt);border-color:rgba(192,123,58,0.28);">Modified</span>
+      </div>
+      <div class="field-list" style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+        <div class="field-row f-new"><span class="fn">target_language</span><span class="ft">string</span><span class="fnt">ISO 639-1 · default 'en'</span></div>
+        <div class="field-row f-new"><span class="fn">framework</span><span class="ft">enum</span><span class="fnt">cefr · jlpt · hsk · custom</span></div>
+        <div class="field-row f-new"><span class="fn">target_level</span><span class="ft">string</span><span class="fnt">replaces target_cefr</span></div>
+        <div class="field-row f-new"><span class="fn">teacher_language</span><span class="ft">string?</span><span class="fnt">UI/explanation language</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════
+     PART 5 — SAAS MODULES
+═══════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:var(--orange-bg);border:0.5px solid var(--orange-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="4.5" height="4.5" rx="1" stroke="#E8A060" stroke-width="1.1"/><rect x="7" y="1.5" width="4.5" height="4.5" rx="1" stroke="#E8A060" stroke-width="1.1"/><rect x="1.5" y="7" width="4.5" height="4.5" rx="1" stroke="#E8A060" stroke-width="1.1"/><rect x="7" y="7" width="4.5" height="4.5" rx="1" stroke="#E8A060" stroke-width="1.1"/></svg>
+    </div>
+    Part 5 — New SaaS modules
+  </div>
+  <div class="section-sub">Four new backend modules, all scoped to be built in Phase 2. Each is independent — they communicate via the event bus, not direct calls.</div>
+
+  <table class="plan-table">
+    <thead>
+      <tr><th>Module</th><th>Responsibility</th><th>Key endpoints</th><th>Triggers</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>billing</td>
+        <td>Stripe webhook handler, subscription lifecycle, upgrade request flow, checkout session creation</td>
+        <td><code>POST /v1/billing/upgrade-request</code><br/><code>POST /v1/billing/checkout</code><br/><code>POST /v1/webhooks/stripe</code></td>
+        <td>Stripe webhook events. On <code>invoice.paid</code> → update subscription. On <code>customer.subscription.deleted</code> → downgrade to free.</td>
+      </tr>
+      <tr>
+        <td>usage</td>
+        <td>Track storage, student count, AI credits per tenant. Nightly snapshot to <code>usage_snapshots</code>. Real-time limit checks.</td>
+        <td><code>GET /v1/usage/summary</code><br/><code>GET /v1/usage/history</code></td>
+        <td>BullMQ cron job runs at midnight. Event bus listens to <code>media.uploaded</code> to add bytes. <code>enrollment.created</code> to increment student count.</td>
+      </tr>
+      <tr>
+        <td>tenant-admin</td>
+        <td>Tenant settings (name, slug, branding), member management for Growth tier, passkey device management per user</td>
+        <td><code>PATCH /v1/tenant/settings</code><br/><code>POST /v1/tenant/members/invite</code><br/><code>DELETE /v1/auth/passkeys/:id</code></td>
+        <td>Direct REST calls. No event bus needed.</td>
+      </tr>
+      <tr>
+        <td>admin</td>
+        <td>Internal Lexis operations: approve upgrade requests, view all tenants, manually adjust subscriptions, review flagged content</td>
+        <td><code>GET /v1/admin/tenants</code><br/><code>POST /v1/admin/upgrade-requests/:id/approve</code><br/><code>PATCH /v1/admin/subscriptions/:id</code></td>
+        <td>Admin-only routes behind a separate <code>requireRole('lexis_admin')</code> guard. Never exposed publicly.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════
+     PART 6 — SAAS BUILD PLAN
+═══════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="section-icon" style="background:var(--green-bg);border:0.5px solid var(--green-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 10l3-7 2.5 5 2-3 1.5 2" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    Part 6 — Phase 2 SaaS build plan
+  </div>
+  <div class="section-sub">SaaS features are built in Phase 2 alongside the whiteboard and assessment modules. These days are the SaaS-specific ones — they interleave with the technical Phase 2 days.</div>
+
+  <!-- Week A -->
+  <div class="week-header open" onclick="toggleWeek(this)">
+    <span class="week-num">Week A</span>
+    <span class="week-title">Billing backend + Stripe integration</span>
+    <span class="wpill dtag-billing">Billing</span>
+    <span class="week-range">Phase 2 · Days 1–3</span>
+    <svg class="week-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body open">
+
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">P2 · D1</span>
+        <span class="day-name">Stripe setup + webhook handler</span>
+        <span class="dtag dtag-billing">Billing</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Create Stripe account, configure products: Free (no charge), Pro (monthly/annual), Growth (monthly/annual)</div>
+        <div class="task-item primary"><div class="t-dot"></div>Implement <code>POST /v1/webhooks/stripe</code> — verify Stripe signature, route to handlers. Use <code>billing_events</code> table as idempotency log — skip if <code>stripe_event_id</code> already processed.</div>
+        <div class="task-item primary"><div class="t-dot"></div>Handle core events: <code>checkout.session.completed</code> → activate subscription. <code>invoice.paid</code> → extend renewal date. <code>customer.subscription.deleted</code> → downgrade to free, enforce limits.</div>
+        <div class="task-item"><div class="t-dot"></div>Write webhook test suite using Stripe CLI event triggers. Confirm all subscription state transitions.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Stripe webhooks process correctly, subscription state updates on all billing events</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">P2 · D2</span>
+        <span class="day-name">Upgrade request flow + admin approval</span>
+        <span class="dtag dtag-billing">Billing</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div><code>POST /v1/billing/upgrade-request</code> — creates <code>upgrade_requests</code> record, sends admin email via Resend with teacher profile and one-click approve URL</div>
+        <div class="task-item primary"><div class="t-dot"></div><code>POST /v1/admin/upgrade-requests/:id/approve</code> — sets status to <code>approved</code>, creates Stripe checkout session, emails teacher with payment link</div>
+        <div class="task-item"><div class="t-dot"></div><code>POST /v1/admin/upgrade-requests/:id/reject</code> — sets status to <code>rejected</code>, sends polite rejection email with reason field</div>
+        <div class="task-item"><div class="t-dot"></div><code>POST /v1/billing/checkout</code> — creates Stripe checkout session for approved teacher. On success, webhook activates subscription.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Full upgrade path works: request → admin email → approve → Stripe checkout → subscription active</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">P2 · D3</span>
+        <span class="day-name">Usage tracking + limit enforcement</span>
+        <span class="dtag dtag-backend">Backend</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Build <code>usage</code> module. BullMQ cron: midnight snapshot writes to <code>usage_snapshots</code> — counts students, courses, storage bytes, AI credits, sessions per tenant.</div>
+        <div class="task-item primary"><div class="t-dot"></div><code>GET /v1/usage/summary</code> — real-time counts for the current tenant. <code>GET /v1/usage/history</code> — last 90 days of snapshots for the usage dashboard chart.</div>
+        <div class="task-item"><div class="t-dot"></div>Event listeners: <code>media.uploaded</code> → add bytes to tenant running total in Redis. <code>enrollment.created</code> → increment student count. These feed the real-time limit checks without hitting the DB on every request.</div>
+        <div class="task-item"><div class="t-dot"></div>Storage limit enforcement: <code>POST /v1/media/upload</code> checks current bytes against <code>subscription.storage_limit</code> before accepting the file.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Usage tracked in real time, storage limits enforced on upload, nightly snapshots running</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="ms-icon"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="ms-title">Billing milestone — money can move</div>
+        <div class="ms-desc">A teacher can hit their free limit, request an upgrade, get approved, pay via Stripe, and have their subscription activate automatically. Usage is tracked. Storage is enforced. The revenue loop is closed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week B -->
+  <div class="week-header" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="week-num">Week B</span>
+    <span class="week-title">Teacher SaaS UI — usage dashboard + billing portal + tenant admin</span>
+    <span class="wpill dtag-web">Web</span>
+    <span class="week-range">Phase 2 · Days 4–7</span>
+    <svg class="week-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">P2 · D4</span>
+        <span class="day-name">Usage dashboard — the teacher's SaaS home</span>
+        <span class="dtag dtag-web">Web</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Build <code>/settings/usage</code> page — plan name + badge, current usage bars (students X/3, courses X/5, storage X MB), history chart (last 90 days)</div>
+        <div class="task-item primary"><div class="t-dot"></div>Upgrade prompt component — shown inline when any limit is at 80% or exceeded. Shows current plan, next plan benefits, "Request upgrade" CTA.</div>
+        <div class="task-item"><div class="t-dot"></div>Upgrade request modal — textarea for motivation message, subject field, submit button. Sends <code>POST /v1/billing/upgrade-request</code>. Confirmation state: "We'll review and email you within 24 hours."</div>
+        <div class="task-item"><div class="t-dot"></div>Wire all usage bars to <code>GET /v1/usage/summary</code>. Animate fill on load.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Teacher sees live usage, upgrade prompt appears at 80% limit, request submits correctly</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">P2 · D5</span>
+        <span class="day-name">Billing portal — subscription management</span>
+        <span class="dtag dtag-web">Web</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Build <code>/settings/billing</code> page — current plan card, renewal date, next invoice amount</div>
+        <div class="task-item primary"><div class="t-dot"></div>Integrate <strong>Stripe Customer Portal</strong> — a single redirect to Stripe handles all billing self-service: change card, view invoices, cancel subscription, download receipts. No custom billing UI needed.</div>
+        <div class="task-item"><div class="t-dot"></div>Implement <code>POST /v1/billing/portal-session</code> — creates a Stripe portal session and returns the URL. Client redirects the teacher to Stripe, Stripe handles everything, teacher returns to Lexis after.</div>
+        <div class="task-item"><div class="t-dot"></div>Cancellation webhook handler: on <code>customer.subscription.deleted</code>, show a re-subscribe prompt on next login with a 7-day grace period before limits enforce.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Teacher can manage their entire subscription via Stripe portal, cancellation handled gracefully</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">P2 · D6</span>
+        <span class="day-name">Tenant admin — account settings + passkey management</span>
+        <span class="dtag dtag-web">Web</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Build <code>/settings/account</code> — name, teaching subjects, languages offered, profile photo upload</div>
+        <div class="task-item primary"><div class="t-dot"></div>Passkey management section: list registered passkeys with device labels and creation dates. "Add new passkey" button (triggers WebAuthn registration). "Remove" button calls <code>DELETE /v1/auth/passkeys/:id</code>. Guard: cannot remove last passkey without adding another.</div>
+        <div class="task-item"><div class="t-dot"></div>Language settings: <code>teacher_language</code> selector (UI language), taught languages (shown on public profile later). These set defaults for new courses.</div>
+        <div class="task-item"><div class="t-dot"></div>Danger zone: "Delete my account" — confirmation dialog, calls <code>DELETE /v1/users/me</code>, signs out, redirects to goodbye screen.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Teacher manages passkeys, account settings, and language preferences. Deletion works.</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">P2 · D7</span>
+        <span class="day-name">Growth tier — team members + language-agnostic course UI</span>
+        <span class="dtag dtag-web">Web</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Build <code>/settings/team</code> — list tenant members, invite by email, assign roles (teacher / admin), remove members. Only visible on Growth plan.</div>
+        <div class="task-item primary"><div class="t-dot"></div>Invitation flow: <code>POST /v1/tenant/members/invite</code> creates <code>tenant_members</code> record with status <code>invited</code>, sends email with a join link + OTP.</div>
+        <div class="task-item primary"><div class="t-dot"></div>Update course creation form to include <code>target_language</code> selector (ISO language picker) and <code>framework</code> selector (CEFR / JLPT / HSK / Custom). Template library filters by language and framework.</div>
+        <div class="task-item"><div class="t-dot"></div>Update template browser: add language + framework filter chips. Show template language and level system prominently.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Growth teams can collaborate, courses are fully language/framework-agnostic in UI</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="ms-icon"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="ms-title">SaaS UI milestone — Lexis is a real product</div>
+        <div class="ms-desc">Any language teacher can sign up, build courses in their language, hit the free limit, upgrade, manage their subscription via Stripe, manage their passkeys, and (on Growth) invite co-teachers. The platform is language-agnostic, multi-tenant, and commercially viable.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /section -->
+
+<script>
+  function toggleWeek(h) {
+    h.classList.toggle('open');
+    h.nextElementSibling.classList.toggle('open');
+  }
+  function toggleDay(h) {
+    const t = h.nextElementSibling;
+    t.style.display = t.style.display === 'none' ? 'flex' : 'none';
+  }
+  document.querySelectorAll('.task-list').forEach(t => t.style.display = 'flex');
+  document.querySelectorAll('.week-header.open').forEach(h => h.nextElementSibling.classList.add('open'));
+</script>
+</body>
+</html>

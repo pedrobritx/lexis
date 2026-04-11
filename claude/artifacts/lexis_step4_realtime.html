@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Phase 3 Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0F1620;
+  --surface:    #16202C;
+  --raised:     #1D2A3A;
+  --hover:      #223040;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.13);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+  --text-1:     #EDE8DF;
+  --text-2:     #8A95A3;
+  --text-3:     #4A5768;
+  --blue:       #7AAAD4;
+  --blue-bg:    rgba(122,170,212,0.08);
+  --blue-bd:    rgba(122,170,212,0.22);
+  --purple:     #B8A8D8;
+  --purple-bg:  rgba(184,168,216,0.08);
+  --purple-bd:  rgba(184,168,216,0.2);
+  --green-bg:   rgba(141,181,160,0.08);
+  --green-bd:   rgba(141,181,160,0.22);
+  --orange:     #E8A060;
+  --orange-bg:  rgba(232,160,96,0.08);
+  --orange-bd:  rgba(232,160,96,0.22);
+  --red:        #E07070;
+  --red-bg:     rgba(224,112,112,0.08);
+  --red-bd:     rgba(224,112,112,0.22);
+  --font: 'DM Sans', sans-serif;
+  --ease: cubic-bezier(0.4,0,0.2,1);
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text-1); padding: 48px 32px 80px; max-width: 940px; margin: 0 auto; }
+
+.doc-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 0.5px solid var(--border-mid); }
+.doc-logo { display: flex; align-items: flex-end; }
+.logo-word { font-size: 22px; font-weight: 500; letter-spacing: -0.03em; color: var(--parchment); }
+.logo-blob { margin-left: 2px; padding-bottom: 2px; display: inline-flex; align-items: flex-end; }
+.doc-meta { text-align: right; }
+.doc-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.doc-sub   { font-size: 11px; color: var(--text-3); }
+
+.stat-bar { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 36px; }
+.stat-card { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 10px; padding: 13px 16px; }
+.sc-val { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+.sc-lab { font-size: 10px; color: var(--text-3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.section { margin-bottom: 44px; }
+.section-title { font-size: 16px; font-weight: 500; color: var(--text-1); margin-bottom: 6px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+.s-icon { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-sub { font-size: 12px; color: var(--text-3); margin-bottom: 20px; line-height: 1.6; }
+.divider { height: 0.5px; background: var(--border-mid); margin: 36px 0; }
+
+.ib { border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; border: 0.5px solid; }
+.ib.blue   { background: var(--blue-bg);   border-color: var(--blue-bd); }
+.ib.amber  { background: var(--amber-glow); border-color: rgba(192,123,58,0.28); }
+.ib.green  { background: var(--green-bg);  border-color: var(--green-bd); }
+.ib.purple { background: var(--purple-bg); border-color: var(--purple-bd); }
+.ib.orange { background: var(--orange-bg); border-color: var(--orange-bd); }
+.ib.red    { background: var(--red-bg);    border-color: var(--red-bd); }
+.ib-hdr { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.ib-ico { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.blue   .ib-ico { background: var(--blue-bg);   border: 0.5px solid var(--blue-bd); }
+.amber  .ib-ico { background: var(--amber-glow); border: 0.5px solid rgba(192,123,58,0.28); }
+.green  .ib-ico { background: var(--green-bg);  border: 0.5px solid var(--green-bd); }
+.purple .ib-ico { background: var(--purple-bg); border: 0.5px solid var(--purple-bd); }
+.orange .ib-ico { background: var(--orange-bg); border: 0.5px solid var(--orange-bd); }
+.red    .ib-ico { background: var(--red-bg);    border: 0.5px solid var(--red-bd); }
+.ib-title { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.ib-sub   { font-size: 11px; margin-top: 1px; }
+.blue   .ib-sub { color: var(--blue); }   .amber  .ib-sub { color: var(--amber-lt); }
+.green  .ib-sub { color: var(--sage); }   .purple .ib-sub { color: var(--purple); }
+.orange .ib-sub { color: var(--orange); } .red    .ib-sub { color: var(--red); }
+.ib-body { font-size: 12px; color: var(--text-2); line-height: 1.65; }
+.ib-body strong { color: var(--text-1); font-weight: 500; }
+.ib-body code { font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 5px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+
+.rules { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.ri { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.rd { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.ri strong { color: var(--text-1); font-weight: 500; }
+.ri code { font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 5px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+
+/* State machine diagram */
+.state-machine { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; }
+.sm-row { display: flex; align-items: center; gap: 0; }
+.sm-state { background: var(--raised); border: 0.5px solid var(--border-mid); border-radius: 8px; padding: 8px 14px; font-size: 11px; font-weight: 500; color: var(--text-1); min-width: 120px; text-align: center; }
+.sm-state.active { border-color: var(--amber-lt); background: var(--amber-glow); color: var(--amber-lt); }
+.sm-state.locked-s { border-color: var(--red-bd); background: var(--red-bg); color: var(--red); }
+.sm-arrow { font-size: 16px; color: var(--text-3); padding: 0 10px; flex-shrink: 0; }
+.sm-label { font-size: 10px; color: var(--text-3); padding: 0 8px; font-style: italic; }
+
+/* Layer diagram */
+.layer-stack { display: flex; flex-direction: column; gap: 4px; margin: 14px 0; }
+.layer-row { display: flex; align-items: center; gap: 12px; padding: 9px 14px; border-radius: 8px; border: 0.5px solid var(--border-mid); background: var(--raised); }
+.layer-z { font-size: 10px; color: var(--text-3); font-family: 'SF Mono','Fira Code',monospace; min-width: 32px; }
+.layer-name { font-size: 12px; font-weight: 500; color: var(--text-1); flex: 1; }
+.layer-desc { font-size: 10px; color: var(--text-3); }
+.layer-row.highlight { border-color: rgba(192,123,58,0.35); background: var(--amber-glow); }
+.layer-row.highlight .layer-name { color: var(--amber-lt); }
+.layer-row.new-l { border-color: var(--blue-bd); background: var(--blue-bg); }
+.layer-row.new-l .layer-name { color: var(--blue); }
+
+/* Event table */
+.ev-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px; }
+.ev-table th { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); padding: 8px 12px; text-align: left; border-bottom: 0.5px solid var(--border-mid); background: var(--surface); }
+.ev-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text-2); vertical-align: top; line-height: 1.5; }
+.ev-table tr:last-child td { border-bottom: none; }
+.ev-table tr:hover td { background: var(--hover); }
+.ev-table td:first-child { font-family: 'SF Mono','Fira Code',monospace; color: var(--blue); font-size: 11px; }
+.ev-table td code { font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 4px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+.tag-new-ev { font-size: 8px; font-weight: 500; padding: 1px 5px; border-radius: 3px; background: var(--blue-bg); color: var(--blue); border: 0.5px solid var(--blue-bd); margin-left: 5px; }
+
+/* Entity grid */
+.entity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.entity-card { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 12px; overflow: hidden; }
+.entity-card.ne { border-color: var(--blue-bd); }
+.entity-card.me { border-color: rgba(192,123,58,0.28); }
+.ec-hdr { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 0.5px solid var(--border); }
+.ec-name { font-size: 12px; font-weight: 500; color: var(--text-1); font-family: 'SF Mono','Fira Code',monospace; }
+.ec-badge { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; border: 0.5px solid; white-space: nowrap; margin-left: auto; letter-spacing: 0.04em; text-transform: uppercase; }
+.b-new { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.b-mod { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.fl { padding: 10px 14px; display: flex; flex-direction: column; gap: 3px; }
+.fr { display: flex; align-items: baseline; gap: 8px; font-size: 11px; padding: 3px 0; border-bottom: 0.5px solid var(--border); }
+.fr:last-child { border-bottom: none; }
+.fr.fn { background: rgba(122,170,212,0.05); border-radius: 3px; padding: 3px 4px; margin: 0 -4px; }
+.fname { font-family: 'SF Mono','Fira Code',monospace; color: var(--parchment); font-size: 11px; min-width: 160px; }
+.fname.pk { color: var(--amber-lt); } .fname.fk { color: var(--sage); }
+.ftype { color: var(--blue); font-family: 'SF Mono','Fira Code',monospace; font-size: 10px; }
+.fnote { color: var(--text-3); font-size: 10px; margin-left: auto; }
+
+/* Build plan */
+.week-hdr { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 10px; margin-bottom: 10px; cursor: pointer; user-select: none; transition: background 0.15s; }
+.week-hdr:hover { background: var(--hover); }
+.wn { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); min-width: 56px; }
+.wt { font-size: 14px; font-weight: 500; color: var(--text-1); flex: 1; }
+.wr { font-size: 11px; color: var(--text-3); }
+.wchev { color: var(--text-3); transition: transform 0.2s; flex-shrink: 0; }
+.week-hdr.open .wchev { transform: rotate(90deg); }
+.wpill { font-size: 9px; font-weight: 500; padding: 2px 8px; border-radius: 4px; border: 0.5px solid; white-space: nowrap; }
+.p-rt  { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.p-pdf { background: var(--orange-bg); color: var(--orange); border-color: var(--orange-bd); }
+.p-ws  { background: var(--green-bg); color: var(--sage); border-color: var(--green-bd); }
+.p-ux  { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+.p-qa  { background: var(--red-bg); color: var(--red); border-color: var(--red-bd); }
+.week-body { display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.week-body.open { display: flex; }
+
+.day-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.day-hdr { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; transition: background 0.15s; }
+.day-hdr:hover { background: var(--hover); }
+.dn { font-size: 11px; color: var(--text-3); min-width: 48px; }
+.dname { font-size: 13px; font-weight: 500; color: var(--text-1); flex: 1; }
+.dtag { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; border: 0.5px solid; white-space: nowrap; }
+.d-rt  { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.d-pdf { background: var(--orange-bg); color: var(--orange); border-color: var(--orange-bd); }
+.d-ws  { background: var(--green-bg); color: var(--sage); border-color: var(--green-bd); }
+.d-ux  { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+.d-qa  { background: var(--red-bg); color: var(--red); border-color: var(--red-bd); }
+.d-hrs { font-size: 10px; color: var(--text-3); }
+
+.task-list { padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; border-top: 0.5px solid var(--border); }
+.ti { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text-2); line-height: 1.55; }
+.td { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; background: var(--text-3); }
+.ti.p { color: var(--text-1); } .ti.p .td { background: var(--amber); }
+.ti code { font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 5px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+
+.day-footer { padding: 8px 16px; border-top: 0.5px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.dl { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
+.dt { font-size: 11px; color: var(--sage); }
+
+.milestone { background: var(--green-bg); border: 0.5px solid var(--green-bd); border-radius: 10px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; margin-top: 4px; }
+.mi { width: 26px; height: 26px; border-radius: 7px; background: rgba(141,181,160,0.15); border: 0.5px solid var(--green-bd); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mt { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.md { font-size: 11px; color: var(--sage); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="doc-header">
+  <div class="doc-logo">
+    <span class="logo-word">lexis</span>
+    <span class="logo-blob">
+      <svg width="10" height="13" viewBox="0 0 18 22" fill="none"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4924F"/><stop offset="100%" stop-color="#A8CCBB"/></linearGradient></defs><path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/></svg>
+    </span>
+  </div>
+  <div class="doc-meta">
+    <div class="doc-title">Step 4 — Phase 3 plan</div>
+    <div class="doc-sub">Real-time deep features · Lock-based conflicts · PDF annotation · WebSocket hardening · Zoom overlay</div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stat-bar">
+  <div class="stat-card"><div class="sc-val" style="color:var(--blue);">28</div><div class="sc-lab">Build days</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--orange);">8</div><div class="sc-lab">New entities</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--purple);">12</div><div class="sc-lab">New WS events</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--sage);">3</div><div class="sc-lab">Canvas layers added</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--amber-lt);">1</div><div class="sc-lab">Zoom overlay system</div></div>
+</div>
+
+
+<!-- ══════════════════════════
+     PART 1 — LOCK-BASED CONFLICT RESOLUTION
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--red-bg);border:0.5px solid var(--red-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="3" y="5.5" width="7" height="6" rx="1.2" stroke="var(--red)" stroke-width="1.1"/><path d="M4.5 5.5V4a2 2 0 014 0v1.5" stroke="var(--red)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    </div>
+    Part 1 — Lock-based conflict resolution
+  </div>
+  <div class="section-sub">When a user begins editing an object, it becomes exclusively theirs until they release. Other users see a visual lock indicator and cannot move or edit the object. The simplest model that eliminates conflicts entirely — appropriate for 1-on-1 and small group teaching.</div>
+
+  <div class="ib red">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="5" width="8" height="6" rx="1.2" stroke="var(--red)" stroke-width="1.1"/><path d="M4 5V3.5a2 2 0 014 0V5" stroke="var(--red)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">Edit lock — state machine</div><div class="ib-sub">Three states per object: free → editing (locked) → free</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="state-machine">
+        <div class="sm-row">
+          <div class="sm-state">Free</div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-label">user starts dragging / double-clicks to edit</div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-state active">Editing (locked)</div>
+        </div>
+        <div class="sm-row" style="margin-top:4px;">
+          <div class="sm-state active">Editing (locked)</div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-label">user releases / clicks away / disconnects</div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-state">Free</div>
+        </div>
+        <div class="sm-row" style="margin-top:4px;">
+          <div class="sm-state active">Editing (locked)</div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-label">another user attempts edit</div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-state locked-s">Rejected + indicator</div>
+        </div>
+      </div>
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--red)"></div><div><strong>Lock acquisition:</strong> client emits <code>object:lock</code> when pointer-down on an object or when entering text edit mode. RT server checks Redis key <code>lock:{objectId}</code> — if absent, sets it with <code>TTL = 30s</code> and the locking user's ID, broadcasts <code>object:locked</code> to all room members. If already set by another user, returns <code>object:lock_rejected</code> to requester only.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--red)"></div><div><strong>Lock TTL safety:</strong> the 30-second TTL ensures locks are auto-released if the user disconnects or the tab crashes. On every <code>pointermove</code> or <code>input</code> event while holding a lock, the client emits <code>object:lock_keepalive</code> which resets the TTL. A user actively editing never loses their lock mid-operation.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--red)"></div><div><strong>Lock release:</strong> client emits <code>object:unlock</code> on pointer-up, click-away, or blur. RT server deletes the Redis key, broadcasts <code>object:unlocked</code> with the final object state. The unlock event carries the committed delta — other clients apply it immediately.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--red)"></div><div><strong>Visual indicator:</strong> locked objects show the locking user's avatar and name in a small badge at the top-left corner. The object border pulses with the user's assigned colour (each presence user gets a colour from a fixed palette of 6). Move and resize handles are hidden. Text cursor shows a "blocked" cursor CSS on hover.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--red)"></div><div><strong>Teacher override:</strong> teacher role can emit <code>object:force_unlock</code> to break any lock in their tenant's board. Used when a student's tab crashes and leaves a stale lock before the TTL expires. Broadcasts <code>object:unlocked</code> with no delta — object state unchanged, lock cleared.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 2 — SHARED UNDO/REDO
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--purple-bg);border:0.5px solid var(--purple-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2.5 5.5H8a3 3 0 010 6H5" stroke="var(--purple)" stroke-width="1.1" stroke-linecap="round"/><path d="M2.5 5.5L5 3M2.5 5.5L5 8" stroke="var(--purple)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    Part 2 — Shared undo/redo
+  </div>
+  <div class="section-sub">A single command log shared across all users in a board page. Undo reverses the most recent action regardless of who performed it. This matches the collaborative model — everyone is building the board together, and mistakes should be reversible by anyone.</div>
+
+  <div class="ib purple">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4h7a3 3 0 010 6H4" stroke="var(--purple)" stroke-width="1.1" stroke-linecap="round"/><path d="M4 2l-2 2 2 2" stroke="var(--purple)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="ib-title">Command log architecture</div><div class="ib-sub">Every mutation is a reversible command stored server-side</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Command log:</strong> every mutable operation on the board is stored in <code>board_commands</code> table: <code>command_type</code> (object_create / object_update / object_delete / stroke_add / stroke_erase), <code>forward_payload</code> (what was applied), <code>reverse_payload</code> (what reverses it), <code>author_id</code>, <code>sequence_num</code> (monotonically increasing per page), <code>undone_at</code> nullable timestamp.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Undo:</strong> client emits <code>board:undo</code>. RT server finds the most recent command for this page where <code>undone_at IS NULL</code>, applies its <code>reverse_payload</code>, sets <code>undone_at = now()</code>, broadcasts <code>object:update</code> or <code>object:delete</code> with the reversed state to all clients. The undo stack is the command log itself — no separate data structure needed.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Redo:</strong> client emits <code>board:redo</code>. RT server finds the most recent command where <code>undone_at IS NOT NULL</code> (the last undone action), re-applies its <code>forward_payload</code>, clears <code>undone_at</code>, broadcasts the re-applied state.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Stroke undo:</strong> strokes live in S3, not PostgreSQL — they can't be individually reversed by a DB update. The command log stores the <code>strokeId</code> in <code>reverse_payload</code>. Undoing a stroke emits a <code>stroke:hide</code> event which adds the ID to a Redis set <code>hidden_strokes:{pageId}</code>. Clients filter hidden stroke IDs when rendering. On S3 flush, hidden strokes are excluded from the binary blob permanently.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>History depth:</strong> the command log is kept for 90 days, capped at 500 commands per page. Beyond 500, the oldest commands are pruned and their effects made permanent. Visual undo history is shown as a scrollable timeline in a board settings panel — each entry shows the action, the author's avatar, and the timestamp.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 3 — ZOOM OVERLAY SYSTEM
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--amber-glow);border:0.5px solid rgba(192,123,58,0.28);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="var(--amber-lt)" stroke-width="1.1"/><path d="M4.5 4.5h4M4.5 6.5h4M4.5 8.5h2" stroke="var(--amber-lt)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    </div>
+    Part 3 — Zoom overlay system
+  </div>
+  <div class="section-sub">PDFs and activity cards expand to a fullscreen overlay when zoomed. The canvas stays live underneath. Drawing tools remain fully active over the overlay — the teacher can annotate a PDF while the canvas with other objects is still visible at the edges.</div>
+
+  <div class="ib amber">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="var(--amber-lt)" stroke-width="1.1"/><path d="M4 4h4M4 6h4M4 8h2" stroke="var(--amber-lt)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">Layer architecture — overlay model</div><div class="ib-sub">5-layer z-stack · Drawing tools always topmost</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="layer-stack">
+        <div class="layer-row"><div class="layer-z">z:50</div><div class="layer-name">Drawing tools HUD</div><div class="layer-desc">Toolbar, colour picker, width selector — always on top of everything. Never obscured by overlay.</div></div>
+        <div class="layer-row highlight"><div class="layer-z">z:40</div><div class="layer-name">Annotation stroke canvas</div><div class="layer-desc">Transparent canvas layer. Active when overlay is open. Strokes drawn here belong to the PDF/activity object, not the board. Emitted as <code>annotation:stroke:delta</code>.</div></div>
+        <div class="layer-row highlight"><div class="layer-z">z:30</div><div class="layer-name">Zoom overlay content</div><div class="layer-desc">PDF.js renderer or activity card UI. Fills 90% of viewport with a 5% margin. Semi-transparent backdrop dims the canvas underneath (rgba 0,0,0,0.6).</div></div>
+        <div class="layer-row"><div class="layer-z">z:20</div><div class="layer-name">Board object layer</div><div class="layer-desc">All canvas objects (stickies, shapes, text). Visible at edges when overlay is open at less than 100% width.</div></div>
+        <div class="layer-row"><div class="layer-z">z:10</div><div class="layer-name">Board stroke canvas</div><div class="layer-desc">Freehand strokes on the board. Paused during overlay — pointer events captured by annotation canvas instead.</div></div>
+        <div class="layer-row"><div class="layer-z">z:0</div><div class="layer-name">Pattern background</div><div class="layer-desc">Blank / dotted / squared CSS pattern.</div></div>
+      </div>
+      <div class="rules" style="margin-top:12px;">
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Opening the overlay:</strong> user clicks the zoom button on any PDF card or activity card → <code>overlay:open</code> event emitted → RT server broadcasts to all room members → all clients open the overlay simultaneously showing the same object. The canvas underneath stays interactive for participants not in follow mode.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Drawing over PDF:</strong> when overlay is open, pointer events are captured by the annotation canvas (z:40) instead of the board stroke canvas (z:10). Strokes drawn here emit <code>annotation:stroke:delta</code> events tagged with the <code>objectId</code> of the PDF. They render on the annotation canvas and sync to all clients in real time via the same stroke pipeline.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Drawing over activity:</strong> same model — annotation canvas captures strokes. Teacher can circle a student's incorrect answer, draw an arrow to the correct option. These annotations are stored per activity attempt — they appear when the teacher reviews the submission, creating a visual correction history.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Closing the overlay:</strong> Esc key, click outside overlay, or close button. Emits <code>overlay:close</code> → all clients close. Annotation strokes drawn during the session are flushed to S3 tagged to the object. Board stroke canvas resumes capturing pointer events.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Follow mode + overlay:</strong> when follow mode is active and teacher opens the overlay, all students automatically see the same overlay open on the same object. If teacher closes the overlay, all students close. Follow mode extends into the overlay layer seamlessly.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 4 — PDF ANNOTATION SYSTEM
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--orange-bg);border:0.5px solid var(--orange-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2.5" y="1.5" width="8" height="10" rx="1.5" stroke="var(--orange)" stroke-width="1.1"/><path d="M4.5 5h4M4.5 7h4M4.5 9h2" stroke="var(--orange)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    </div>
+    Part 4 — PDF annotation system
+  </div>
+  <div class="section-sub">PDF objects on the canvas are first-class annotatable documents. Annotations are shared — teacher and student see each other's marks in real time. Three annotation types: freehand strokes, text comments, and highlights. All anchored to PDF coordinates, not screen coordinates.</div>
+
+  <div class="ib orange">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 9.5L5 3l3 5 2-2.5" stroke="var(--orange)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="ib-title">Annotation coordinate system — PDF-space, not screen-space</div><div class="ib-sub">Annotations survive zoom, scroll, and resize</div></div>
+    </div>
+    <div class="ib-body">PDF.js renders pages at a given <code>scale</code> factor. All annotation coordinates are stored in <strong>PDF-space</strong> — normalised to the page dimensions (0.0–1.0 on both axes). On render, the client transforms from PDF-space to screen-space using the current PDF.js scale. This means annotations remain perfectly aligned regardless of zoom level, screen size, or device. A highlight drawn at PDF coordinates (0.1, 0.4) → (0.6, 0.45) renders correctly on a 13" MacBook at 100% zoom and on an iPad at 150% zoom.
+    </div>
+  </div>
+
+  <div class="ib orange">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="var(--orange)" stroke-width="1.1"/><path d="M4 6h4M6 4v4" stroke="var(--orange)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">Three annotation types</div><div class="ib-sub">Freehand · Text comment · Highlight</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Freehand annotation:</strong> uses the drawing tools HUD (pen, highlighter, eraser). Strokes drawn over the overlay PDF are tagged with <code>target_type: 'pdf'</code>, <code>target_id: objectId</code>, <code>page_num: N</code>. Points stored in PDF-space coordinates. Synced via <code>annotation:stroke:delta</code> in real time. Persisted to <code>pdf_annotations</code> table on stroke end, separate from the board stroke S3 binary.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Text comment:</strong> double-tap anywhere on the PDF page opens an inline text input anchored to that PDF-space coordinate. Stored as <code>annotation_type: 'comment'</code> with <code>position: {x, y}</code> and <code>content: text</code>. Rendered as a small speech bubble floating at that position. Visible to all. Click to expand, click away to collapse. Author avatar shown on the bubble.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Highlight:</strong> select text in PDF.js (drag over text), "Highlight" button appears in a floating toolbar. Stores the selection as <code>annotation_type: 'highlight'</code> with PDF-space bounding box and optionally a comment. Highlights are rendered as a coloured overlay rect on the annotation canvas — teacher highlights in amber, student highlights in sage.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Teacher pushes a page:</strong> teacher emits <code>pdf:push_page</code> with <code>{objectId, pageNum}</code>. RT server broadcasts to all clients in room. All students' PDF viewer scrolls to that page. Combined with follow mode — when follow is active, page changes automatically sync. Without follow mode, the push is a one-time nudge that the student can override.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Independent annotations:</strong> even though annotations are shared, the student has their own independent copy of the PDF object via <code>pdf_annotation_sets</code> — a personal layer. Teacher's annotation set is visible to the student as read-only coloured marks. Student's set is visible to teacher. This creates a visual dialogue on the document without either overwriting the other.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 5 — WEBSOCKET HARDENING
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--green-bg);border:0.5px solid var(--green-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z" stroke="var(--sage)" stroke-width="1.1"/><path d="M4.5 6.5l1.5 1.5 3-3" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    Part 5 — WebSocket hardening
+  </div>
+  <div class="section-sub">Two hardening features: connection health indicator (latency badge, reconnect status) and automatic reconnection with zero data loss. A dropped connection should be invisible to both teacher and student.</div>
+
+  <div class="ib green">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="var(--sage)" stroke-width="1.1"/><path d="M6 3.5v2.5l2 1.5" stroke="var(--sage)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">Connection health indicator</div><div class="ib-sub">Always visible · Never alarming unless actionable</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--sage)"></div><div><strong>Latency measurement:</strong> client sends a <code>ping</code> every 5 seconds with a <code>timestamp</code>. Server responds with <code>pong</code> carrying the same timestamp. Client computes round-trip time. Displayed as a small indicator in the session HUD: green (&lt;100ms), amber (100–300ms), red (&gt;300ms or timeout). Shows exact ms on hover.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--sage)"></div><div><strong>Reconnecting state:</strong> when Socket.IO detects a disconnect, the HUD indicator switches to a pulsing "Reconnecting…" badge. The board is still fully visible and readable — only new events are paused. The client continues to accept local edits and queues them in memory (not in localStorage — in-memory only, cleared on hard refresh).</div></div>
+        <div class="ri"><div class="rd" style="background:var(--sage)"></div><div><strong>Connection quality detail:</strong> clicking the health indicator opens a small popover showing: current latency, last 10 measurements as a sparkline, packet loss percentage, and the Socket.IO transport type (websocket / polling fallback). Useful for diagnosing poor session quality.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ib green">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 6a4 4 0 11-4-4" stroke="var(--sage)" stroke-width="1.1" stroke-linecap="round"/><path d="M8 2l2 2-2 2" stroke="var(--sage)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="ib-title">Automatic reconnection with state recovery</div><div class="ib-sub">Sequence numbers ensure no event is lost or replayed twice</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--sage)"></div><div><strong>Sequence numbers:</strong> every event the RT server broadcasts is stamped with a monotonically increasing <code>seq</code> integer per board page, stored in Redis as <code>seq:{pageId}</code>. Clients track the highest <code>seq</code> they have received as <code>lastSeq</code>.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--sage)"></div><div><strong>Reconnection handshake:</strong> Socket.IO's built-in reconnection fires automatically. On reconnect, the client sends <code>board:join</code> with <code>{pageId, token, lastSeq}</code>. The server checks Redis for events since <code>lastSeq</code> in a replay buffer (last 500 events per page, 5-minute TTL). Missing events are replayed to the reconnecting client only. No duplicate events — <code>seq</code> guards against re-processing.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--sage)"></div><div><strong>Replay buffer:</strong> a Redis list <code>replay:{pageId}</code> stores the last 500 serialised events with their <code>seq</code>. New events are prepended (LPUSH), old events trimmed (LTRIM to 500). On reconnect with a <code>lastSeq</code> that's within the buffer, only missing events are replayed. If <code>lastSeq</code> is older than the buffer, a full board state refresh is sent instead (same as initial join).</div></div>
+        <div class="ri"><div class="rd" style="background:var(--sage)"></div><div><strong>In-memory queued edits:</strong> edits made during the disconnection window are queued in memory. On reconnect and after the replay completes, queued edits are applied on top of the recovered state and emitted to the server. The result is seamless — the user sees their edits persist as if the connection never dropped.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 6 — NEW WS EVENTS
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--blue-bg);border:0.5px solid var(--blue-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5h9M8 3.5l3 3-3 3" stroke="var(--blue)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    Part 6 — Phase 3 Socket.IO event additions
+  </div>
+  <div class="section-sub">12 new events added to the Phase 2 contract. All are additive — no changes to existing events.</div>
+
+  <table class="ev-table">
+    <thead><tr><th>Event</th><th>Direction</th><th>Payload</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>object:lock <span class="tag-new-ev">New</span></td><td>Client → Server</td><td><code>{objectId}</code></td><td>Request edit lock. Server checks Redis, grants or rejects.</td></tr>
+      <tr><td>object:locked <span class="tag-new-ev">New</span></td><td>Server → All clients</td><td><code>{objectId, lockedBy: userId, userName, color}</code></td><td>Broadcast when lock acquired. All clients show lock indicator.</td></tr>
+      <tr><td>object:lock_rejected <span class="tag-new-ev">New</span></td><td>Server → Requester</td><td><code>{objectId, lockedBy: userId}</code></td><td>Lock denied. Client shows "Being edited by X" toast.</td></tr>
+      <tr><td>object:lock_keepalive <span class="tag-new-ev">New</span></td><td>Client → Server</td><td><code>{objectId}</code></td><td>Resets lock TTL. Sent every 5s while actively editing.</td></tr>
+      <tr><td>object:unlock <span class="tag-new-ev">New</span></td><td>Client → Server → All</td><td><code>{objectId, delta?}</code></td><td>Release lock with optional final state. Clears Redis key.</td></tr>
+      <tr><td>object:force_unlock <span class="tag-new-ev">New</span></td><td>Teacher → Server → All</td><td><code>{objectId}</code></td><td>Teacher breaks stale lock. No delta applied.</td></tr>
+      <tr><td>board:undo <span class="tag-new-ev">New</span></td><td>Client → Server → All</td><td><code>{pageId}</code></td><td>Reverse most recent command. Server broadcasts reversed state.</td></tr>
+      <tr><td>board:redo <span class="tag-new-ev">New</span></td><td>Client → Server → All</td><td><code>{pageId}</code></td><td>Re-apply last undone command.</td></tr>
+      <tr><td>overlay:open <span class="tag-new-ev">New</span></td><td>Client → Server → All</td><td><code>{objectId, pageNum?}</code></td><td>All clients open fullscreen overlay for this object.</td></tr>
+      <tr><td>overlay:close <span class="tag-new-ev">New</span></td><td>Client → Server → All</td><td><code>{objectId}</code></td><td>All clients close the overlay.</td></tr>
+      <tr><td>annotation:stroke:delta <span class="tag-new-ev">New</span></td><td>Client → Server → All</td><td><code>{objectId, pageNum, points[], tool, color}</code></td><td>Freehand annotation over PDF/activity overlay. Points in PDF-space.</td></tr>
+      <tr><td>pdf:push_page <span class="tag-new-ev">New</span></td><td>Teacher → Server → All</td><td><code>{objectId, pageNum}</code></td><td>Force all clients to scroll PDF to this page.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 7 — DATA MODEL
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--purple-bg);border:0.5px solid var(--purple-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><ellipse cx="6.5" cy="4" rx="5" ry="2" stroke="var(--purple)" stroke-width="1.1"/><path d="M1.5 4v5c0 1.1 2.2 2 5 2s5-.9 5-2V4" stroke="var(--purple)" stroke-width="1.1"/><path d="M1.5 6.5c0 1.1 2.2 2 5 2s5-.9 5-2" stroke="var(--purple)" stroke-width="1.1"/></svg>
+    </div>
+    Part 7 — Phase 3 data model additions
+  </div>
+  <div class="section-sub">8 new entities. Additive to Phase 1 and 2 schemas — no breaking changes.</div>
+
+  <div class="entity-grid">
+
+    <div class="entity-card ne">
+      <div class="ec-hdr"><span class="ec-name">board_commands</span><span class="ec-badge b-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fname pk">id</span><span class="ftype">uuid PK</span></div>
+        <div class="fr"><span class="fname fk">page_id</span><span class="ftype">uuid FK</span></div>
+        <div class="fr"><span class="fname fk">author_id</span><span class="ftype">uuid FK</span></div>
+        <div class="fr"><span class="fname">sequence_num</span><span class="ftype">bigint</span><span class="fnote">per-page monotonic</span></div>
+        <div class="fr"><span class="fname">command_type</span><span class="ftype">enum</span><span class="fnote">create·update·delete·stroke</span></div>
+        <div class="fr"><span class="fname">forward_payload</span><span class="ftype">jsonb</span><span class="fnote">what was applied</span></div>
+        <div class="fr"><span class="fname">reverse_payload</span><span class="ftype">jsonb</span><span class="fnote">what reverses it</span></div>
+        <div class="fr"><span class="fname">undone_at</span><span class="ftype">timestamp?</span><span class="fnote">null = active</span></div>
+        <div class="fr"><span class="fname">created_at</span><span class="ftype">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-hdr"><span class="ec-name">pdf_annotations</span><span class="ec-badge b-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fname pk">id</span><span class="ftype">uuid PK</span></div>
+        <div class="fr"><span class="fname fk">tenant_id</span><span class="ftype">uuid FK</span></div>
+        <div class="fr"><span class="fname fk">object_id</span><span class="ftype">uuid FK</span><span class="fnote">board_objects</span></div>
+        <div class="fr"><span class="fname fk">author_id</span><span class="ftype">uuid FK</span></div>
+        <div class="fr"><span class="fname">page_num</span><span class="ftype">int</span></div>
+        <div class="fr"><span class="fname">annotation_type</span><span class="ftype">enum</span><span class="fnote">stroke·comment·highlight</span></div>
+        <div class="fr"><span class="fname">content</span><span class="ftype">jsonb</span><span class="fnote">type-specific payload</span></div>
+        <div class="fr"><span class="fname">pdf_coords</span><span class="ftype">jsonb</span><span class="fnote">normalised 0–1 coordinates</span></div>
+        <div class="fr"><span class="fname">deleted_at</span><span class="ftype">timestamp?</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-hdr"><span class="ec-name">annotation_strokes</span><span class="ec-badge b-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fname pk">id</span><span class="ftype">uuid PK</span></div>
+        <div class="fr"><span class="fname fk">object_id</span><span class="ftype">uuid FK</span></div>
+        <div class="fr"><span class="fname fk">author_id</span><span class="ftype">uuid FK</span></div>
+        <div class="fr"><span class="fname">page_num</span><span class="ftype">int</span><span class="fnote">for PDF pages</span></div>
+        <div class="fr"><span class="fname">s3_key</span><span class="ftype">string?</span><span class="fnote">flushed binary</span></div>
+        <div class="fr"><span class="fname">redis_key</span><span class="ftype">string?</span><span class="fnote">live buffer</span></div>
+        <div class="fr"><span class="fname">last_flushed_at</span><span class="ftype">timestamp?</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-hdr"><span class="ec-name">object_locks</span><span class="ec-badge b-new">New (Redis only)</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fname">Key</span><span class="ftype">string</span><span class="fnote">lock:{objectId}</span></div>
+        <div class="fr"><span class="fname">Value</span><span class="ftype">json</span><span class="fnote">{userId, userName, color}</span></div>
+        <div class="fr"><span class="fname">TTL</span><span class="ftype">30s</span><span class="fnote">reset by keepalive</span></div>
+        <div class="fr"><span class="fname">Storage</span><span class="ftype">Redis only</span><span class="fnote">not persisted to PostgreSQL</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-hdr"><span class="ec-name">rt_replay_buffer</span><span class="ec-badge b-new">New (Redis only)</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fname">Key</span><span class="ftype">string</span><span class="fnote">replay:{pageId}</span></div>
+        <div class="fr"><span class="fname">Type</span><span class="ftype">Redis List</span><span class="fnote">LPUSH / LTRIM 500</span></div>
+        <div class="fr"><span class="fname">Value</span><span class="ftype">json</span><span class="fnote">{seq, event, payload}</span></div>
+        <div class="fr"><span class="fname">TTL</span><span class="ftype">5 min</span><span class="fnote">refreshed on each push</span></div>
+        <div class="fr"><span class="fname">Storage</span><span class="ftype">Redis only</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-hdr"><span class="ec-name">connection_metrics</span><span class="ec-badge b-new">New (Redis only)</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fname">Key</span><span class="ftype">string</span><span class="fnote">metrics:{socketId}</span></div>
+        <div class="fr"><span class="fname">latency_ms</span><span class="ftype">int[]</span><span class="fnote">last 10 ping RTTs</span></div>
+        <div class="fr"><span class="fname">reconnect_count</span><span class="ftype">int</span></div>
+        <div class="fr"><span class="fname">transport</span><span class="ftype">string</span><span class="fnote">websocket or polling</span></div>
+        <div class="fr"><span class="fname">TTL</span><span class="ftype">session lifetime</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card me">
+      <div class="ec-hdr"><span class="ec-name">board_objects (Phase 3 fields)</span><span class="ec-badge b-mod">Additive</span></div>
+      <div class="fl">
+        <div class="fr fn"><span class="fname">has_annotations</span><span class="ftype">boolean</span><span class="fnote">+ badge on card thumbnail</span></div>
+        <div class="fr fn"><span class="fname">annotation_count</span><span class="ftype">int</span><span class="fnote">+ shown on collapsed card</span></div>
+        <div class="fr fn"><span class="fname">current_page_num</span><span class="ftype">int?</span><span class="fnote">+ last pushed page for PDFs</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card me">
+      <div class="ec-hdr"><span class="ec-name">activity_attempts (Phase 3 fields)</span><span class="ec-badge b-mod">Additive</span></div>
+      <div class="fl">
+        <div class="fr fn"><span class="fname">annotation_stroke_key</span><span class="ftype">string?</span><span class="fnote">+ S3 key for teacher corrections</span></div>
+        <div class="fr fn"><span class="fname">annotation_comments</span><span class="ftype">jsonb?</span><span class="fnote">+ inline text comments on response</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 8 — BUILD PLAN
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--green-bg);border:0.5px solid var(--green-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 10.5l2-7 2.5 4 2-3 2 4" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    Part 8 — Phase 3 build plan
+  </div>
+  <div class="section-sub">28 days across 5 weeks. RT hardening first — it underpins everything else. PDF annotation and zoom overlay in parallel on backend and frontend.</div>
+
+  <!-- Week 1: Lock system + undo -->
+  <div class="week-hdr open" onclick="toggleWeek(this)">
+    <span class="wn">Week 1</span>
+    <span class="wt">Lock system + shared undo/redo</span>
+    <span class="wpill p-rt">Real-time</span>
+    <span class="wr">Days 1–5</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body open">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D1</span><span class="dname">Lock acquisition, broadcast, TTL, keepalive</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Implement <code>object:lock</code> handler — check Redis <code>lock:{objectId}</code>, grant with 30s TTL or reject. Broadcast <code>object:locked</code> with user colour from presence palette.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>object:lock_keepalive</code> — EXPIRE reset on Redis key. Rate-limit to 1 per 3 seconds per socket to prevent abuse.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>object:unlock</code> — delete Redis key, apply delta to PostgreSQL if present, broadcast <code>object:unlocked</code> with final state.</div>
+        <div class="ti"><div class="td"></div>Implement <code>object:force_unlock</code> — teacher-only, deletes Redis key regardless of owner, broadcasts unlock with no delta.</div>
+        <div class="ti"><div class="td"></div>Auto-release on disconnect: Socket.IO <code>disconnect</code> event → scan all <code>lock:*</code> keys owned by this socket → delete and broadcast <code>object:unlocked</code>. Use Redis SCAN with pattern match on userId stored in lock value.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Lock acquisition, TTL keepalive, release on disconnect all work correctly</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D2</span><span class="dname">Command log — schema + writer + undo/redo handlers</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Wrap all object mutation handlers (<code>object:create</code>, <code>object:update</code>, <code>object:delete</code>) in a command writer: after persisting to PostgreSQL, write a <code>board_commands</code> row with <code>forward_payload</code> and computed <code>reverse_payload</code>.</div>
+        <div class="ti p"><div class="td"></div><code>reverse_payload</code> computation: for create → delete command. For delete → re-create with full object snapshot. For update → previous state snapshot (fetched from DB before applying the delta).</div>
+        <div class="ti p"><div class="td"></div>Implement <code>board:undo</code> — find latest active command for page, apply <code>reverse_payload</code>, set <code>undone_at</code>, broadcast reversed state to all clients.</div>
+        <div class="ti"><div class="td"></div>Implement <code>board:redo</code> — find latest undone command, re-apply <code>forward_payload</code>, clear <code>undone_at</code>, broadcast.</div>
+        <div class="ti"><div class="td"></div>Stroke undo: on <code>stroke:end</code>, write command with <code>reverse_payload = {strokeId}</code>. <code>board:undo</code> for a stroke adds strokeId to Redis <code>hidden_strokes:{pageId}</code> set, broadcasts <code>stroke:hide</code> event.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Ctrl+Z undoes last action for all users, Ctrl+Y redoes, stroke undo hides stroke</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D3</span><span class="dname">Sequence numbers + replay buffer</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Add sequence number to every outgoing broadcast: Redis INCR on <code>seq:{pageId}</code> before each emit. Stamp <code>seq</code> onto all broadcasted events.</div>
+        <div class="ti p"><div class="td"></div>Replay buffer: on each broadcast, LPUSH serialised event to <code>replay:{pageId}</code> list. LTRIM to 500 entries. Refresh key TTL to 5 minutes.</div>
+        <div class="ti p"><div class="td"></div>Update <code>board:join</code> handler to accept optional <code>lastSeq</code>. If provided, query replay buffer for events since <code>lastSeq</code> and emit them in order to reconnecting client only.</div>
+        <div class="ti"><div class="td"></div>Edge case: <code>lastSeq</code> older than buffer → send full board state (same as fresh join). Log metric: "full_state_recovery" counter.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Reconnecting clients receive all missed events in order, no duplicates</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D4</span><span class="dname">Connection health indicator — ping/pong + client UI</span>
+        <span class="dtag d-ws">WS</span><span class="d-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Client: every 5s, emit <code>ping</code> with <code>{ts: Date.now()}</code>. On <code>pong</code> received, compute RTT = <code>Date.now() - ts</code>. Store last 10 RTTs in memory.</div>
+        <div class="ti p"><div class="td"></div>Build connection health badge in session HUD: coloured dot (green/amber/red) + ms value. Pulsing "Reconnecting…" state when Socket.IO is in reconnect phase.</div>
+        <div class="ti"><div class="td"></div>Health detail popover: RTT sparkline (last 10 measurements), reconnect count, transport type (<code>socket.transport.name</code>). Open on click, close on click-away.</div>
+        <div class="ti"><div class="td"></div>In-memory edit queue: during disconnect, new edits pushed to a local array. On reconnect + replay completion, drain queue by emitting each queued event in order.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Health indicator visible in session, reconnect recovers state, edit queue drains on reconnect</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D5</span><span class="dname">Lock UI — visual indicators + undo history panel</span>
+        <span class="dtag d-ux">UX</span><span class="d-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Lock indicator: on <code>object:locked</code>, render avatar badge + user name on locked object. Use presence colour palette (6 colours assigned per user on join). Hide move/resize handles.</div>
+        <div class="ti p"><div class="td"></div">"Being edited by X" toast: on <code>object:lock_rejected</code>, show a 2s non-blocking toast at bottom of screen. Do not block the rejected user's view.</div>
+        <div class="ti"><div class="td"></div>Undo history panel: slide-out panel from right — list of last 20 commands for the current page. Each entry: action type icon, author avatar, time, "Undo to here" button. Clicking "Undo to here" calls <code>board:undo</code> repeatedly until that sequence is reached.</div>
+        <div class="ti"><div class="td"></div>Keyboard shortcuts: Ctrl+Z for undo, Ctrl+Shift+Z for redo, across web and iOS (⌘Z / ⌘⇧Z).</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Lock indicators visible, undo history panel works, keyboard shortcuts functional</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Week 1 milestone — collaboration is robust</div><div class="md">Lock-based conflicts prevent overwrites. Shared undo/redo reverses any action. Sequence numbers guarantee no event loss on reconnect. Health indicator shows connection quality. The real-time layer is production-grade.</div></div>
+    </div>
+  </div>
+
+  <!-- Week 2: Zoom overlay -->
+  <div class="week-hdr" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="wn">Week 2</span>
+    <span class="wt">Zoom overlay system — fullscreen PDF + activity</span>
+    <span class="wpill p-ux">UX</span>
+    <span class="wr">Days 6–10</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D6</span><span class="dname">Overlay infrastructure — layers, open/close, sync</span>
+        <span class="dtag d-ux">UX</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Build overlay container: fixed z:30 div, 90% viewport with 5% margin, backdrop at rgba(0,0,0,0.6). Appears above canvas stage, below annotation canvas and drawing tools HUD.</div>
+        <div class="ti p"><div class="td"></div>Handle <code>overlay:open</code> event: render correct content type (PDF or activity card) in overlay. Transition: scale from object's canvas position to fullscreen (CSS transform animation, 250ms).</div>
+        <div class="ti p"><div class="td"></div>Handle <code>overlay:close</code>: reverse scale animation back to canvas object position. Restore board stroke canvas pointer capture.</div>
+        <div class="ti"><div class="td"></div>Annotation canvas (z:40): transparent positioned overlay with <code>pointer-events: all</code>. When overlay is open, board stroke canvas gets <code>pointer-events: none</code>. Drawing tools HUD remains fully active.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Overlay opens and closes with animation, annotation canvas captures pointer correctly</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D7</span><span class="dname">PDF.js in overlay — render, paginate, push_page</span>
+        <span class="dtag d-pdf">PDF</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Integrate PDF.js into overlay content. Request signed S3 URL from <code>GET /v1/media/:id/url</code>. PDF.js renders pages at scale to fill overlay dimensions. Page navigation controls (prev / next / page number input).</div>
+        <div class="ti p"><div class="td"></div>Coordinate transform helpers: <code>screenToPdf(x, y, scale, pageRect)</code> and <code>pdfToScreen(x, y, scale, pageRect)</code>. Used by all annotation tools to convert between coordinate spaces.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>pdf:push_page</code>: teacher presses "Push this page" button → emits event → all clients call PDF.js <code>scrollPageIntoView({pageNumber})</code>. Teacher sees confirmation toast.</div>
+        <div class="ti"><div class="td"></div>Page sync in follow mode: teacher page change automatically emits <code>pdf:push_page</code> while follow mode is active. No button needed — page is a follow property.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">PDF renders in overlay, pages navigate, teacher push syncs all clients to same page</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D8</span><span class="dname">Activity card in overlay — full interactive mode</span>
+        <span class="dtag d-ux">UX</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Activity card overlay: same expanded state as Phase 2 card, but rendered at full overlay size. Step pips, instructions, sentence, word bank, feedback — all at larger font sizes for comfortable reading.</div>
+        <div class="ti p"><div class="td"></div>Drawing over activity overlay: annotation canvas (z:40) sits on top of activity card. Teacher can circle a student's incorrect answer or underline a grammar error. These strokes emit <code>annotation:stroke:delta</code> tagged to the activity attempt ID.</div>
+        <div class="ti"><div class="td"></div>Annotation persistence: on overlay close, annotation strokes are flushed to <code>annotation_strokes</code> record tagged to <code>activity_attempt_id</code>. When reviewing submissions, teacher's annotations are shown overlaid on the student's response.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Activity card opens in overlay, teacher annotations on student work save and replay correctly</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D9</span><span class="dname">iOS overlay + annotation canvas</span>
+        <span class="dtag d-ux">iOS</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Build iOS overlay modal: SwiftUI <code>ZStack</code> with fullscreen sheet. PDFKit renders the PDF (native, no PDF.js needed on iOS). Page navigation via <code>PDFView.go(to page:)</code>.</div>
+        <div class="ti p"><div class="td"></div>Annotation canvas layer: PencilKit <code>PKCanvasView</code> overlaid on PDFKit view with <code>backgroundColor = .clear</code>. Apple Pencil strokes captured, transformed to PDF-space coordinates, emitted as <code>annotation:stroke:delta</code>.</div>
+        <div class="ti"><div class="td"></div>Receive annotations from other clients: render incoming <code>annotation:stroke:delta</code> points on a separate <code>PKCanvasView</code> layer (read-only). Different tint colour per author.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">iOS PDF overlay works with Apple Pencil annotation, syncs with web in real time</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D10</span><span class="dname">Follow mode + overlay integration</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>When follow mode is active and teacher emits <code>overlay:open</code>, student's client automatically opens the same overlay. Test: teacher opens PDF on web → student's iOS opens the same PDF.</div>
+        <div class="ti"><div class="td"></div>Follow mode in overlay: <code>follow:viewport</code> events continue to sync scroll position and zoom level within the PDF. Student's PDF.js viewport matches teacher's.</div>
+        <div class="ti"><div class="td"></div>When follow mode is inactive, <code>overlay:open</code> is still broadcast to all clients (overlay is always shared) but each client's PDF page is independent until teacher pushes a page.</div>
+        <div class="ti"><div class="td"></div>Integration test: teacher on web, student on iOS, follow mode active, teacher opens PDF → student sees PDF. Teacher draws annotation → student sees stroke appear in real time.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Follow mode extends seamlessly into overlay on both platforms</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Week 2 milestone — zoom overlay ships</div><div class="md">PDFs and activity cards open fullscreen with a single tap. Drawing tools work over both. Follow mode extends into the overlay. Teacher and student can annotate the same PDF simultaneously on different devices and see each other's marks in real time.</div></div>
+    </div>
+  </div>
+
+  <!-- Week 3: PDF annotations -->
+  <div class="week-hdr" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="wn">Week 3</span>
+    <span class="wt">PDF annotation system — text comments, highlights, persistence</span>
+    <span class="wpill p-pdf">PDF</span>
+    <span class="wr">Days 11–16</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D11</span><span class="dname">PDF annotation backend — REST API + persistence</span>
+        <span class="dtag d-pdf">PDF</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Implement <code>GET /v1/board/objects/:id/annotations</code> — returns all <code>pdf_annotations</code> for an object, grouped by page and author.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>POST /v1/board/objects/:id/annotations</code> — creates a text comment or highlight annotation. Validates PDF-space coordinates (0–1 range). Tenant-scoped.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>DELETE /v1/board/objects/:id/annotations/:annotationId</code> — soft-delete. Author-only, plus teacher can delete any annotation in their tenant.</div>
+        <div class="ti"><div class="td"></div>Annotation stroke flush worker: BullMQ job every 60s flushes <code>annotation:stroke:delta</code> buffer from Redis to S3, updates <code>annotation_strokes</code> record. Same pattern as board stroke flush.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Annotation REST API works, strokes flush to S3, annotations load correctly on board open</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D12–13</span><span class="dname">Text comments + highlights UI</span>
+        <span class="dtag d-pdf">PDF</span><span class="d-hrs">7 hrs each</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Text comment: double-tap on PDF overlay → position input at PDF-space coordinates → type comment → submit → creates <code>pdf_annotations</code> row, broadcasts as <code>annotation:comment:add</code> event. Render as speech bubble at PDF coordinate.</div>
+        <div class="ti p"><div class="td"></div>Highlight: on text selection in PDF.js, show floating "Highlight" button → create annotation with bounding box → render as coloured rect overlay on annotation canvas. Teacher = amber, student = sage.</div>
+        <div class="ti"><div class="td"></div>Annotation rendering layer: a dedicated React component reads all annotations for the current PDF page, renders them above the PDF.js canvas and below the drawing annotation canvas.</div>
+        <div class="ti"><div class="td"></div>Delete annotation: right-click on any annotation → "Remove" option. Only visible to author and teacher.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Text comments and highlights create, sync in real time, persist across sessions</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D14</span><span class="dname">Annotation export — PDF with annotations baked in</span>
+        <span class="dtag d-pdf">PDF</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Implement <code>POST /v1/board/objects/:id/export-annotated</code>: server-side job — load original PDF from S3, fetch all annotations for this object, use <code>pdf-lib</code> to: draw stroke paths, add text annotations as PDF annotations, draw highlight rects. Upload annotated PDF to S3, return signed URL.</div>
+        <div class="ti p"><div class="td"></div>Client: "Export with annotations" button in PDF overlay toolbar → POST to export endpoint → download signed URL when ready. Show progress indicator during server processing.</div>
+        <div class="ti"><div class="td"></div>Include teacher annotations and student annotations as separate visual layers in the export (different colours, each labelled with author name).</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Annotated PDF exports correctly with all marks baked in, correct author colours</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Week 3 milestone — PDF annotation complete</div><div class="md">Teacher and student annotate the same PDF in real time. Freehand strokes, text comments, and highlights all persist across sessions. Annotated PDFs export as a single document with all marks baked in.</div></div>
+    </div>
+  </div>
+
+  <!-- Week 4: QA + iOS hardening -->
+  <div class="week-hdr" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="wn">Week 4–5</span>
+    <span class="wt">QA, iOS hardening, production deploy</span>
+    <span class="wpill p-qa">QA</span>
+    <span class="wr">Days 17–28</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D17–20</span><span class="dname">iOS hardening — lock UI, undo, health indicator, annotations</span>
+        <span class="dtag d-ux">iOS</span><span class="d-hrs">7 hrs each</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Port all Phase 3 features to iOS: lock badge UI on locked objects, undo/redo via ⌘Z/⌘⇧Z (hardware keyboard) and shake gesture (iOS convention), health indicator badge in session HUD.</div>
+        <div class="ti p"><div class="td"></div>iOS annotation on activity overlay: PencilKit canvas over SwiftUI activity card view. Teacher's strokes on student answers sync to web in real time.</div>
+        <div class="ti"><div class="td"></div>Reconnection on iOS: Socket.IO Swift client handles reconnect. On reconnect, send <code>lastSeq</code> from in-memory state. In-memory edit queue drains after replay.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">All Phase 3 features at parity on iOS, undo works with keyboard and shake</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D21–24</span><span class="dname">Integration QA — adversarial collaboration scenarios</span>
+        <span class="dtag d-qa">QA</span><span class="d-hrs">6 hrs each</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Scenario 1: Two users grab the same object simultaneously. Verify one gets lock, other gets rejection toast. Verify no data loss when lock expires.</div>
+        <div class="ti p"><div class="td"></div>Scenario 2: Undo after 20 actions by 2 different users. Verify correct sequencing. Verify redo works in reverse order.</div>
+        <div class="ti p"><div class="td"></div>Scenario 3: Tab crashes mid-edit (force-close browser tab). Verify lock auto-clears within 30 seconds. Verify no data corruption.</div>
+        <div class="ti"><div class="td"></div>Scenario 4: Disconnect web client for 2 minutes, make edits on iOS, reconnect web. Verify web replays all missed events. Verify in-memory queue drains correctly.</div>
+        <div class="ti"><div class="td"></div>Scenario 5: Open PDF on web and iOS simultaneously. Teacher draws annotation on web, push page. Verify iOS sees annotation and jumps to page.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">All 5 adversarial scenarios pass. No data loss in any scenario.</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P3·D25–28</span><span class="dname">Bug fixes + production deploy + monitoring</span>
+        <span class="dtag d-qa">QA</span><span class="d-hrs">6–7 hrs each</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Fix all P0 and P1 bugs from QA week. Re-run all 5 adversarial scenarios after fixes.</div>
+        <div class="ti p"><div class="td"></div>Deploy Phase 3 to production. Migrate <code>board_commands</code> table. Verify replay buffer initialises correctly on first page event post-deploy.</div>
+        <div class="ti"><div class="td"></div>Add monitoring: alert on lock Redis key count exceeding 100 (potential leak). Alert on replay buffer miss rate exceeding 5% (buffer too small for usage pattern).</div>
+        <div class="ti"><div class="td"></div>Tag <code>v0.3.0-phase3</code>. Write Phase 3 retrospective covering latency measurements, conflict resolution edge cases found, and undo sequencing correctness.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Phase 3 live in production, monitoring active, retrospective written</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Phase 3 complete — v0.3.0</div><div class="md">Lexis now has production-grade real-time collaboration: conflict-free editing via locks, shared undo/redo with command history, seamless reconnection with zero data loss, and a fullscreen zoom overlay with live PDF annotation on web and iOS with Apple Pencil. Ready for Phase 4: AI generation, analytics, and gamification.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleWeek(h) { h.classList.toggle('open'); h.nextElementSibling.classList.toggle('open'); }
+  function toggleDay(h) { const t = h.nextElementSibling; t.style.display = t.style.display === 'none' ? 'flex' : 'none'; }
+  document.querySelectorAll('.task-list').forEach(t => t.style.display = 'flex');
+  document.querySelectorAll('.week-hdr.open').forEach(h => h.nextElementSibling.classList.add('open'));
+</script>
+</body>
+</html>

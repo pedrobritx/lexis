@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Lesson View (Dark)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:      #111820;
+  --bg-surface:   #17202B;
+  --bg-raised:    #1E2A3A;
+  --bg-hover:     #243040;
+  --border:       rgba(255,255,255,0.07);
+  --border-mid:   rgba(255,255,255,0.12);
+
+  --amber:        #C07B3A;
+  --amber-lt:     #D4924F;
+  --amber-glow:   rgba(192,123,58,0.12);
+  --sage:         #8DB5A0;
+  --sage-dk:      #6A9A85;
+  --parchment:    #F0E4CC;
+
+  --text-1:       #EDE8DF;
+  --text-2:       #8A95A3;
+  --text-3:       #4D5A68;
+
+  --correct-bg:   rgba(106,154,133,0.12);
+  --correct-bd:   rgba(106,154,133,0.35);
+  --correct-tx:   #8DB5A0;
+  --wrong-bg:     rgba(180,60,60,0.10);
+  --wrong-bd:     rgba(180,60,60,0.30);
+  --wrong-tx:     #E07070;
+  --hint-bg:      rgba(55,100,165,0.12);
+  --hint-bd:      rgba(55,100,165,0.30);
+  --hint-tx:      #7AAAD4;
+
+  --font: 'DM Sans', sans-serif;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-base);
+  color: var(--text-1);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Topbar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 60px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: flex-end;
+  text-decoration: none;
+}
+.logo-word {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--parchment);
+  line-height: 1;
+}
+.logo-blob {
+  margin-left: 2px;
+  padding-bottom: 2px;
+  display: inline-flex;
+  align-items: flex-end;
+}
+
+.topbar-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.lesson-meta {
+  font-size: 12px;
+  color: var(--text-2);
+  letter-spacing: 0.02em;
+}
+.progress-track {
+  width: 100%;
+  height: 3px;
+  background: var(--border-mid);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), var(--sage));
+  border-radius: 99px;
+  width: 40%;
+  transition: width 0.6s var(--ease);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.level-pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(192,123,58,0.12);
+  color: var(--amber-lt);
+  border: 0.5px solid rgba(192,123,58,0.35);
+  letter-spacing: 0.02em;
+}
+.xp-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+.xp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--amber), var(--sage));
+}
+.btn-exit {
+  font-size: 12px;
+  color: var(--text-2);
+  background: none;
+  border: 0.5px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-exit:hover { color: var(--text-1); border-color: rgba(255,255,255,0.25); }
+
+/* ── Main ── */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px 40px;
+}
+
+.activity-wrap {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* Instruction */
+.instruction {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.instruction-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--amber) 0%, var(--sage) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.instruction-text {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+/* Cloze */
+.cloze-block {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.context-note {
+  font-size: 13px;
+  color: var(--text-3);
+  font-style: italic;
+  padding-left: 16px;
+  border-left: 2px solid var(--border-mid);
+  line-height: 1.6;
+}
+.sentence {
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.75;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+.blank-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: bottom;
+  position: relative;
+  margin: 0 4px;
+}
+.blank-input {
+  font-family: var(--font);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--parchment);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--amber);
+  outline: none;
+  padding: 0 4px 2px;
+  width: 168px;
+  text-align: center;
+  caret-color: var(--amber-lt);
+  transition: border-color 0.2s var(--ease), background 0.2s;
+  letter-spacing: -0.01em;
+}
+.blank-input::placeholder { color: var(--text-3); }
+.blank-input:focus {
+  border-bottom-color: var(--amber-lt);
+  background: var(--amber-glow);
+  border-radius: 4px 4px 0 0;
+}
+.blank-input.correct {
+  border-bottom-color: var(--sage);
+  color: var(--sage);
+}
+.blank-input.incorrect {
+  border-bottom-color: var(--wrong-tx);
+  color: var(--wrong-tx);
+}
+.blank-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+/* Word bank */
+.wordbank-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+.wordbank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.word-chip {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-1);
+  background: var(--bg-raised);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s, opacity 0.2s;
+  user-select: none;
+}
+.word-chip:hover {
+  background: var(--bg-hover);
+  border-color: var(--amber);
+  transform: translateY(-1px);
+}
+.word-chip:active { transform: scale(0.97); }
+.word-chip.used {
+  opacity: 0.2;
+  pointer-events: none;
+  text-decoration: line-through;
+}
+
+/* Feedback */
+.feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  pointer-events: none;
+}
+.feedback.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.feedback.correct-fb  { background: var(--correct-bg); border: 0.5px solid var(--correct-bd); color: var(--correct-tx); }
+.feedback.incorrect-fb { background: var(--wrong-bg);   border: 0.5px solid var(--wrong-bd);   color: var(--wrong-tx); }
+.feedback.hint-fb     { background: var(--hint-bg);    border: 0.5px solid var(--hint-bd);    color: var(--hint-tx); }
+.feedback-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--bg-base);
+}
+.correct-fb  .feedback-icon { background: var(--sage); }
+.incorrect-fb .feedback-icon { background: var(--wrong-tx); }
+.hint-fb     .feedback-icon { background: var(--hint-tx); }
+
+/* ── Footer ── */
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-top: 0.5px solid var(--border);
+  background: var(--bg-surface);
+}
+.step-count {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.nav-btns { display: flex; gap: 10px; }
+.btn {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  letter-spacing: 0.01em;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 0.5px solid var(--border-mid);
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: var(--text-1); }
+.btn-primary {
+  background: var(--parchment);
+  color: var(--bg-base);
+  border: none;
+}
+.btn-primary:hover { background: #F5ECD7; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled {
+  background: var(--bg-raised);
+  color: var(--text-3);
+  cursor: not-allowed;
+}
+.hint-btn {
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  transition: color 0.15s;
+}
+.hint-btn:hover { color: var(--amber-lt); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="#">
+    <span class="logo-word">lexis</span>
+    <span class="logo-blob">
+      <svg width="10" height="13" viewBox="0 0 18 22" fill="none">
+        <defs>
+          <linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#D4924F"/>
+            <stop offset="100%" stop-color="#A8CCBB"/>
+          </linearGradient>
+        </defs>
+        <path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/>
+      </svg>
+    </span>
+  </a>
+
+  <div class="topbar-center">
+    <span class="lesson-meta">Conditionals · Unit 3 · Activity 2 of 5</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="topbar-right">
+    <span class="level-pill">B1</span>
+    <div class="xp-chip"><div class="xp-dot"></div><span id="xpCount">240 XP</span></div>
+    <button class="btn-exit">Exit</button>
+  </div>
+</header>
+
+<main>
+  <div class="activity-wrap">
+
+    <div class="instruction">
+      <div class="instruction-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 7h10M7 2v10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="instruction-text">Complete each sentence using the correct form of the verb in brackets.</span>
+    </div>
+
+    <div class="cloze-block">
+      <p class="context-note">Second conditional — imaginary or unlikely situations in the present or future.</p>
+
+      <div>
+        <p class="sentence">
+          If she
+          <span class="blank-wrap">
+            <input class="blank-input" type="text" placeholder="·  ·  ·" autocomplete="off" spellcheck="false" data-answer="studied" data-verb="study"/>
+            <span class="blank-hint">(study)</span>
+          </span>
+          harder, she
+          <span class="blank-wrap">
+            <input class="blank-input" type="text" placeholder="·  ·  ·" autocomplete="off" spellcheck="false" data-answer="would pass" data-verb="pass"/>
+            <span class="blank-hint">(pass)</span>
+          </span>
+          the exam.
+        </p>
+      </div>
+
+      <div>
+        <p class="sentence">
+          They
+          <span class="blank-wrap">
+            <input class="blank-input" type="text" placeholder="·  ·  ·" autocomplete="off" spellcheck="false" data-answer="would travel" data-verb="travel"/>
+            <span class="blank-hint">(travel)</span>
+          </span>
+          more if they
+          <span class="blank-wrap">
+            <input class="blank-input" type="text" placeholder="·  ·  ·" autocomplete="off" spellcheck="false" data-answer="had" data-verb="have"/>
+            <span class="blank-hint">(have)</span>
+          </span>
+          more time.
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <p class="wordbank-label">Word bank</p>
+      <div class="wordbank" id="wordbank">
+        <button class="word-chip" onclick="useWord(this,'studied')">studied</button>
+        <button class="word-chip" onclick="useWord(this,'would travel')">would travel</button>
+        <button class="word-chip" onclick="useWord(this,'had')">had</button>
+        <button class="word-chip" onclick="useWord(this,'would pass')">would pass</button>
+        <button class="word-chip" onclick="useWord(this,'studies')">studies</button>
+        <button class="word-chip" onclick="useWord(this,'will pass')">will pass</button>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="feedback-icon" id="feedbackIcon"></div>
+      <div class="feedback-body" id="feedbackBody"></div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span class="step-count">2 of 5 activities</span>
+  <button class="hint-btn" onclick="showHint()">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+      <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1"/>
+      <path d="M6.5 9V6.5M6.5 4.5V4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+    Show hint
+  </button>
+  <div class="nav-btns">
+    <button class="btn btn-ghost">Back</button>
+    <button class="btn btn-primary" id="checkBtn" onclick="checkAnswers()">Check answers</button>
+  </div>
+</footer>
+
+<script>
+  const inputs = document.querySelectorAll('.blank-input');
+  const feedback = document.getElementById('feedback');
+  const feedbackIcon = document.getElementById('feedbackIcon');
+  const feedbackBody = document.getElementById('feedbackBody');
+  const checkBtn = document.getElementById('checkBtn');
+  let checked = false;
+  let activeInput = null;
+
+  inputs.forEach(inp => {
+    inp.addEventListener('focus', () => { activeInput = inp; });
+    inp.addEventListener('input', () => {
+      if (checked) {
+        inp.classList.remove('correct','incorrect');
+        feedback.classList.remove('visible','correct-fb','incorrect-fb','hint-fb');
+        checkBtn.textContent = 'Check answers';
+        checked = false;
+      }
+    });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswers(); });
+  });
+
+  function useWord(chip, word) {
+    const target = activeInput || [...inputs].find(i => !i.value);
+    if (!target) return;
+    target.value = word;
+    target.dispatchEvent(new Event('input'));
+    target.focus();
+    chip.classList.add('used');
+  }
+
+  function normalize(s) { return s.trim().toLowerCase().replace(/\s+/g,' '); }
+
+  function checkAnswers() {
+    const allFilled = [...inputs].every(i => i.value.trim() !== '');
+    if (!allFilled) { showFeedback('incorrect', '<strong>Not quite yet.</strong> Fill in all the blanks before checking.'); return; }
+
+    let allCorrect = true;
+    inputs.forEach(inp => {
+      const ok = normalize(inp.value) === normalize(inp.dataset.answer);
+      inp.classList.toggle('correct', ok);
+      inp.classList.toggle('incorrect', !ok);
+      if (!ok) allCorrect = false;
+    });
+
+    if (allCorrect) {
+      showFeedback('correct', '<strong>Well done!</strong> Both sentences use the second conditional correctly — past simple in the if-clause, <em>would + infinitive</em> in the result clause.');
+      checkBtn.textContent = 'Next activity →';
+      document.getElementById('progressFill').style.width = '60%';
+      document.getElementById('xpCount').textContent = '260 XP';
+      checked = true;
+    } else {
+      const wrongs = [...inputs].filter(i => i.classList.contains('incorrect')).map(i => `<em>${i.dataset.verb}</em>`).join(' and ');
+      showFeedback('incorrect', `<strong>Almost.</strong> Check the form of ${wrongs}. Remember: if-clause uses simple past, result clause uses <em>would + base verb</em>.`);
+    }
+  }
+
+  function showFeedback(type, msg) {
+    feedback.classList.remove('visible','correct-fb','incorrect-fb','hint-fb');
+    void feedback.offsetWidth;
+    const cls = type === 'correct' ? 'correct-fb' : type === 'hint' ? 'hint-fb' : 'incorrect-fb';
+    feedback.classList.add(cls, 'visible');
+    feedbackIcon.textContent = type === 'correct' ? '✓' : type === 'hint' ? '?' : '✗';
+    feedbackBody.innerHTML = msg;
+  }
+
+  function showHint() {
+    showFeedback('hint', 'Second conditional: <strong>If + subject + past simple, subject + would + base verb</strong>. Example: "If I <em>had</em> more time, I <em>would read</em> more."');
+  }
+</script>
+</body>
+</html>

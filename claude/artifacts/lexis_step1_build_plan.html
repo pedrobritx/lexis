@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Phase 1 Build Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #0F1620;
+  --surface:    #16202C;
+  --raised:     #1D2A3A;
+  --hover:      #223040;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.13);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+  --text-1:     #EDE8DF;
+  --text-2:     #8A95A3;
+  --text-3:     #4A5768;
+  --blue:       #7AAAD4;
+  --blue-bg:    rgba(122,170,212,0.1);
+  --blue-bd:    rgba(122,170,212,0.25);
+  --purple:     #B8A8D8;
+  --purple-bg:  rgba(184,168,216,0.1);
+  --purple-bd:  rgba(184,168,216,0.22);
+  --font:       'DM Sans', sans-serif;
+  --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  padding: 48px 32px 80px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Header */
+.doc-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 24px;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 0.5px solid var(--border-mid);
+}
+.doc-logo { display: flex; align-items: flex-end; gap: 0; }
+.doc-logo-word { font-size: 24px; font-weight: 500; letter-spacing: -0.03em; color: var(--parchment); line-height: 1; }
+.doc-logo-blob { margin-left: 2px; padding-bottom: 2px; display: inline-flex; align-items: flex-end; }
+.doc-meta { text-align: right; }
+.doc-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.doc-sub   { font-size: 11px; color: var(--text-3); }
+
+/* Stats bar */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 36px;
+}
+.stat-card {
+  background: var(--surface); border: 0.5px solid var(--border-mid);
+  border-radius: 10px; padding: 14px 16px;
+}
+.stat-val { font-size: 22px; font-weight: 500; color: var(--text-1); letter-spacing: -0.02em; line-height: 1; }
+.stat-lab { font-size: 10px; color: var(--text-3); margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* Week block */
+.week {
+  margin-bottom: 32px;
+}
+.week-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 14px; cursor: pointer;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 10px;
+  transition: background 0.15s;
+  user-select: none;
+}
+.week-header:hover { background: var(--hover); }
+.week-number {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-3); min-width: 52px;
+}
+.week-title { font-size: 14px; font-weight: 500; color: var(--text-1); flex: 1; }
+.week-range { font-size: 11px; color: var(--text-3); }
+.week-chevron { color: var(--text-3); transition: transform 0.2s var(--ease); flex-shrink: 0; }
+.week-header.open .week-chevron { transform: rotate(90deg); }
+
+.week-pill {
+  font-size: 10px; font-weight: 500; padding: 2px 9px; border-radius: 4px;
+  border: 0.5px solid; white-space: nowrap;
+}
+
+.week-body { display: none; flex-direction: column; gap: 10px; }
+.week-body.open { display: flex; }
+
+/* Day card */
+.day-card {
+  background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+  transition: border-color 0.15s;
+}
+.day-card:hover { border-color: var(--border-mid); }
+.day-card.done { border-color: rgba(106,154,133,0.25); }
+
+.day-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.day-header:hover { background: var(--hover); }
+
+.day-check {
+  width: 18px; height: 18px; border-radius: 5px;
+  border: 1.5px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; cursor: pointer;
+  transition: all 0.15s;
+}
+.day-check.checked { background: var(--sage-dk); border-color: var(--sage-dk); }
+
+.day-label { font-size: 12px; font-weight: 500; color: var(--text-1); flex: 1; }
+.day-number { font-size: 10px; color: var(--text-3); min-width: 40px; }
+.day-hrs { font-size: 10px; color: var(--text-3); }
+
+/* Tag */
+.tag {
+  font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px;
+  border: 0.5px solid; white-space: nowrap; letter-spacing: 0.03em;
+}
+.tag-setup   { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+.tag-backend { background: var(--blue-bg);   color: var(--blue);   border-color: var(--blue-bd);   }
+.tag-db      { background: rgba(141,181,160,0.1); color: var(--sage); border-color: rgba(141,181,160,0.25); }
+.tag-web     { background: rgba(192,123,58,0.12); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.tag-qa      { background: rgba(224,112,112,0.1); color: #E07070; border-color: rgba(224,112,112,0.25); }
+.tag-ios     { background: rgba(184,168,216,0.1); color: #C8A8F8; border-color: rgba(184,168,216,0.25); }
+
+/* Task list */
+.task-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 7px; }
+.task-item {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-size: 12px; color: var(--text-2); line-height: 1.5;
+}
+.task-bullet {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--text-3); flex-shrink: 0; margin-top: 6px;
+}
+.task-item.primary { color: var(--text-1); }
+.task-item.primary .task-bullet { background: var(--amber); }
+.task-item code {
+  font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+
+/* Day footer */
+.day-footer {
+  padding: 9px 16px;
+  border-top: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.deliverable-label { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
+.deliverable-text  { font-size: 11px; color: var(--sage); }
+
+/* Milestone card */
+.milestone {
+  background: rgba(141,181,160,0.07);
+  border: 0.5px solid rgba(141,181,160,0.22);
+  border-radius: 10px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-top: 4px;
+}
+.milestone-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(141,181,160,0.15);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.milestone-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.milestone-desc  { font-size: 11px; color: var(--sage); line-height: 1.5; }
+
+/* Progress bar */
+.phase-progress {
+  margin-bottom: 32px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 10px;
+}
+.pp-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.pp-title { font-size: 12px; font-weight: 500; color: var(--text-1); }
+.pp-pct   { font-size: 12px; color: var(--text-3); }
+.pp-bar   { height: 4px; background: var(--border-mid); border-radius: 99px; overflow: hidden; }
+.pp-fill  { height: 100%; background: linear-gradient(90deg, var(--amber), var(--sage)); border-radius: 99px; width: 0%; transition: width 0.4s var(--ease); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="doc-header">
+  <div class="doc-logo">
+    <span class="doc-logo-word">lexis</span>
+    <span class="doc-logo-blob">
+      <svg width="10" height="13" viewBox="0 0 18 22" fill="none">
+        <defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4924F"/><stop offset="100%" stop-color="#A8CCBB"/></linearGradient></defs>
+        <path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/>
+      </svg>
+    </span>
+  </div>
+  <div class="doc-meta">
+    <div class="doc-title">Phase 1 — Foundations build plan</div>
+    <div class="doc-sub">Solo build · Full-time · 6 weeks · ~30 working days</div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat-card">
+    <div class="stat-val">6</div>
+    <div class="stat-lab">Weeks</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-val">30</div>
+    <div class="stat-lab">Working days</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-val">7</div>
+    <div class="stat-lab">Modules shipped</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-val" style="color:var(--sage);">MVP</div>
+    <div class="stat-lab">End deliverable</div>
+  </div>
+</div>
+
+<!-- Phase progress -->
+<div class="phase-progress">
+  <div class="pp-top">
+    <span class="pp-title">Phase 1 progress</span>
+    <span class="pp-pct" id="progressPct">0 of 30 days complete</span>
+  </div>
+  <div class="pp-bar"><div class="pp-fill" id="progressFill"></div></div>
+</div>
+
+
+<!-- ══════════════════════════════
+     WEEK 1 — Project foundations
+══════════════════════════════ -->
+<div class="week">
+  <div class="week-header" onclick="toggleWeek(this)">
+    <span class="week-number">Week 1</span>
+    <span class="week-title">Project foundations & infrastructure</span>
+    <span class="week-pill tag-setup">Setup</span>
+    <span class="week-range">Days 1–5</span>
+    <svg class="week-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body open">
+
+    <!-- Day 1 -->
+    <div class="day-card" id="day1">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 1</span>
+        <span class="day-label">Monorepo setup + tooling</span>
+        <span class="tag tag-setup">Setup</span>
+        <span class="day-hrs">6–7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Initialise <code>pnpm</code> monorepo with <code>apps/</code> and <code>packages/</code> workspace structure</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Create <code>apps/api</code> (Node.js + TypeScript + Fastify), <code>apps/web</code> (Next.js), <code>packages/types</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Configure TypeScript strict mode, shared <code>tsconfig.base.json</code>, path aliases</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up ESLint + Prettier with shared config across all workspaces</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up <code>husky</code> pre-commit hooks (lint + type-check)</div>
+        <div class="task-item"><span class="task-bullet"></span>Initialise Git repo, <code>.gitignore</code>, basic <code>README.md</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Configure <code>dotenv</code> and <code>.env.example</code> for all apps</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Monorepo boots, all workspaces type-check clean, commit hooks run</span>
+      </div>
+    </div>
+
+    <!-- Day 2 -->
+    <div class="day-card" id="day2">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 2</span>
+        <span class="day-label">Database setup + Prisma schema</span>
+        <span class="tag tag-db">Database</span>
+        <span class="day-hrs">6–7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Spin up PostgreSQL locally via Docker Compose, add Redis container</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Initialise Prisma in <code>packages/db</code>, configure <code>DATABASE_URL</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Write full <code>schema.prisma</code> — all entities from the data model: <code>User</code>, <code>StudentProfile</code>, <code>TeacherProfile</code>, <code>Course</code>, <code>Unit</code>, <code>Lesson</code>, <code>Activity</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Add remaining models: <code>Classroom</code>, <code>Enrollment</code>, <code>LessonProgress</code>, <code>ActivityAttempt</code>, <code>SrsItem</code>, <code>Badge</code>, <code>StudentBadge</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Add whiteboard models: <code>SessionBoard</code>, <code>BoardPage</code>, <code>BoardObject</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Run first migration — <code>prisma migrate dev --name init</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Write seed script with one teacher, two students, one sample course</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Full schema migrated, seed script populates DB, Prisma Studio accessible</span>
+      </div>
+    </div>
+
+    <!-- Day 3 -->
+    <div class="day-card" id="day3">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 3</span>
+        <span class="day-label">API skeleton + shared types</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Bootstrap Fastify server with plugin architecture — <code>cors</code>, <code>helmet</code>, <code>rate-limit</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Set up module folder structure: <code>src/modules/{auth,users,courses,activities,enrollments,progress,placement}/</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Write all shared TypeScript types in <code>packages/types</code> mirroring Prisma models — DTOs for every entity</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up Zod for request validation, global error handler, standardised API response shape</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up <code>@fastify/swagger</code> — OpenAPI spec auto-generated from route schemas</div>
+        <div class="task-item"><span class="task-bullet"></span>Configure internal event bus (<code>EventEmitter</code> wrapper) in <code>packages/events</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Wire Redis client in <code>packages/cache</code> with typed helpers <code>get</code>, <code>set</code>, <code>del</code></div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">API server runs, Swagger UI accessible at /docs, types package exports all DTOs</span>
+      </div>
+    </div>
+
+    <!-- Day 4 -->
+    <div class="day-card" id="day4">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 4</span>
+        <span class="day-label">Auth module — register, login, JWT</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/auth/register</code> — hash password with bcrypt, create <code>User</code> record</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/auth/login</code> — validate credentials, issue JWT access + refresh token pair</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/auth/refresh</code> — validate refresh token (stored in Redis), rotate and reissue</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>POST /v1/auth/logout</code> — invalidate refresh token in Redis</div>
+        <div class="task-item"><span class="task-bullet"></span>Write <code>authenticate</code> Fastify hook — verify JWT, attach <code>req.user</code> to all protected routes</div>
+        <div class="task-item"><span class="task-bullet"></span>Write <code>requireRole('teacher' | 'student')</code> guard hook</div>
+        <div class="task-item"><span class="task-bullet"></span>Write unit tests for register, login, invalid password, expired token</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Full auth flow works end-to-end, JWT verified on protected routes, tests pass</span>
+      </div>
+    </div>
+
+    <!-- Day 5 -->
+    <div class="day-card" id="day5">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 5</span>
+        <span class="day-label">Users module + profile setup</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/users/student-profile</code> — create <code>StudentProfile</code> linked to authenticated user</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/users/teacher-profile</code> — create <code>TeacherProfile</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>GET /v1/users/me</code> — return full profile for authenticated user (role-aware)</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>PATCH /v1/users/me</code> — update name, native language, goals, interests</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/teacher/students</code> — list all students (teacher-only)</div>
+        <div class="task-item"><span class="task-bullet"></span>Write integration test — register → login → create profile → fetch /me</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Full user lifecycle works, teacher can list students, integration test passes</span>
+      </div>
+    </div>
+
+    <div class="milestone">
+      <div class="milestone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#8DB5A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="milestone-title">Week 1 milestone — Infrastructure ready</div>
+        <div class="milestone-desc">Monorepo boots cleanly. Database migrated. Auth flow complete. Users can register, log in, and create profiles. The foundation every other module builds on is solid.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     WEEK 2 — Placement + Curriculum
+══════════════════════════════ -->
+<div class="week">
+  <div class="week-header" onclick="toggleWeek(this)">
+    <span class="week-number">Week 2</span>
+    <span class="week-title">Placement test + curriculum backbone</span>
+    <span class="week-pill tag-backend">Backend</span>
+    <span class="week-range">Days 6–10</span>
+    <svg class="week-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <!-- Day 6 -->
+    <div class="day-card" id="day6">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 6</span>
+        <span class="day-label">Placement test — delivery</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Write placement test question bank as a seed file — 12 MCQ questions spanning A1→C1 grammar</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>GET /v1/placement/test</code> — return randomised question set (no answers in response)</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/placement/submit</code> — receive answers, score against answer key, compute CEFR level</div>
+        <div class="task-item"><span class="task-bullet"></span>CEFR scoring logic: A1 ≤3, A2 4–5, B1 6–7, B2 8–9, C1 10–11, C2 12 correct</div>
+        <div class="task-item"><span class="task-bullet"></span>Write result back to <code>PlacementTest</code> table and update <code>StudentProfile.cefr_level</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Handle skip path — <code>POST /v1/placement/skip</code> with manual level assignment (teacher role only)</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Placement test delivers, scores, and writes CEFR level to student profile</span>
+      </div>
+    </div>
+
+    <!-- Day 7 -->
+    <div class="day-card" id="day7">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 7</span>
+        <span class="day-label">Courses module — CRUD + versioning</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement full CRUD for <code>Course</code>: <code>POST</code>, <code>GET</code>, <code>PATCH</code>, <code>DELETE /v1/courses</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>Unit</code> CRUD nested under course: <code>/v1/courses/:id/units</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>Lesson</code> CRUD nested under unit: <code>/v1/units/:id/lessons</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Status machine: <code>draft</code> → <code>active</code> → <code>archived</code> with guards (can't archive if classroom enrolled)</div>
+        <div class="task-item"><span class="task-bullet"></span>Auto-increment <code>version</code> on any update to course, unit, or lesson</div>
+        <div class="task-item"><span class="task-bullet"></span>Teacher-only write access, read access for enrolled students</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Teacher can create full course hierarchy, versioning increments on edits</span>
+      </div>
+    </div>
+
+    <!-- Day 8 -->
+    <div class="day-card" id="day8">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 8</span>
+        <span class="day-label">Activities module — type registry</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>Activity</code> CRUD: <code>/v1/lessons/:id/activities</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build activity type registry — each type (<code>cloze</code>, <code>mcq</code>, <code>matching</code>, <code>ordering</code>, <code>open</code>) registers a content schema + validator</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement answer validation endpoint: <code>POST /v1/activities/:id/validate</code> — returns <code>correct: bool</code>, <code>score: float</code>, <code>feedback: string</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Cloze validator: normalise whitespace + case, accept near-matches flag</div>
+        <div class="task-item"><span class="task-bullet"></span>MCQ validator: single correct option check</div>
+        <div class="task-item"><span class="task-bullet"></span>Matching validator: all pairs must match, partial scoring supported</div>
+        <div class="task-item"><span class="task-bullet"></span>Write validator unit tests for each type with correct and incorrect inputs</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">All 4 activity types validate correctly, type registry extensible with one file per type</span>
+      </div>
+    </div>
+
+    <!-- Day 9 -->
+    <div class="day-card" id="day9">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 9</span>
+        <span class="day-label">Enrollments module — classrooms</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>Classroom</code> CRUD: <code>POST /v1/classrooms</code>, <code>GET /v1/classrooms/:id</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/classrooms/:id/enroll</code> — add student to classroom, create <code>Enrollment</code> record</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>DELETE /v1/classrooms/:id/students/:studentId</code> — unenroll with status update, preserve progress records</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/classrooms/:id/students</code> — list enrolled students with their progress summary</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/students/:id/classrooms</code> — list classrooms a student belongs to</div>
+        <div class="task-item"><span class="task-bullet"></span>Guard: a student can't enroll in the same classroom twice</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Teacher can create classrooms, enroll students, list rosters with progress</span>
+      </div>
+    </div>
+
+    <!-- Day 10 -->
+    <div class="day-card" id="day10">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 10</span>
+        <span class="day-label">Progress module — attempt logging</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/progress/lessons/:lessonId/start</code> — create <code>LessonProgress</code> record</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/progress/activities/:activityId/attempt</code> — log <code>ActivityAttempt</code>, call activity validator, return result</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Auto-complete lesson: when all activities attempted, mark <code>LessonProgress.status = completed</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Emit <code>lesson.completed</code> event on the internal event bus</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/progress/students/:id/summary</code> — overall completion %, score averages, last active</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement XP award on activity correct: +10 XP per correct, +50 XP per lesson complete, update <code>StudentProfile.xp_total</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Integration test: full lesson flow — start → 5 attempts → lesson completes → XP awarded</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Full lesson completion flow works end-to-end, XP awarded, events emitted</span>
+      </div>
+    </div>
+
+    <div class="milestone">
+      <div class="milestone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#8DB5A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="milestone-title">Week 2 milestone — Core backend complete</div>
+        <div class="milestone-desc">All 7 Phase 1 modules exist and function. A student can register, take a placement test, get assigned a CEFR level, enroll in a classroom, start a lesson, attempt activities, and have progress recorded. The entire data flow is working.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     WEEK 3 — Lesson engine + SRS
+══════════════════════════════ -->
+<div class="week">
+  <div class="week-header" onclick="toggleWeek(this)">
+    <span class="week-number">Week 3</span>
+    <span class="week-title">Lesson engine + spaced repetition</span>
+    <span class="week-pill tag-backend">Backend</span>
+    <span class="week-range">Days 11–15</span>
+    <svg class="week-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card" id="day11">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 11</span>
+        <span class="day-label">Lesson engine — sequencing + hints</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build <code>lesson-engine</code> module — orchestrates activity delivery in position order</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>GET /v1/lessons/:id/next-activity</code> — returns next unattempted activity for current progress</div>
+        <div class="task-item"><span class="task-bullet"></span>Hint system: track <code>hints_used</code> per attempt, deduct 50% score if hint used</div>
+        <div class="task-item"><span class="task-bullet"></span>Retry logic: allow re-attempt on incorrect, track attempt count</div>
+        <div class="task-item"><span class="task-bullet"></span>Lesson summary endpoint: <code>GET /v1/lessons/:id/summary</code> — score breakdown per activity</div>
+        <div class="task-item"><span class="task-bullet"></span>Handle edge: student navigates back to previous activity in same session</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Engine correctly sequences, handles hints, retries, and produces lesson summaries</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day12">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 12</span>
+        <span class="day-label">SRS module — SM-2 implementation</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement SM-2 algorithm in <code>srs/sm2.ts</code> — inputs: quality (0–5), ease_factor, interval, repetitions → outputs: new interval, new ease_factor</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Listen to <code>activity.attempted</code> event — create or update <code>SrsItem</code> for each activity based on correctness</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>GET /v1/srs/queue</code> — return all <code>SrsItem</code> records where <code>next_review ≤ today</code>, ordered by urgency</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>POST /v1/srs/review/:itemId</code> — record quality, run SM-2, update <code>SrsItem</code>, log to <code>SrsLog</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Streak logic: update <code>StudentProfile.streak_days</code> — increment if reviewed today, reset if >1 day gap</div>
+        <div class="task-item"><span class="task-bullet"></span>Unit tests for SM-2: quality 0 resets interval, quality 5 grows interval correctly</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">SM-2 schedules items correctly, review queue populated after lesson completion</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day13">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 13</span>
+        <span class="day-label">Gamification — XP, badges, streaks</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement badge trigger system — listen to events: <code>lesson.completed</code>, <code>streak.maintained</code>, <code>unit.completed</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Seed badge catalogue: Grammar Master, 7-Day Streak, Unit Complete, B1 Complete, First Lesson</div>
+        <div class="task-item"><span class="task-bullet"></span>Badge award logic: check <code>trigger_criteria</code> JSON against student state, insert <code>StudentBadge</code> if criteria met</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/students/:id/badges</code> — return earned + locked badges</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/students/:id/xp</code> — XP total, level, progress to next level</div>
+        <div class="task-item"><span class="task-bullet"></span>Emit <code>badge.earned</code> event (for future push notifications)</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Badges awarded automatically on trigger events, XP level computed correctly</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day14">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 14</span>
+        <span class="day-label">Sessions module — scheduling</span>
+        <span class="tag tag-backend">Backend</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>POST /v1/sessions</code> — create session with teacher, student, lesson reference, scheduled time</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Implement <code>GET /v1/sessions/upcoming</code> — next 5 sessions for authenticated user (teacher or student view)</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>PATCH /v1/sessions/:id/start</code> — mark session as started, record <code>started_at</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>PATCH /v1/sessions/:id/end</code> — mark session as ended, compute duration</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/teacher/schedule</code> — all sessions for teacher, grouped by day</div>
+        <div class="task-item"><span class="task-bullet"></span>Implement <code>GET /v1/student/schedule</code> — student's upcoming sessions</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Sessions can be scheduled, started, ended, and listed for both roles</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day15">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 15</span>
+        <span class="day-label">API integration tests + OpenAPI export</span>
+        <span class="tag tag-qa">QA</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Write end-to-end integration test: register → placement → enroll → lesson → complete → SRS queue populated → badge awarded</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Export full OpenAPI spec to <code>packages/openapi/spec.json</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Run <code>swift-openapi-generator</code> against spec — verify Swift client generates cleanly</div>
+        <div class="task-item"><span class="task-bullet"></span>Run <code>openapi-generator-cli kotlin</code> against spec — verify Kotlin client generates cleanly</div>
+        <div class="task-item"><span class="task-bullet"></span>Fix any type mismatches flagged by client generators</div>
+        <div class="task-item"><span class="task-bullet"></span>Document all endpoints in README, note any breaking changes policy</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Full e2e test passes, Swift and Kotlin clients generate without errors</span>
+      </div>
+    </div>
+
+    <div class="milestone">
+      <div class="milestone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#8DB5A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="milestone-title">Week 3 milestone — Backend feature-complete</div>
+        <div class="milestone-desc">Lesson engine sequences activities. SRS schedules reviews. Gamification awards XP and badges. Sessions are schedulable. The full backend is e2e tested and OpenAPI spec generates clean native clients.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     WEEK 4 — Web frontend
+══════════════════════════════ -->
+<div class="week">
+  <div class="week-header" onclick="toggleWeek(this)">
+    <span class="week-number">Week 4</span>
+    <span class="week-title">Web frontend — teacher dashboard + lesson view</span>
+    <span class="week-pill tag-web">Web</span>
+    <span class="week-range">Days 16–20</span>
+    <svg class="week-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card" id="day16">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 16</span>
+        <span class="day-label">Web setup — design system + auth pages</span>
+        <span class="tag tag-web">Web</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Set up Next.js app with Tailwind, import all CSS variables from brand system</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build component library foundation: Button, Input, Card, Badge, LevelPill, ProgressBar</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build auth pages: <code>/login</code>, <code>/register</code> — wire to <code>POST /v1/auth/login</code> and register</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up <code>next-auth</code> or custom JWT session with cookie storage</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up API client in <code>packages/api-client</code> — typed fetch wrapper consuming <code>@lexis/types</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Protected route middleware — redirect unauthenticated users to <code>/login</code></div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Login and register work, session persists across page refreshes, design tokens applied</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day17">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 17</span>
+        <span class="day-label">Teacher dashboard — main panels</span>
+        <span class="tag tag-web">Web</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build collapsible sidebar with logo, nav items, teacher chip — matching wireframe</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build stats bar — fetch from <code>GET /v1/teacher/stats</code> (add this endpoint if missing)</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build student roster panel with tabbed switcher (Students / Classrooms / Courses)</div>
+        <div class="task-item"><span class="task-bullet"></span>Build upcoming sessions panel — fetch from <code>GET /v1/teacher/schedule</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Build recent activity feed — fetch from progress events</div>
+        <div class="task-item"><span class="task-bullet"></span>Wire all panels to live API data, add loading skeletons</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Teacher dashboard renders live data, all three tabs work, sessions listed correctly</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day18">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 18</span>
+        <span class="day-label">Course builder — lesson + activity editor</span>
+        <span class="tag tag-web">Web</span>
+        <span class="day-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build course creation form — title, CEFR level, description</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build unit + lesson editor — add/reorder/delete lessons within a unit</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build activity editor — type selector dropdown, dynamic form per type (cloze inputs, MCQ options, matching pairs)</div>
+        <div class="task-item"><span class="task-bullet"></span>Activity preview — render the activity as a student would see it before saving</div>
+        <div class="task-item"><span class="task-bullet"></span>Wire all forms to API — save on change with debounce, show version number</div>
+        <div class="task-item"><span class="task-bullet"></span>Status toggle — draft / active / archived with confirmation on archive</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Teacher can build a complete course with lessons and activities from the browser</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day19">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 19</span>
+        <span class="day-label">Lesson view — student activity experience</span>
+        <span class="tag tag-web">Web</span>
+        <span class="day-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build lesson view layout — topbar with progress, minimal centred content, footer nav — matching wireframe</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build cloze activity component — inline inputs on sentence, word bank chips, check answer button</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build MCQ activity component — option list with letter badges, correct/incorrect states</div>
+        <div class="task-item"><span class="task-bullet"></span>Build feedback bar component — correct/incorrect/hint variants with grammar explanation</div>
+        <div class="task-item"><span class="task-bullet"></span>Wire to <code>POST /v1/progress/activities/:id/attempt</code> — show feedback from API response</div>
+        <div class="task-item"><span class="task-bullet"></span>XP counter in topbar — animate increment on correct answer</div>
+        <div class="task-item"><span class="task-bullet"></span>Progress fill — advance bar on each correct attempt</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Student can complete a full lesson in the browser with live API feedback</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day20">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 20</span>
+        <span class="day-label">Onboarding flow — web version</span>
+        <span class="tag tag-web">Web</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build onboarding flow pages: welcome → profile setup → placement test → result → first lesson preview</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Fast lane / thorough lane split — "Add more details later" stores partial state in local storage</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Placement test UI — 12 MCQ questions, timer, progress bar, answer reveal with grammar note</div>
+        <div class="task-item"><span class="task-bullet"></span>Result screen — CEFR level display with blob mark animation, stats, CEFR scale</div>
+        <div class="task-item"><span class="task-bullet"></span>Wire to <code>POST /v1/placement/submit</code> — receive level, redirect to first lesson</div>
+        <div class="task-item"><span class="task-bullet"></span>Guard: skip onboarding if profile + placement already complete</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">New student completes full onboarding in browser, lands on first lesson correctly</span>
+      </div>
+    </div>
+
+    <div class="milestone">
+      <div class="milestone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#8DB5A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="milestone-title">Week 4 milestone — Web MVP usable</div>
+        <div class="milestone-desc">A teacher can log in, build a course, enroll a student, and schedule a session. A student can register, complete onboarding, take a placement test, and do a full lesson. The web product is end-to-end usable.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     WEEK 5 — iOS foundations
+══════════════════════════════ -->
+<div class="week">
+  <div class="week-header" onclick="toggleWeek(this)">
+    <span class="week-number">Week 5</span>
+    <span class="week-title">iOS app — foundations + student dashboard</span>
+    <span class="week-pill tag-ios">iOS</span>
+    <span class="week-range">Days 21–25</span>
+    <svg class="week-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card" id="day21">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 21</span>
+        <span class="day-label">iOS project setup + API client generation</span>
+        <span class="tag tag-ios">iOS</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Create Xcode project — SwiftUI, iOS 17+, iPad-first layout targets</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Run <code>swift-openapi-generator</code> — generate typed API client from <code>spec.json</code></div>
+        <div class="task-item primary"><span class="task-bullet"></span>Set up <code>AuthManager</code> — Keychain JWT storage, refresh token logic mirroring web</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up design token system — all CSS variables ported to Swift <code>Color</code> extensions and <code>Font</code> extensions</div>
+        <div class="task-item"><span class="task-bullet"></span>Build reusable component library: <code>LexisButton</code>, <code>LevelPill</code>, <code>ProgressBar</code>, <code>Card</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Set up navigation structure — <code>TabView</code> for student, <code>NavigationSplitView</code> for teacher (iPad)</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Xcode project runs on iPad simulator, API client generated, auth stores token in Keychain</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day22">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 22</span>
+        <span class="day-label">iOS onboarding + placement test</span>
+        <span class="tag tag-ios">iOS</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build welcome screen — animated blob mark, get started / login CTAs</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build profile setup view — name field, language chip selector, goal list</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build placement test view — MCQ with option tapping, progress bar, timer</div>
+        <div class="task-item"><span class="task-bullet"></span>Build result view — CEFR badge, stats cards, CEFR scale</div>
+        <div class="task-item"><span class="task-bullet"></span>Wire all to API — same endpoints as web, fast lane / thorough lane split</div>
+        <div class="task-item"><span class="task-bullet"></span>Haptic feedback on correct/incorrect answers</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">iOS onboarding flow complete end-to-end on iPad simulator</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day23">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 23</span>
+        <span class="day-label">iOS student dashboard</span>
+        <span class="tag tag-ios">iOS</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build home tab — greeting, continue card, CEFR progress section</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build upcoming sessions card — session rows with join/prepare CTAs</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build spaced review card — streak week strip, review queue items, start review button</div>
+        <div class="task-item"><span class="task-bullet"></span>Build XP + badges section — XP bar, badge 2×2 grid with earned/locked states</div>
+        <div class="task-item"><span class="task-bullet"></span>Pull-to-refresh, loading skeletons for all sections</div>
+        <div class="task-item"><span class="task-bullet"></span>Tab bar: Home, Lessons, Review, Schedule, Profile</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">iOS student dashboard renders live data, all sections functional</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day24">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 24</span>
+        <span class="day-label">iOS lesson view — cloze + MCQ</span>
+        <span class="tag tag-ios">iOS</span>
+        <span class="day-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build lesson view layout — topbar with progress, centred activity area, footer nav</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build cloze activity view — inline text with <code>TextField</code> placeholders, word bank chips</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Build MCQ activity view — option list with tap selection, letter badges</div>
+        <div class="task-item"><span class="task-bullet"></span>Build feedback banner — correct/incorrect/hint variants with grammar note</div>
+        <div class="task-item"><span class="task-bullet"></span>Wire to progress API — attempt logging, XP animation on correct</div>
+        <div class="task-item"><span class="task-bullet"></span>Keyboard handling — dismiss on submit, move focus to next blank</div>
+        <div class="task-item"><span class="task-bullet"></span>Apple Pencil support — enable scribble on text inputs for handwriting-to-text</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Student can complete a cloze and MCQ lesson on iPad with Pencil support</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day25">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 25</span>
+        <span class="day-label">iOS spaced review flow</span>
+        <span class="tag tag-ios">iOS</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Build review session view — card-by-card flashcard interface for SRS queue</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Quality rating after each card — 5-option scale (Again / Hard / Good / Easy / Perfect) mapped to SM-2 quality 0–5</div>
+        <div class="task-item"><span class="task-bullet"></span>Review completion screen — items reviewed, streak updated, next review dates</div>
+        <div class="task-item"><span class="task-bullet"></span>Wire to <code>GET /v1/srs/queue</code> and <code>POST /v1/srs/review/:itemId</code></div>
+        <div class="task-item"><span class="task-bullet"></span>Swipe gestures — swipe right for easy, swipe left for again</div>
+        <div class="task-item"><span class="task-bullet"></span>Empty state — no items due, next review date displayed</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Full SRS review session works on iOS with swipe gestures and quality rating</span>
+      </div>
+    </div>
+
+    <div class="milestone">
+      <div class="milestone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#8DB5A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="milestone-title">Week 5 milestone — iOS student experience complete</div>
+        <div class="milestone-desc">A student can onboard, take a placement test, see their dashboard, complete lessons with Apple Pencil support, and do spaced reviews — all on iPad. The iOS app is functionally at parity with the web student experience.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════
+     WEEK 6 — QA, polish, Phase 1 ship
+══════════════════════════════ -->
+<div class="week">
+  <div class="week-header" onclick="toggleWeek(this)">
+    <span class="week-number">Week 6</span>
+    <span class="week-title">QA, polish, and Phase 1 sign-off</span>
+    <span class="week-pill tag-qa">QA</span>
+    <span class="week-range">Days 26–30</span>
+    <svg class="week-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card" id="day26">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 26</span>
+        <span class="day-label">Pilot with yourself — full walkthrough</span>
+        <span class="tag tag-qa">QA</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Run complete teacher flow: create account → build a B1 course with 2 units, 3 lessons each → create classroom → enroll a student</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Run complete student flow: register → onboarding → placement test → lesson 1 → lesson 2 → check SRS queue</div>
+        <div class="task-item"><span class="task-bullet"></span>Document every bug, friction point, and confusing UI as GitHub issues</div>
+        <div class="task-item"><span class="task-bullet"></span>Check CEFR alignment: do placement test questions correctly assign B1? Does the content match the level?</div>
+        <div class="task-item"><span class="task-bullet"></span>Verify XP, streaks, and badges trigger at the right moments</div>
+        <div class="task-item"><span class="task-bullet"></span>Test on both web and iOS — note any parity gaps</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Full bug list documented as issues, prioritised by severity</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day27">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 27</span>
+        <span class="day-label">Bug fixes — critical issues</span>
+        <span class="tag tag-qa">QA</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Fix all P0 bugs (blocking user flows) from Day 26 issue list</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Fix all P1 bugs (major UX problems, wrong data) from Day 26 issue list</div>
+        <div class="task-item"><span class="task-bullet"></span>Re-run full walkthrough after fixes to confirm resolution</div>
+        <div class="task-item"><span class="task-bullet"></span>Fix any API response inconsistencies flagged during walkthrough</div>
+        <div class="task-item"><span class="task-bullet"></span>Add missing loading and empty states across both platforms</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">All P0 and P1 bugs resolved, both flows run clean</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day28">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 28</span>
+        <span class="day-label">First real student pilot</span>
+        <span class="tag tag-qa">QA</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Onboard one real student (João or another actual student) on web</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Watch them complete onboarding and first lesson — note every hesitation, confusion, or error</div>
+        <div class="task-item"><span class="task-bullet"></span>Check placement test results against your own assessment of their level</div>
+        <div class="task-item"><span class="task-bullet"></span>Collect verbal feedback: what felt natural, what felt confusing</div>
+        <div class="task-item"><span class="task-bullet"></span>Document new issues raised by real usage</div>
+        <div class="task-item"><span class="task-bullet"></span>Note any pedagogical issues — is the CEFR alignment accurate for real learners?</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Real student feedback collected, new issue list documented</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day29">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 29</span>
+        <span class="day-label">Fixes from pilot + content polish</span>
+        <span class="tag tag-qa">QA</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Implement fixes from Day 28 pilot feedback</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Polish placement test question bank — review all 12 questions for CEFR accuracy</div>
+        <div class="task-item"><span class="task-bullet"></span>Polish activity feedback copy — make grammar explanations clearer and more natural</div>
+        <div class="task-item"><span class="task-bullet"></span>Add micro-animations: XP count-up, lesson complete celebration, badge earned modal</div>
+        <div class="task-item"><span class="task-bullet"></span>Ensure dark mode renders correctly on all web pages</div>
+        <div class="task-item"><span class="task-bullet"></span>Accessibility pass — keyboard navigation, focus rings, colour contrast on critical elements</div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Pilot feedback addressed, content polished, animations in place</span>
+      </div>
+    </div>
+
+    <div class="day-card" id="day30">
+      <div class="day-header" onclick="toggleDay(this)">
+        <div class="day-check" onclick="toggleCheck(event, this)"></div>
+        <span class="day-number">Day 30</span>
+        <span class="day-label">Deployment + Phase 1 sign-off</span>
+        <span class="tag tag-setup">Setup</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><span class="task-bullet"></span>Deploy API to production (Railway, Render, or Fly.io) — set up env vars, run migrations</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Deploy web to Vercel — connect to production API, test full flow in production</div>
+        <div class="task-item primary"><span class="task-bullet"></span>Set up database backups — daily automated PostgreSQL dumps</div>
+        <div class="task-item"><span class="task-bullet"></span>Set up basic error monitoring (Sentry) on API and web</div>
+        <div class="task-item"><span class="task-bullet"></span>Write Phase 1 retrospective — what worked, what to carry into Phase 2</div>
+        <div class="task-item"><span class="task-bullet"></span>Update project README with setup instructions, architecture decisions, known limitations</div>
+        <div class="task-item"><span class="task-bullet"></span>Tag git commit as <code>v0.1.0-phase1</code></div>
+      </div>
+      <div class="day-footer">
+        <span class="deliverable-label">Deliverable</span>
+        <span class="deliverable-text">Lexis is live in production. Phase 1 complete. Ready for Phase 2.</span>
+      </div>
+    </div>
+
+    <div class="milestone">
+      <div class="milestone-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3" stroke="#8DB5A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div>
+        <div class="milestone-title">Phase 1 complete — Lexis is live</div>
+        <div class="milestone-desc">Teacher can build courses, manage students, and schedule sessions. Student can onboard, take a placement test, complete lessons, and track their progress. Real student pilot done. Product deployed to production. Foundation is solid for Phase 2: real-time whiteboard, advanced assessments, and AI generation.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleWeek(header) {
+    header.classList.toggle('open');
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  function toggleDay(header) {
+    const card = header.closest('.day-card');
+    const tasks = card.querySelector('.task-list');
+    const footer = card.querySelector('.day-footer');
+    const isOpen = tasks.style.display !== 'none' && tasks.style.display !== '';
+    if (isOpen) {
+      tasks.style.display = 'none';
+      if (footer) footer.style.display = 'none';
+    } else {
+      tasks.style.display = 'flex';
+      if (footer) footer.style.display = 'flex';
+    }
+  }
+
+  function toggleCheck(e, checkEl) {
+    e.stopPropagation();
+    checkEl.classList.toggle('checked');
+    if (checkEl.classList.contains('checked')) {
+      checkEl.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5L8.5 2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    } else {
+      checkEl.innerHTML = '';
+    }
+    const card = checkEl.closest('.day-card');
+    if (checkEl.classList.contains('checked')) {
+      card.classList.add('done');
+    } else {
+      card.classList.remove('done');
+    }
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total   = document.querySelectorAll('.day-check').length;
+    const checked = document.querySelectorAll('.day-check.checked').length;
+    const pct     = Math.round((checked / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = `${checked} of ${total} days complete`;
+  }
+
+  // Open Week 1 by default
+  document.querySelector('.week-header').classList.add('open');
+  document.querySelector('.week-body').classList.add('open');
+
+  // Show task lists by default
+  document.querySelectorAll('.task-list, .day-footer').forEach(el => {
+    el.style.display = el.classList.contains('task-list') ? 'flex' : 'flex';
+  });
+</script>
+</body>
+</html>

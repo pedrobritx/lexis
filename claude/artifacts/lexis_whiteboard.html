@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Session Board</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-canvas:  #0E1520;
+  --bg-surface: #17202B;
+  --bg-raised:  #1E2A3A;
+  --bg-hover:   #243040;
+  --bg-active:  #2A3850;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.13);
+  --border-hi:  rgba(255,255,255,0.22);
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.14);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+  --text-1:     #EDE8DF;
+  --text-2:     #8A95A3;
+  --text-3:     #4D5A68;
+  --font:       'DM Sans', sans-serif;
+  --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+  --hud-h:      48px;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: var(--font);
+  background: var(--bg-canvas);
+  color: var(--text-1);
+  user-select: none;
+}
+
+/* ── Canvas ── */
+.canvas-wrap {
+  position: absolute;
+  inset: 0;
+  top: var(--hud-h);
+  overflow: hidden;
+  cursor: default;
+}
+.canvas-grid {
+  position: absolute;
+  inset: -400px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.canvas-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+
+/* ─────────────────────────────────────────────
+   ACTIVITY CARD — canvas object
+   Two states: .collapsed (small chip) and
+   .expanded (full interactive card)
+───────────────────────────────────────────── */
+.activity-card {
+  position: absolute;
+  background: var(--bg-surface);
+  border-radius: 14px;
+  border: 0.5px solid var(--border-mid);
+  box-shadow: 0 6px 32px rgba(0,0,0,0.45);
+  transition:
+    width 0.32s var(--ease),
+    height 0.32s var(--ease),
+    transform 0.32s var(--ease),
+    border-color 0.2s;
+  overflow: hidden;
+  cursor: grab;
+}
+.activity-card:hover { border-color: var(--border-hi); }
+.activity-card.is-focused { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(192,123,58,0.18), 0 8px 40px rgba(0,0,0,0.5); }
+
+/* ── Collapsed state ── */
+.activity-card.collapsed {
+  width: 220px;
+}
+.activity-card.collapsed .card-body     { display: none; }
+.activity-card.collapsed .card-footer   { display: none; }
+.activity-card.collapsed .card-header   { border-bottom: none; padding: 12px 14px; }
+.activity-card.collapsed .header-meta   { display: none; }
+.activity-card.collapsed .step-pips     { display: none; }
+
+/* ── Expanded state ── */
+.activity-card.expanded {
+  width: 480px;
+  cursor: default;
+}
+.activity-card.expanded .collapsed-hint { display: none; }
+
+/* Card header — always visible */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px 11px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+  gap: 10px;
+}
+.header-left  { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+.activity-type-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
+  background: var(--amber-glow); color: var(--amber-lt);
+  border: 0.5px solid rgba(192,123,58,0.28);
+  white-space: nowrap; flex-shrink: 0;
+}
+.card-title {
+  font-size: 12px; font-weight: 500; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.collapsed-hint {
+  font-size: 10px; color: var(--text-3); white-space: nowrap;
+}
+.header-meta {
+  font-size: 10px; color: var(--text-3);
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* Zoom toggle button */
+.zoom-toggle {
+  width: 24px; height: 24px; border-radius: 6px;
+  border: 0.5px solid var(--border-mid);
+  background: transparent; color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: color 0.15s, background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.zoom-toggle:hover { color: var(--amber-lt); border-color: rgba(192,123,58,0.35); background: var(--amber-glow); }
+
+/* Step pips — visible when expanded */
+.step-pips {
+  display: flex; align-items: center; gap: 4px;
+  padding: 9px 16px;
+  border-bottom: 0.5px solid var(--border);
+}
+.pip {
+  height: 3px; border-radius: 99px; background: var(--border-mid);
+  cursor: pointer; transition: background 0.15s; flex: 1;
+}
+.pip.done    { background: var(--sage-dk); }
+.pip.current { background: var(--amber); }
+.pip:hover   { background: var(--border-hi); }
+
+/* Card body */
+.card-body {
+  padding: 18px 18px 14px;
+  display: flex; flex-direction: column; gap: 18px;
+  overflow-y: auto;
+}
+
+.instr-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text-2);
+}
+.instr-icon {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--amber), var(--sage));
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.context-note {
+  font-size: 11px; color: var(--text-3); font-style: italic;
+  padding-left: 11px; border-left: 2px solid var(--border-mid); line-height: 1.6;
+}
+.sentences { display: flex; flex-direction: column; gap: 16px; }
+.sentence {
+  font-size: 18px; font-weight: 400; line-height: 1.75;
+  color: var(--text-1); letter-spacing: -0.01em;
+}
+.blank-wrap {
+  display: inline-flex; flex-direction: column;
+  align-items: center; vertical-align: bottom; margin: 0 3px;
+}
+.blank-input {
+  font-family: var(--font); font-size: 18px; font-weight: 500;
+  color: var(--parchment); background: transparent;
+  border: none; border-bottom: 2px solid var(--amber);
+  outline: none; padding: 0 4px 2px; width: 118px; text-align: center;
+  caret-color: var(--amber-lt); letter-spacing: -0.01em;
+  user-select: text;
+}
+.blank-input::placeholder { color: var(--text-3); }
+.blank-input:focus { border-bottom-color: var(--amber-lt); background: var(--amber-glow); border-radius: 4px 4px 0 0; }
+.blank-input.correct   { border-bottom-color: var(--sage);   color: var(--sage); }
+.blank-input.incorrect { border-bottom-color: #E07070; color: #E07070; }
+.blank-hint { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+
+.wordbank-label { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); margin-bottom: 7px; }
+.wordbank { display: flex; flex-wrap: wrap; gap: 5px; }
+.word-chip {
+  font-family: var(--font); font-size: 11px; color: var(--text-1);
+  background: var(--bg-raised); border: 0.5px solid var(--border-mid);
+  border-radius: 5px; padding: 4px 11px; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  user-select: none;
+}
+.word-chip:hover { background: var(--bg-hover); border-color: var(--amber); transform: translateY(-1px); }
+.word-chip.used  { opacity: 0.22; pointer-events: none; text-decoration: line-through; }
+
+.feedback-bar {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 10px 13px; border-radius: 8px; font-size: 11px; line-height: 1.55;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.feedback-bar.show { opacity: 1; transform: translateY(0); }
+.feedback-bar.correct-fb  { background: rgba(106,154,133,0.12); border: 0.5px solid rgba(106,154,133,0.3); color: var(--sage); }
+.feedback-bar.incorrect-fb { background: rgba(180,60,60,0.10); border: 0.5px solid rgba(180,60,60,0.28); color: #E07070; }
+.feedback-bar.hint-fb     { background: rgba(55,100,165,0.12); border: 0.5px solid rgba(55,100,165,0.28); color: #7AAAD4; }
+.fb-icon {
+  width: 15px; height: 15px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 500; flex-shrink: 0; margin-top: 1px;
+  color: var(--bg-canvas);
+}
+.correct-fb   .fb-icon { background: var(--sage); }
+.incorrect-fb .fb-icon { background: #E07070; }
+.hint-fb      .fb-icon { background: #7AAAD4; }
+
+/* Card footer */
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.step-label { font-size: 10px; color: var(--text-3); }
+.card-nav   { display: flex; gap: 6px; }
+.c-btn {
+  font-family: var(--font); font-size: 11px; font-weight: 500;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+}
+.c-btn-ghost   { background: transparent; color: var(--text-2); border: 0.5px solid var(--border-mid); }
+.c-btn-ghost:hover { color: var(--text-1); border-color: var(--border-hi); }
+.c-btn-primary { background: var(--parchment); color: var(--bg-canvas); border: none; }
+.c-btn-primary:hover { background: #F5ECD7; }
+
+
+/* ─────────────────────────────────
+   Other canvas objects
+───────────────────────────────── */
+.canvas-obj { position: absolute; cursor: grab; }
+.canvas-obj:active { cursor: grabbing; }
+
+.diagram-card {
+  background: var(--bg-raised);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.38);
+  width: 290px;
+}
+.diagram-title { font-size: 9px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+.clause-row    { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.clause-box    { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.clause-if     { background: rgba(192,123,58,0.15); border: 0.5px solid rgba(192,123,58,0.35); color: var(--amber-lt); }
+.clause-res    { background: rgba(141,181,160,0.12); border: 0.5px solid rgba(141,181,160,0.3);  color: var(--sage); }
+.clause-arrow  { color: var(--text-3); font-size: 13px; }
+.diagram-ex    { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--text-2); font-style: italic; line-height: 1.6; }
+.em-a { color: var(--amber-lt); font-style: normal; font-weight: 500; }
+.em-s { color: var(--sage);     font-style: normal; font-weight: 500; }
+
+.sticky {
+  border-radius: 8px; padding: 12px 14px;
+  font-size: 11px; line-height: 1.55;
+  box-shadow: 0 3px 16px rgba(0,0,0,0.32);
+  width: 180px;
+}
+.sticky-green  { background: #1B2818; border: 0.5px solid #384E2C; color: #A8CCAA; }
+.sticky-purple { background: #1F1630; border: 0.5px solid #3A2858; color: #B8A8D8; }
+.sticky-amber  { background: rgba(192,123,58,0.12); border: 0.5px solid rgba(192,123,58,0.28); color: #D4924F; }
+.s-label { font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.5; margin-bottom: 4px; }
+
+.pdf-obj {
+  background: var(--bg-raised);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.38);
+  width: 200px;
+}
+.pdf-bar  { display: flex; align-items: center; gap: 7px; padding: 7px 10px; background: var(--bg-surface); border-bottom: 0.5px solid var(--border); }
+.pdf-icon { width: 15px; height: 15px; background: rgba(224,80,80,0.15); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 500; color: #E07070; flex-shrink: 0; }
+.pdf-name { font-size: 10px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdf-body { padding: 12px; }
+.pdf-line { height: 6px; background: var(--border-mid); border-radius: 3px; margin-bottom: 6px; }
+.pdf-line:last-child { margin-bottom: 0; }
+
+
+/* ── Top HUD ── */
+.hud-top {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--hud-h);
+  background: var(--bg-surface);
+  border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 14px; gap: 10px; z-index: 200;
+}
+.blob-btn {
+  width: 28px; height: 28px; border-radius: 7px;
+  border: 0.5px solid var(--border-mid); background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s; flex-shrink: 0; text-decoration: none;
+}
+.blob-btn:hover { background: var(--bg-hover); }
+.hud-div { width: 0.5px; height: 18px; background: var(--border-mid); flex-shrink: 0; }
+.session-chip { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.s-avatar { width: 22px; height: 22px; border-radius: 50%; background: rgba(122,170,212,0.22); color: #7AAAD4; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 500; flex-shrink: 0; }
+.s-name  { font-size: 12px; font-weight: 500; color: var(--text-1); white-space: nowrap; }
+.s-level { font-size: 9px; font-weight: 500; padding: 1px 6px; border-radius: 3px; background: rgba(192,123,58,0.12); color: var(--amber-lt); border: 0.5px solid rgba(192,123,58,0.28); }
+.hud-center { flex: 1; display: flex; align-items: center; justify-content: center; gap: 9px; }
+.participants { display: flex; align-items: center; }
+.p-av { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 500; border: 2px solid var(--bg-surface); margin-left: -5px; flex-shrink: 0; }
+.p-av:first-child { margin-left: 0; }
+.pa-t { background: linear-gradient(135deg, var(--amber), var(--sage)); color: var(--bg-canvas); }
+.pa-s { background: rgba(122,170,212,0.22); color: #7AAAD4; }
+.live-badge { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 500; color: var(--sage); padding: 2px 8px; border-radius: 99px; background: rgba(141,181,160,0.1); border: 0.5px solid rgba(141,181,160,0.2); }
+.live-dot  { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.35} }
+.timer { font-size: 10px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.hud-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.hud-btn { font-family: var(--font); font-size: 11px; font-weight: 500; padding: 4px 11px; border-radius: 6px; cursor: pointer; transition: all 0.15s; border: 0.5px solid var(--border-mid); background: transparent; color: var(--text-2); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.hud-btn:hover { color: var(--text-1); border-color: var(--border-hi); background: var(--bg-hover); }
+.hud-btn-end { background: rgba(180,60,60,0.11); border-color: rgba(180,60,60,0.26); color: #E07070; }
+.hud-btn-end:hover { background: rgba(180,60,60,0.2); color: #F08080; }
+
+
+/* ── Sessions drawer ── */
+.sessions-drawer {
+  position: fixed; left: 0; top: var(--hud-h); bottom: 0; width: 230px;
+  background: var(--bg-surface); border-right: 0.5px solid var(--border-mid);
+  display: flex; flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.22s var(--ease);
+  z-index: 150; box-shadow: 4px 0 28px rgba(0,0,0,0.4);
+}
+.sessions-drawer.open { transform: translateX(0); }
+.drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.drawer-title  { font-size: 12px; font-weight: 500; color: var(--text-1); }
+.drawer-close  { width: 20px; height: 20px; border-radius: 4px; border: 0.5px solid var(--border-mid); background: transparent; color: var(--text-3); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; transition: color 0.15s, background 0.15s; }
+.drawer-close:hover { color: var(--text-1); background: var(--bg-hover); }
+.drawer-new { display: flex; align-items: center; gap: 7px; margin: 9px 11px; padding: 6px 11px; border-radius: 6px; border: 0.5px dashed var(--border-mid); background: transparent; color: var(--text-3); font-family: var(--font); font-size: 11px; cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+.drawer-new:hover { color: var(--amber-lt); border-color: rgba(192,123,58,0.35); background: var(--amber-glow); }
+.drawer-section { font-size: 9px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); padding: 8px 15px 3px; }
+.session-list { flex: 1; overflow-y: auto; }
+.si { display: flex; align-items: flex-start; gap: 9px; padding: 9px 15px; cursor: pointer; transition: background 0.15s; border-left: 2px solid transparent; }
+.si:hover { background: var(--bg-hover); }
+.si.active { background: var(--bg-active); border-left-color: var(--amber); }
+.si-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.si-body { flex: 1; min-width: 0; }
+.si-title { font-size: 11px; font-weight: 500; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.si-meta  { font-size: 9px; color: var(--text-3); margin-top: 1px; }
+.si-live  { font-size: 8px; font-weight: 500; padding: 1px 5px; border-radius: 3px; background: rgba(192,123,58,0.12); color: var(--amber-lt); border: 0.5px solid rgba(192,123,58,0.28); flex-shrink: 0; margin-top: 2px; }
+.drawer-footer { padding: 10px 15px; border-top: 0.5px solid var(--border); flex-shrink: 0; }
+.df-row { display: flex; align-items: center; gap: 8px; }
+.df-avatar { width: 26px; height: 26px; border-radius: 50%; background: rgba(122,170,212,0.18); color: #7AAAD4; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 500; flex-shrink: 0; }
+.df-name  { font-size: 11px; font-weight: 500; color: var(--text-1); }
+.df-level { font-size: 9px; color: var(--text-3); margin-top: 1px; }
+
+
+/* ── Left toolbar ── */
+.toolbar {
+  position: fixed; left: 14px; top: 50%; transform: translateY(-50%);
+  background: var(--bg-surface); border: 0.5px solid var(--border-mid);
+  border-radius: 12px; padding: 5px;
+  display: flex; flex-direction: column; gap: 1px;
+  z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.38);
+  transition: left 0.22s var(--ease);
+}
+.toolbar.shifted { left: 248px; }
+.t-btn { width: 32px; height: 32px; border-radius: 7px; border: none; background: transparent; color: var(--text-2); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s, color 0.15s; position: relative; }
+.t-btn:hover  { background: var(--bg-hover); color: var(--text-1); }
+.t-btn.active { background: var(--amber-glow); color: var(--amber-lt); border: 0.5px solid rgba(192,123,58,0.32); }
+.t-div { width: 20px; height: 0.5px; background: var(--border-mid); margin: 2px auto; }
+.t-notif { position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+
+
+/* ── Bottom — minimal ── */
+.hud-bottom {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 32px; display: flex; align-items: center;
+  padding: 0 14px; gap: 8px;
+  z-index: 100; background: transparent; pointer-events: none;
+}
+.hud-bottom > * { pointer-events: auto; }
+.zoom-controls { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.z-btn  { width: 22px; height: 22px; border-radius: 5px; border: 0.5px solid var(--border-mid); background: var(--bg-surface); color: var(--text-2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; transition: color 0.15s, background 0.15s; }
+.z-btn:hover { color: var(--text-1); background: var(--bg-hover); }
+.z-label { font-size: 10px; color: var(--text-3); min-width: 34px; text-align: center; font-family: var(--font); }
+.mini-map { width: 76px; height: 44px; background: var(--bg-surface); border: 0.5px solid var(--border-mid); border-radius: 5px; overflow: hidden; position: relative; opacity: 0.65; transition: opacity 0.15s; }
+.mini-map:hover { opacity: 1; }
+.mm-viewport { position: absolute; width: 28px; height: 18px; border: 1.5px solid var(--amber); border-radius: 2px; top: 5px; left: 7px; background: rgba(192,123,58,0.07); }
+.mm-dot { position: absolute; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ── Canvas ── -->
+<div class="canvas-wrap" id="canvasWrap">
+  <div class="canvas-grid"></div>
+  <div class="canvas-stage" id="stage">
+
+    <!-- ═══════════════════════════════════════
+         ACTIVITY CARD 1 — Cloze (expanded)
+    ═══════════════════════════════════════ -->
+    <div class="activity-card expanded is-focused" id="activity1" style="left: 160px; top: 60px;">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="activity-type-badge">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 4h6M4 1v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Cloze
+          </span>
+          <span class="card-title">Second conditional — fill in the blank</span>
+        </div>
+        <div class="header-right">
+          <span class="header-meta">B1 · Unit 3</span>
+          <!-- Zoom out icon when expanded -->
+          <button class="zoom-toggle" onclick="toggleCard('activity1')" title="Minimise">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1.5 4.5H4.5V1.5M6.5 1.5V4.5H9.5M9.5 6.5H6.5V9.5M4.5 9.5V6.5H1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="step-pips">
+        <div class="pip done"    title="Activity 1 — done"></div>
+        <div class="pip current" title="Activity 2 — active"></div>
+        <div class="pip"         title="Activity 3"></div>
+        <div class="pip"         title="Activity 4"></div>
+        <div class="pip"         title="Activity 5"></div>
+      </div>
+
+      <div class="card-body">
+        <div class="instr-row">
+          <div class="instr-icon"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 4.5h7M4.5 1v7" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          Complete each sentence using the correct form of the verb.
+        </div>
+        <p class="context-note">Second conditional — imaginary or unlikely situations.</p>
+        <div class="sentences">
+          <p class="sentence">
+            If she
+            <span class="blank-wrap">
+              <input class="blank-input correct" type="text" value="studied" data-answer="studied" data-verb="study" autocomplete="off" spellcheck="false"/>
+              <span class="blank-hint">(study)</span>
+            </span>
+            harder, she
+            <span class="blank-wrap">
+              <input class="blank-input" type="text" placeholder="·  ·  ·" data-answer="would pass" data-verb="pass" autocomplete="off" spellcheck="false"/>
+              <span class="blank-hint">(pass)</span>
+            </span>
+            the exam.
+          </p>
+          <p class="sentence">
+            They
+            <span class="blank-wrap">
+              <input class="blank-input" type="text" placeholder="·  ·  ·" data-answer="would travel" data-verb="travel" autocomplete="off" spellcheck="false"/>
+              <span class="blank-hint">(travel)</span>
+            </span>
+            more if they
+            <span class="blank-wrap">
+              <input class="blank-input" type="text" placeholder="·  ·  ·" data-answer="had" data-verb="have" autocomplete="off" spellcheck="false"/>
+              <span class="blank-hint">(have)</span>
+            </span>
+            more time.
+          </p>
+        </div>
+        <div>
+          <p class="wordbank-label">Word bank</p>
+          <div class="wordbank">
+            <button class="word-chip used">studied</button>
+            <button class="word-chip" onclick="useWord(this,'would travel','activity1')">would travel</button>
+            <button class="word-chip" onclick="useWord(this,'had','activity1')">had</button>
+            <button class="word-chip" onclick="useWord(this,'would pass','activity1')">would pass</button>
+            <button class="word-chip" onclick="useWord(this,'studies','activity1')">studies</button>
+            <button class="word-chip" onclick="useWord(this,'will pass','activity1')">will pass</button>
+          </div>
+        </div>
+        <div class="feedback-bar correct-fb show" id="fb1">
+          <div class="fb-icon">✓</div>
+          <div><strong>Good start!</strong> "studied" is correct. Now complete the rest.</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="step-label">Activity 2 of 5</span>
+        <div class="card-nav">
+          <button class="c-btn c-btn-ghost">Back</button>
+          <button class="c-btn c-btn-primary" onclick="checkCard('activity1')">Check</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         ACTIVITY CARD 2 — MCQ (collapsed)
+    ═══════════════════════════════════════ -->
+    <div class="activity-card collapsed" id="activity2" style="left: 700px; top: 60px;">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="activity-type-badge" style="background:rgba(122,170,212,0.12);color:#7AAAD4;border-color:rgba(122,170,212,0.25);">MCQ</span>
+          <span class="card-title">Choose the correct form</span>
+          <span class="collapsed-hint">· tap to expand</span>
+        </div>
+        <div class="header-right">
+          <button class="zoom-toggle" onclick="toggleCard('activity2')" title="Expand">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1.5 4H4V1.5M7 1.5V4H9.5M9.5 7H7V9.5M4 9.5V7H1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════
+         ACTIVITY CARD 3 — Matching (collapsed)
+    ═══════════════════════════════════════ -->
+    <div class="activity-card collapsed" id="activity3" style="left: 700px; top: 130px;">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="activity-type-badge" style="background:rgba(141,181,160,0.12);color:#8DB5A0;border-color:rgba(141,181,160,0.25);">Match</span>
+          <span class="card-title">Clause matching</span>
+          <span class="collapsed-hint">· tap to expand</span>
+        </div>
+        <div class="header-right">
+          <button class="zoom-toggle" onclick="toggleCard('activity3')" title="Expand">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M1.5 4H4V1.5M7 1.5V4H9.5M9.5 7H7V9.5M4 9.5V7H1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Grammar diagram -->
+    <div class="canvas-obj diagram-card" style="left: 160px; top: 400px;">
+      <div class="diagram-title">Second conditional structure</div>
+      <div class="clause-row">
+        <span class="clause-box clause-if">If + past simple</span>
+        <span class="clause-arrow">→</span>
+        <span class="clause-box clause-res">would + base verb</span>
+      </div>
+      <div class="clause-row" style="font-size:10px;color:var(--text-3);">Imaginary / unlikely situations</div>
+      <div class="diagram-ex">
+        "If she <span class="em-a">studied</span>, she <span class="em-s">would pass</span>."<br/>
+        "If I <span class="em-a">had</span> time, I <span class="em-s">would travel</span>."
+      </div>
+    </div>
+
+    <!-- SVG freehand annotation -->
+    <svg style="position:absolute;left:150px;top:388px;pointer-events:none;" width="310" height="160" fill="none">
+      <ellipse cx="93" cy="54" rx="63" ry="17" stroke="#C07B3A" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.4"/>
+      <path d="M165 70 Q185 106 148 124" stroke="#8DB5A0" stroke-width="1.3" stroke-linecap="round" opacity="0.4"/>
+      <circle cx="148" cy="124" r="2" fill="#8DB5A0" opacity="0.4"/>
+    </svg>
+
+    <!-- Sticky notes -->
+    <div class="canvas-obj sticky sticky-green" style="left: 510px; top: 400px;">
+      <div class="s-label">Note · Pedro</div>
+      Drill result clause separately — "would + base verb" before combining.
+    </div>
+    <div class="canvas-obj sticky sticky-purple" style="left: 510px; top: 530px;">
+      <div class="s-label">Note · João</div>
+      if-clause = past simple, NOT "would"
+    </div>
+    <div class="canvas-obj sticky sticky-amber" style="left: 160px; top: 560px;">
+      <div class="s-label">Common error</div>
+      ✗ "If she <em>would study</em>…"<br/>
+      ✓ "If she <em>studied</em>…"
+    </div>
+
+    <!-- PDF object -->
+    <div class="canvas-obj pdf-obj" style="left: 720px; top: 400px;">
+      <div class="pdf-bar">
+        <div class="pdf-icon">PDF</div>
+        <span class="pdf-name">B1_conditionals_worksheet.pdf</span>
+      </div>
+      <div class="pdf-body">
+        <div class="pdf-line" style="width:88%"></div>
+        <div class="pdf-line" style="width:70%"></div>
+        <div class="pdf-line" style="width:82%"></div>
+        <div class="pdf-line" style="width:55%"></div>
+        <div class="pdf-line"></div>
+      </div>
+      <svg style="position:absolute;top:32px;left:0;pointer-events:none;" width="200" height="85" fill="none">
+        <ellipse cx="88" cy="36" rx="50" ry="10" stroke="#C07B3A" stroke-width="1.3" stroke-dasharray="4 2" opacity="0.5"/>
+        <path d="M138 36L158 22" stroke="#C07B3A" stroke-width="1" opacity="0.5"/>
+      </svg>
+    </div>
+
+  </div><!-- /stage -->
+</div>
+
+
+<!-- ── Top HUD ── -->
+<div class="hud-top">
+  <a class="blob-btn" href="#" title="Lexis">
+    <svg width="12" height="15" viewBox="0 0 18 22" fill="none">
+      <defs>
+        <linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#D4924F"/>
+          <stop offset="100%" stop-color="#A8CCBB"/>
+        </linearGradient>
+      </defs>
+      <path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/>
+    </svg>
+  </a>
+  <div class="hud-div"></div>
+  <div class="session-chip">
+    <div class="s-avatar">JL</div>
+    <span class="s-name">João Lima</span>
+    <span class="s-level">B1</span>
+  </div>
+  <div class="hud-center">
+    <div class="participants">
+      <div class="p-av pa-t">P</div>
+      <div class="p-av pa-s">JL</div>
+    </div>
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <span class="timer" id="timer">42:18</span>
+  </div>
+  <div class="hud-right">
+    <button class="hud-btn">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="2" cy="6" r="1.3" stroke="currentColor" stroke-width="1.1"/><circle cx="10" cy="2" r="1.3" stroke="currentColor" stroke-width="1.1"/><circle cx="10" cy="10" r="1.3" stroke="currentColor" stroke-width="1.1"/><path d="M3.2 5.5L8.8 2.5M3.2 6.5L8.8 9.5" stroke="currentColor" stroke-width="1.1"/></svg>
+      Share
+    </button>
+    <button class="hud-btn hud-btn-end">End session</button>
+  </div>
+</div>
+
+
+<!-- ── Sessions drawer ── -->
+<div class="sessions-drawer" id="sessionsDrawer">
+  <div class="drawer-header">
+    <span class="drawer-title">João Lima — boards</span>
+    <button class="drawer-close" onclick="toggleSessions()">×</button>
+  </div>
+  <button class="drawer-new">
+    <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    New page
+  </button>
+  <div class="session-list">
+    <div class="drawer-section">This unit</div>
+    <div class="si active">
+      <div class="si-dot" style="background:var(--amber)"></div>
+      <div class="si-body"><div class="si-title">Session 12</div><div class="si-meta">Today · Second conditional</div></div>
+      <span class="si-live">Live</span>
+    </div>
+    <div class="si"><div class="si-dot" style="background:var(--text-3)"></div><div class="si-body"><div class="si-title">Session 11</div><div class="si-meta">Apr 3 · First conditional</div></div></div>
+    <div class="si"><div class="si-dot" style="background:var(--text-3)"></div><div class="si-body"><div class="si-title">Session 10</div><div class="si-meta">Mar 28 · Modal verbs</div></div></div>
+    <div class="si"><div class="si-dot" style="background:var(--text-3)"></div><div class="si-body"><div class="si-title">Session 9</div><div class="si-meta">Mar 21 · Passive voice</div></div></div>
+    <div class="drawer-section" style="padding-top:12px;">Freeform pages</div>
+    <div class="si"><div class="si-dot" style="background:var(--sage-dk)"></div><div class="si-body"><div class="si-title">Unit 3 — vocab map</div><div class="si-meta">Mind map · Apr 2</div></div></div>
+    <div class="si"><div class="si-dot" style="background:var(--sage-dk)"></div><div class="si-body"><div class="si-title">Grammar reference</div><div class="si-meta">Ongoing · B1 structures</div></div></div>
+    <div class="drawer-section" style="padding-top:12px;">Older sessions</div>
+    <div class="si"><div class="si-dot" style="background:var(--text-3)"></div><div class="si-body"><div class="si-title">Unit 2 sessions (8)</div><div class="si-meta">Feb – Mar · Reported speech</div></div></div>
+    <div class="si"><div class="si-dot" style="background:var(--text-3)"></div><div class="si-body"><div class="si-title">Unit 1 sessions (6)</div><div class="si-meta">Jan – Feb · Past tenses</div></div></div>
+  </div>
+  <div class="drawer-footer">
+    <div class="df-row">
+      <div class="df-avatar">JL</div>
+      <div><div class="df-name">João Lima</div><div class="df-level">B1 · Unit 3 of 10</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Toolbar ── -->
+<div class="toolbar" id="toolbar">
+  <button class="t-btn" id="sessionsBtn" onclick="toggleSessions()" title="Sessions">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.5 3.5h11M1.5 7h11M1.5 10.5h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+    <span class="t-notif"></span>
+  </button>
+  <div class="t-div"></div>
+  <button class="t-btn" title="Select">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 2L2.5 10L5 7.8L6.8 12L8.2 11.5L6.5 7L9.5 7L2.5 2Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" fill="none"/></svg>
+  </button>
+  <button class="t-btn active" title="Pen">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.5 1.5L12.5 4.5L4 13L1 13L1 10L9.5 1.5Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="t-btn" title="Highlighter">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3.5" y="2.5" width="7" height="6" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M5 8.5v3M9 8.5v3M5 11.5h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+  </button>
+  <div class="t-div"></div>
+  <button class="t-btn" title="Shapes">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.1"/><circle cx="10" cy="4" r="2.5" stroke="currentColor" stroke-width="1.1"/><path d="M1.5 13l3-4.5 3 4.5H1.5z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="t-btn" title="Text">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 3.5h9M7 3.5v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+  </button>
+  <button class="t-btn" title="Sticky">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.1"/><path d="M4.5 5.5h5M4.5 8h3.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+  </button>
+  <div class="t-div"></div>
+  <button class="t-btn" title="Insert">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M7 5.5v3M5.5 7h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+  </button>
+  <button class="t-btn" title="Eraser">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L6 8M11.5 2.5L6 8M2.5 11.5H6M6 8L9 10.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="t-div"></div>
+  <button class="t-btn" title="Pan">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2v5M7.5 2.5v4.5M10 4.5v3M2.5 7.5v2a3.5 3.5 0 003.5 3.5h2a3.5 3.5 0 003.5-3.5v-2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+
+<!-- ── Bottom ── -->
+<div class="hud-bottom">
+  <div class="mini-map">
+    <div class="mm-viewport"></div>
+    <div class="mm-dot" style="width:16px;height:10px;background:var(--bg-surface);border:0.5px solid rgba(192,123,58,0.4);border-radius:3px;top:4px;left:5px;"></div>
+    <div class="mm-dot" style="width:7px;height:5px;background:var(--bg-raised);border-radius:2px;top:4px;left:42px;"></div>
+    <div class="mm-dot" style="width:7px;height:4px;background:var(--bg-raised);border-radius:2px;top:12px;left:42px;"></div>
+    <div class="mm-dot" style="width:8px;height:6px;background:var(--bg-raised);border-radius:2px;top:22px;left:8px;"></div>
+    <div class="mm-dot" style="width:6px;height:5px;background:#1B2818;border-radius:2px;top:22px;left:34px;"></div>
+    <div class="mm-dot" style="width:6px;height:5px;background:#1F1630;border-radius:2px;top:30px;left:34px;"></div>
+    <div class="mm-dot" style="width:7px;height:5px;background:var(--bg-raised);border-radius:2px;top:22px;left:52px;"></div>
+  </div>
+  <div class="zoom-controls">
+    <button class="z-btn" onclick="adjustZoom(-10)">−</button>
+    <span class="z-label" id="zoomLabel">100%</span>
+    <button class="z-btn" onclick="adjustZoom(10)">+</button>
+  </div>
+</div>
+
+
+<script>
+  /* ── Sessions drawer ── */
+  let sessionsOpen = false;
+  function toggleSessions() {
+    sessionsOpen = !sessionsOpen;
+    document.getElementById('sessionsDrawer').classList.toggle('open', sessionsOpen);
+    document.getElementById('toolbar').classList.toggle('shifted', sessionsOpen);
+  }
+
+  /* ── Activity card expand / collapse ── */
+  function toggleCard(id) {
+    const card = document.getElementById(id);
+    const isExpanded = card.classList.contains('expanded');
+
+    if (isExpanded) {
+      // Collapse
+      card.classList.remove('expanded', 'is-focused');
+      card.classList.add('collapsed');
+    } else {
+      // Expand — remove focus from others
+      document.querySelectorAll('.activity-card').forEach(c => {
+        c.classList.remove('is-focused');
+      });
+      card.classList.remove('collapsed');
+      card.classList.add('expanded', 'is-focused');
+    }
+  }
+
+  /* ── Cloze interaction ── */
+  let activeInputs = {};
+
+  document.querySelectorAll('.blank-input').forEach(inp => {
+    inp.addEventListener('mousedown', e => e.stopPropagation()); // prevent canvas drag
+    inp.addEventListener('focus', () => {
+      const card = inp.closest('.activity-card');
+      if (card) activeInputs[card.id] = inp;
+    });
+  });
+
+  function useWord(chip, word, cardId) {
+    const card = document.getElementById(cardId);
+    const inputs = [...card.querySelectorAll('.blank-input')];
+    const target = activeInputs[cardId] || inputs.find(i => !i.value.trim() && !i.classList.contains('correct'));
+    if (!target) return;
+    target.value = word;
+    target.focus();
+    chip.classList.add('used');
+  }
+
+  function checkCard(cardId) {
+    const card  = document.getElementById(cardId);
+    const inputs = [...card.querySelectorAll('.blank-input')];
+    const fb     = card.querySelector('.feedback-bar');
+
+    const allFilled = inputs.every(i => i.value.trim() !== '');
+    if (!allFilled) {
+      showFeedback(fb, 'incorrect', '<strong>Not yet.</strong> Fill in all blanks first.');
+      return;
+    }
+
+    let allOk = true;
+    inputs.forEach(inp => {
+      const ok = inp.value.trim().toLowerCase() === inp.dataset.answer.toLowerCase();
+      inp.classList.toggle('correct', ok);
+      inp.classList.toggle('incorrect', !ok);
+      if (!ok) allOk = false;
+    });
+
+    if (allOk) {
+      showFeedback(fb, 'correct', '<strong>Well done!</strong> Both sentences are correct — past simple in the if-clause, <em>would + base verb</em> in the result clause.');
+    } else {
+      const wrongs = inputs.filter(i => i.classList.contains('incorrect')).map(i => `<em>${i.dataset.verb}</em>`).join(' and ');
+      showFeedback(fb, 'incorrect', `<strong>Almost.</strong> Check the form of ${wrongs}.`);
+    }
+  }
+
+  function showFeedback(el, type, msg) {
+    el.classList.remove('show', 'correct-fb', 'incorrect-fb', 'hint-fb');
+    void el.offsetWidth;
+    const cls = type === 'correct' ? 'correct-fb' : type === 'hint' ? 'hint-fb' : 'incorrect-fb';
+    el.classList.add(cls, 'show');
+    el.querySelector('.fb-icon').textContent = type === 'correct' ? '✓' : type === 'hint' ? '?' : '✗';
+    el.querySelector('div:last-child').innerHTML = msg;
+  }
+
+  /* ── Zoom ── */
+  let zoom = 100;
+  function adjustZoom(delta) {
+    zoom = Math.min(200, Math.max(25, zoom + delta));
+    document.getElementById('zoomLabel').textContent = zoom + '%';
+    document.getElementById('stage').style.transform = `scale(${zoom/100})`;
+    document.getElementById('stage').style.transformOrigin = '120px 80px';
+  }
+
+  /* ── Timer ── */
+  let secs = 42*60+18;
+  setInterval(() => {
+    secs++;
+    const m = Math.floor(secs/60), s = secs%60;
+    document.getElementById('timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
+  }, 1000);
+</script>
+</body>
+</html>

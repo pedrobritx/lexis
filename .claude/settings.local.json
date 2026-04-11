@@ -16,7 +16,19 @@
       "Bash(pnpm --filter \"@lexis/api\" typecheck)",
       "Bash(pnpm --filter \"@lexis/web\" typecheck)",
       "Bash(pnpm lint:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh pr:*)",
+      "Bash(/Users/pedr/.local/bin/claude mcp:*)",
+      "Bash(/opt/homebrew/bin/gh run:*)",
+      "Bash(npm install:*)",
+      "Bash(npx pnpm:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

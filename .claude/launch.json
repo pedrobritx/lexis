@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "/Users/pedr/.local/share/fnm/node-versions/v20.19.6/installation/bin/pnpm",
+      "runtimeArgs": ["--filter", "@lexis/api", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "/Users/pedr/.local/share/fnm/node-versions/v20.19.6/installation/bin/pnpm",
+      "runtimeArgs": ["--filter", "@lexis/web", "dev"],
+      "port": 3001
+    },
+    {
+      "name": "realtime",
+      "runtimeExecutable": "/Users/pedr/.local/share/fnm/node-versions/v20.19.6/installation/bin/pnpm",
+      "runtimeArgs": ["--filter", "@lexis/realtime", "dev"],
+      "port": 4000
+    }
+  ]
+}

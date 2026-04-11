@@ -12,7 +12,9 @@
     "lint:fix": "eslint src/ --fix"
   },
   "dependencies": {
+    "@lexis/billing": "workspace:*",
     "@lexis/db": "workspace:*",
+    "@lexis/srs": "workspace:*",
     "@lexis/types": "workspace:*",
     "@lexis/cache": "workspace:*",
     "@lexis/logger": "workspace:*",

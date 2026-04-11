@@ -10,6 +10,7 @@ export default defineWorkspace([
       coverage: {
         thresholds: {
           '**/db/middleware/**': { lines: 90, functions: 90 },
+          '**/srs/src/**': { lines: 90, functions: 90 },
           '**': { lines: 70, functions: 70 },
         },
       },
@@ -32,6 +33,10 @@ export default defineWorkspace([
   },
 
   // Integration tests for the API (Supertest + real DB + Redis)
+  // singleFork: true forces all test files in this project to run in a single
+  // worker process, which serialises file execution and prevents the cross-test
+  // OTP/Redis key interference that occurs when afterEach hooks in one file
+  // delete keys that a concurrently-running file still needs.
   {
     test: {
       name: 'api-integration',
@@ -39,6 +44,12 @@ export default defineWorkspace([
       environment: 'node',
       globalSetup: ['apps/api/test/globalSetup.ts'],
       testTimeout: 30_000,
+      pool: 'forks',
+      poolOptions: {
+        forks: {
+          singleFork: true,
+        },
+      },
       coverage: {
         thresholds: {
           '**/modules/auth/**': { lines: 90, functions: 90 },

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Phase 2 Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0F1620;
+  --surface:    #16202C;
+  --raised:     #1D2A3A;
+  --hover:      #223040;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.13);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+  --text-1:     #EDE8DF;
+  --text-2:     #8A95A3;
+  --text-3:     #4A5768;
+  --blue:       #7AAAD4;
+  --blue-bg:    rgba(122,170,212,0.08);
+  --blue-bd:    rgba(122,170,212,0.22);
+  --purple:     #B8A8D8;
+  --purple-bg:  rgba(184,168,216,0.08);
+  --purple-bd:  rgba(184,168,216,0.2);
+  --green-bg:   rgba(141,181,160,0.08);
+  --green-bd:   rgba(141,181,160,0.22);
+  --orange:     #E8A060;
+  --orange-bg:  rgba(232,160,96,0.08);
+  --orange-bd:  rgba(232,160,96,0.22);
+  --red-bg:     rgba(224,112,112,0.08);
+  --red-bd:     rgba(224,112,112,0.22);
+  --font:       'DM Sans', sans-serif;
+  --ease:       cubic-bezier(0.4,0,0.2,1);
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  padding: 48px 32px 80px;
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.doc-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 24px;
+  margin-bottom: 36px; padding-bottom: 24px;
+  border-bottom: 0.5px solid var(--border-mid);
+}
+.doc-logo { display: flex; align-items: flex-end; }
+.logo-word { font-size: 22px; font-weight: 500; letter-spacing: -0.03em; color: var(--parchment); }
+.logo-blob { margin-left: 2px; padding-bottom: 2px; display: inline-flex; align-items: flex-end; }
+.doc-meta { text-align: right; }
+.doc-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.doc-sub   { font-size: 11px; color: var(--text-3); }
+
+/* ── Stat bar ── */
+.stat-bar { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 36px; }
+.stat-card { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 10px; padding: 13px 16px; }
+.sc-val { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+.sc-lab { font-size: 10px; color: var(--text-3); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── Section ── */
+.section { margin-bottom: 44px; }
+.section-title {
+  font-size: 16px; font-weight: 500; color: var(--text-1);
+  margin-bottom: 6px; letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 10px;
+}
+.s-icon { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-sub { font-size: 12px; color: var(--text-3); margin-bottom: 20px; line-height: 1.6; }
+.divider { height: 0.5px; background: var(--border-mid); margin: 36px 0; }
+
+/* ── Info box ── */
+.ib { border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; border: 0.5px solid; }
+.ib.blue   { background: var(--blue-bg);   border-color: var(--blue-bd); }
+.ib.amber  { background: var(--amber-glow); border-color: rgba(192,123,58,0.28); }
+.ib.green  { background: var(--green-bg);  border-color: var(--green-bd); }
+.ib.purple { background: var(--purple-bg); border-color: var(--purple-bd); }
+.ib.orange { background: var(--orange-bg); border-color: var(--orange-bd); }
+.ib-hdr { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.ib-ico { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.blue   .ib-ico { background: var(--blue-bg);   border: 0.5px solid var(--blue-bd); }
+.amber  .ib-ico { background: var(--amber-glow); border: 0.5px solid rgba(192,123,58,0.28); }
+.green  .ib-ico { background: var(--green-bg);  border: 0.5px solid var(--green-bd); }
+.purple .ib-ico { background: var(--purple-bg); border: 0.5px solid var(--purple-bd); }
+.orange .ib-ico { background: var(--orange-bg); border: 0.5px solid var(--orange-bd); }
+.ib-title { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.ib-sub   { font-size: 11px; margin-top: 1px; }
+.blue   .ib-sub { color: var(--blue); }   .amber  .ib-sub { color: var(--amber-lt); }
+.green  .ib-sub { color: var(--sage); }   .purple .ib-sub { color: var(--purple); }
+.orange .ib-sub { color: var(--orange); }
+.ib-body { font-size: 12px; color: var(--text-2); line-height: 1.65; }
+.ib-body strong { color: var(--text-1); font-weight: 500; }
+.ib-body code { font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 5px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+
+/* ── Rule list ── */
+.rules { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.ri { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.rd { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.ri strong { color: var(--text-1); font-weight: 500; }
+.ri code { font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 5px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+
+/* ── Architecture diagram ── */
+.arch { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+.arch-col { display: flex; flex-direction: column; gap: 8px; }
+.arch-label { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); margin-bottom: 4px; padding-left: 2px; }
+.arch-box { background: var(--raised); border: 0.5px solid var(--border-mid); border-radius: 8px; padding: 10px 12px; }
+.ab-title { font-size: 12px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; font-family: 'SF Mono','Fira Code',monospace; }
+.ab-sub   { font-size: 10px; color: var(--text-3); line-height: 1.5; }
+.arch-box.highlight { border-color: rgba(192,123,58,0.35); background: var(--amber-glow); }
+.arch-box.highlight .ab-title { color: var(--amber-lt); }
+.arch-box.new-box { border-color: var(--blue-bd); }
+.arch-box.new-box .ab-title { color: var(--blue); }
+.arch-arrow { display: flex; align-items: center; justify-content: center; color: var(--text-3); font-size: 18px; padding: 0 4px; }
+
+/* ── Event table ── */
+.ev-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12px; }
+.ev-table th { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); padding: 8px 12px; text-align: left; border-bottom: 0.5px solid var(--border-mid); background: var(--surface); }
+.ev-table td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text-2); vertical-align: top; line-height: 1.5; }
+.ev-table tr:last-child td { border-bottom: none; }
+.ev-table tr:hover td { background: var(--hover); }
+.ev-table td:first-child { font-family: 'SF Mono','Fira Code',monospace; color: var(--blue); font-size: 11px; }
+.ev-table td code { font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 4px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+
+/* ── Feature grid ── */
+.feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.feat-card { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 10px; padding: 14px 16px; }
+.fc-title { font-size: 12px; font-weight: 500; color: var(--text-1); margin-bottom: 6px; display: flex; align-items: center; gap: 7px; }
+.fc-body  { font-size: 11px; color: var(--text-2); line-height: 1.6; }
+.fc-body code { font-size: 10px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 4px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+.feat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Entity grid ── */
+.entity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.entity-card { background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 12px; overflow: hidden; }
+.entity-card.ne { border-color: var(--blue-bd); }
+.entity-card.me { border-color: rgba(192,123,58,0.28); }
+.ec-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 0.5px solid var(--border); }
+.ec-name { font-size: 12px; font-weight: 500; color: var(--text-1); font-family: 'SF Mono','Fira Code',monospace; }
+.ec-badge { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; border: 0.5px solid; white-space: nowrap; margin-left: auto; letter-spacing: 0.04em; text-transform: uppercase; }
+.badge-new { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.badge-mod { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.fl { padding: 10px 14px; display: flex; flex-direction: column; gap: 3px; }
+.fr { display: flex; align-items: baseline; gap: 8px; font-size: 11px; padding: 3px 0; border-bottom: 0.5px solid var(--border); }
+.fr:last-child { border-bottom: none; }
+.fr.fn-new { background: rgba(122,170,212,0.05); border-radius: 3px; padding: 3px 4px; margin: 0 -4px; }
+.fn { font-family: 'SF Mono','Fira Code',monospace; color: var(--parchment); font-size: 11px; min-width: 150px; }
+.fn.pk { color: var(--amber-lt); } .fn.fk { color: var(--sage); }
+.ft { color: var(--blue); font-family: 'SF Mono','Fira Code',monospace; font-size: 10px; }
+.fnt { color: var(--text-3); font-size: 10px; margin-left: auto; }
+
+/* ── Build plan ── */
+.week-hdr { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: var(--surface); border: 0.5px solid var(--border-mid); border-radius: 10px; margin-bottom: 10px; cursor: pointer; user-select: none; transition: background 0.15s; }
+.week-hdr:hover { background: var(--hover); }
+.wn { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); min-width: 56px; }
+.wt { font-size: 14px; font-weight: 500; color: var(--text-1); flex: 1; }
+.wr { font-size: 11px; color: var(--text-3); }
+.wchev { color: var(--text-3); transition: transform 0.2s; flex-shrink: 0; }
+.week-hdr.open .wchev { transform: rotate(90deg); }
+.wpill { font-size: 9px; font-weight: 500; padding: 2px 8px; border-radius: 4px; border: 0.5px solid; white-space: nowrap; letter-spacing: 0.03em; }
+.p-rt  { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.p-wb  { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+.p-me  { background: var(--orange-bg); color: var(--orange); border-color: var(--orange-bd); }
+.p-as  { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.p-sr  { background: var(--green-bg); color: var(--sage); border-color: var(--green-bd); }
+.p-qa  { background: var(--red-bg); color: #E07070; border-color: var(--red-bd); }
+.week-body { display: none; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.week-body.open { display: flex; }
+
+.day-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.day-hdr { display: flex; align-items: center; gap: 10px; padding: 10px 16px; cursor: pointer; transition: background 0.15s; }
+.day-hdr:hover { background: var(--hover); }
+.dn { font-size: 11px; color: var(--text-3); min-width: 48px; }
+.dname { font-size: 13px; font-weight: 500; color: var(--text-1); flex: 1; }
+.dtag { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; border: 0.5px solid; white-space: nowrap; }
+.d-rt  { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.d-wb  { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+.d-me  { background: var(--orange-bg); color: var(--orange); border-color: var(--orange-bd); }
+.d-as  { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.d-sr  { background: var(--green-bg); color: var(--sage); border-color: var(--green-bd); }
+.d-qa  { background: var(--red-bg); color: #E07070; border-color: var(--red-bd); }
+.d-web { background: rgba(184,168,216,0.08); color: #C8A8F8; border-color: rgba(184,168,216,0.22); }
+.d-hrs { font-size: 10px; color: var(--text-3); }
+
+.task-list { padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; border-top: 0.5px solid var(--border); }
+.ti { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text-2); line-height: 1.55; }
+.td { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; background: var(--text-3); }
+.ti.p { color: var(--text-1); } .ti.p .td { background: var(--amber); }
+.ti code { font-size: 11px; font-family: 'SF Mono','Fira Code',monospace; background: var(--raised); padding: 1px 5px; border-radius: 3px; color: var(--parchment); border: 0.5px solid var(--border-mid); }
+
+.day-footer { padding: 8px 16px; border-top: 0.5px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.dl { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
+.dt { font-size: 11px; color: var(--sage); }
+
+.milestone { background: var(--green-bg); border: 0.5px solid var(--green-bd); border-radius: 10px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; margin-top: 4px; }
+.mi { width: 26px; height: 26px; border-radius: 7px; background: rgba(141,181,160,0.15); border: 0.5px solid var(--green-bd); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mt { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.md { font-size: 11px; color: var(--sage); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="doc-header">
+  <div class="doc-logo">
+    <span class="logo-word">lexis</span>
+    <span class="logo-blob">
+      <svg width="10" height="13" viewBox="0 0 18 22" fill="none"><defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4924F"/><stop offset="100%" stop-color="#A8CCBB"/></linearGradient></defs><path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/></svg>
+    </span>
+  </div>
+  <div class="doc-meta">
+    <div class="doc-title">Step 3 — Phase 2 plan</div>
+    <div class="doc-sub">Whiteboard engine · Real-time · Assessments · Media pipeline · SRS delivery</div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stat-bar">
+  <div class="stat-card"><div class="sc-val" style="color:var(--purple);">45</div><div class="sc-lab">Build days</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--blue);">12</div><div class="sc-lab">New entities</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--amber-lt);">6</div><div class="sc-lab">New modules</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--sage);">4</div><div class="sc-lab">Assessment types</div></div>
+  <div class="stat-card"><div class="sc-val" style="color:var(--orange);">5</div><div class="sc-lab">Media types</div></div>
+</div>
+
+
+<!-- ══════════════════════════
+     PART 1 — REAL-TIME TRANSPORT
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--blue-bg);border:0.5px solid var(--blue-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 9.5L6.5 2 11 9.5H2z" stroke="var(--blue)" stroke-width="1.1" stroke-linejoin="round"/><path d="M6.5 5.5v2.5" stroke="var(--blue)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    </div>
+    Part 1 — Real-time transport architecture
+  </div>
+  <div class="section-sub">Socket.IO on a dedicated Node.js process, Redis pub/sub as the message broker. The API server handles persistence; the RT server handles broadcast. They never talk to each other directly — only via Redis channels.</div>
+
+  <div class="arch">
+    <div class="arch-col">
+      <div class="arch-label">Clients</div>
+      <div class="arch-box"><div class="ab-title">Web (Next.js)</div><div class="ab-sub">socket.io-client · canvas rendering</div></div>
+      <div class="arch-box"><div class="ab-title">iOS (Swift)</div><div class="ab-sub">URLSessionWebSocketTask · SwiftUI canvas</div></div>
+      <div class="arch-box"><div class="ab-title">Android (Kotlin)</div><div class="ab-sub">OkHttp WebSocket · Compose Canvas</div></div>
+    </div>
+    <div class="arch-col">
+      <div class="arch-label">Servers</div>
+      <div class="arch-box highlight"><div class="ab-title">apps/realtime</div><div class="ab-sub">Socket.IO · dedicated process · port 4000 · room-per-board-page</div></div>
+      <div class="arch-box"><div class="ab-title">apps/api (existing)</div><div class="ab-sub">REST + persistence only · no WS logic</div></div>
+    </div>
+    <div class="arch-col">
+      <div class="arch-label">Infrastructure</div>
+      <div class="arch-box new-box"><div class="ab-title">Redis pub/sub</div><div class="ab-sub">Channel per board page · RT server subscribes · API server publishes on save</div></div>
+      <div class="arch-box new-box"><div class="ab-title">S3 stroke store</div><div class="ab-sub">60s flush from Redis buffer · binary format per page</div></div>
+      <div class="arch-box"><div class="ab-title">PostgreSQL</div><div class="ab-sub">Structured objects only · strokes never land here</div></div>
+    </div>
+  </div>
+
+  <div class="ib blue">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="var(--blue)" stroke-width="1.1"/><path d="M6 3.5v3l2 1" stroke="var(--blue)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">How a drawing stroke flows through the system</div><div class="ib-sub">From pen-down to all screens in &lt;50ms</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--blue)"></div><div><strong>1. Client draws:</strong> pointer events fire → stroke points buffered locally at 60fps → emitted to RT server as <code>stroke:delta</code> events every 16ms (one frame). Never sent to the API server directly.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--blue)"></div><div><strong>2. RT server broadcasts:</strong> receives <code>stroke:delta</code> → publishes to Redis channel <code>board:{pageId}</code> → all other connected clients in that room receive it via Socket.IO room broadcast. Latency: &lt;50ms on same region.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--blue)"></div><div><strong>3. Stroke persistence:</strong> RT server accumulates stroke deltas in Redis key <code>strokes:{pageId}:buffer</code>. A BullMQ job flushes every 60 seconds — serialises buffer to binary (MessagePack), uploads to S3 at <code>strokes/{pageId}/{timestamp}.bin</code>, clears Redis buffer, updates <code>board_strokes.strokes_url</code>.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--blue)"></div><div><strong>4. Board load:</strong> client requests <code>GET /v1/board/pages/:id</code> from REST API → receives structured objects (stickies, activity cards, PDFs) from PostgreSQL + a signed S3 URL for the stroke binary. Client renders both layers independently.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--blue)"></div><div><strong>5. Async access (homework):</strong> outside live sessions, clients connect to the RT server in <em>async mode</em> — same socket, same room, but no presence indicators. Changes persist identically. The board is always live; the session is what has presence.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.IO events table -->
+  <div style="font-size:11px;color:var(--text-3);margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;">Socket.IO event contract</div>
+  <table class="ev-table">
+    <thead><tr><th>Event</th><th>Direction</th><th>Payload</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>board:join</td><td>Client → Server</td><td><code>{pageId, token}</code></td><td>Auth + join room. Server verifies JWT, checks tenant ownership.</td></tr>
+      <tr><td>board:state</td><td>Server → Client</td><td><code>{objects[], presences[]}</code></td><td>Full board state on join. Sent only to the joining client.</td></tr>
+      <tr><td>stroke:delta</td><td>Client → Server → Clients</td><td><code>{strokeId, points[], tool, color, width}</code></td><td>Incremental stroke broadcast. Server appends to Redis buffer.</td></tr>
+      <tr><td>stroke:end</td><td>Client → Server → Clients</td><td><code>{strokeId}</code></td><td>Stroke complete. Server marks buffer entry as closed.</td></tr>
+      <tr><td>object:create</td><td>Client → Server → Clients</td><td><code>{object: BoardObject}</code></td><td>New canvas object. Server persists to PostgreSQL, broadcasts.</td></tr>
+      <tr><td>object:update</td><td>Client → Server → Clients</td><td><code>{id, delta: Partial&lt;BoardObject&gt;}</code></td><td>Object moved/resized/edited. Server updates PostgreSQL.</td></tr>
+      <tr><td>object:delete</td><td>Client → Server → Clients</td><td><code>{id}</code></td><td>Object removed. Server soft-deletes.</td></tr>
+      <tr><td>cursor:move</td><td>Client → Server → Clients</td><td><code>{x, y, userId}</code></td><td>Live cursor sync. Server relays only — never persists.</td></tr>
+      <tr><td>follow:start</td><td>Teacher → Server → Student</td><td><code>{viewport: {x,y,zoom}}</code></td><td>Teacher activates follow mode. Student viewport locked.</td></tr>
+      <tr><td>follow:viewport</td><td>Teacher → Server → Student</td><td><code>{x, y, zoom}</code></td><td>Continuous viewport sync while follow mode active.</td></tr>
+      <tr><td>follow:end</td><td>Teacher → Server → Student</td><td><code>{}</code></td><td>Teacher deactivates follow mode. Student viewport freed.</td></tr>
+      <tr><td>laser:move</td><td>Teacher → Server → Clients</td><td><code>{x, y}</code></td><td>Laser pointer position. Ephemeral — never stored.</td></tr>
+      <tr><td>laser:end</td><td>Teacher → Server → Clients</td><td><code>{}</code></td><td>Laser hidden. Clients remove the indicator dot.</td></tr>
+      <tr><td>presence:update</td><td>Client → Server → Clients</td><td><code>{userId, status, tool}</code></td><td>Online presence. Redis TTL of 5s — auto-removes on disconnect.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 2 — WHITEBOARD ENGINE
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--purple-bg);border:0.5px solid var(--purple-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 10L6 3l4 7H2z" stroke="var(--purple)" stroke-width="1.1" stroke-linejoin="round"/></svg>
+    </div>
+    Part 2 — Whiteboard engine features
+  </div>
+  <div class="section-sub">Every feature specified, with implementation detail. All built in Phase 2. Canvas rendering uses the HTML5 Canvas API on web and Core Graphics on iOS.</div>
+
+  <div class="feat-grid">
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--purple)"></div>Drawing tools</div>
+      <div class="fc-body">Pen (pressure-sensitive via Pointer Events API), highlighter (semi-transparent overlay, 40% opacity), eraser (stroke-based — removes intersecting strokes, not pixel-based). Each tool has <code>color</code>, <code>width</code>, and <code>opacity</code> properties stored per stroke in the event payload. Tool state is local — never synced, only the output strokes are.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--blue)"></div>Shapes & connectors</div>
+      <div class="fc-body">Rectangle, ellipse, line, arrow, diamond. All stored as <code>BoardObject</code> with <code>object_type = 'shape'</code> and geometry in <code>content.geometry</code>. Connectors snap to object anchor points — 4 cardinal points per shape. Connection is stored as <code>{from: objectId, to: objectId, anchor: 'top'|'right'|'bottom'|'left'}</code>. When a connected object moves, the connector recomputes its path client-side.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--amber)"></div>Object locking</div>
+      <div class="fc-body">Any object can be locked via context menu or toolbar. Locked objects have <code>locked: true</code> in their <code>content</code>. The RT server rejects <code>object:update</code> and <code>object:delete</code> events for locked objects. Writing inside a locked text box or activity card is still permitted — only position and size are frozen. Visual indicator: a small lock icon in the top-left corner of the object.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--sage)"></div>Magnetic alignment + rulers</div>
+      <div class="fc-body">When dragging an object, snap guides appear at: edges of other objects (±8px threshold), canvas centre lines, and ruler intervals. Ruler spacing is configurable (10px, 20px, 50px). Snap is client-side only — no server involvement. On release, the snapped position is sent as the final <code>object:update</code>. Shift key temporarily disables snap. Rulers are rendered as a fixed overlay layer above the canvas grid, below all objects.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--blue)"></div>Follow mode</div>
+      <div class="fc-body">Teacher presses "Follow" button in session HUD. Emits <code>follow:start</code> with current viewport state. Student's canvas is locked to teacher's viewport — pan and zoom are disabled. Teacher's subsequent pan/zoom emits <code>follow:viewport</code> events; student canvas mirrors them. Student sees a "Following Pedro" banner with a "Break free" button that sends <code>follow:break</code> — teacher is notified. Teacher ends follow mode with the same button, emitting <code>follow:end</code>.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--orange)"></div>Board patterns</div>
+      <div class="fc-body">Three patterns: blank (solid colour), dotted (radial gradient dots, default), squared (grid lines). Pattern preference stored in <code>board_pages.pattern</code> enum: <code>blank|dotted|squared</code>. Rendered as the bottom CSS layer — a <code>background-image</code> pattern on the canvas wrapper div. Switching is instant and persists per page. Each teacher can set a default pattern in their account settings.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--purple)"></div>Laser pointer</div>
+      <div class="fc-body">Teacher activates via toolbar or keyboard shortcut (L). While active, mouse/pen position emits <code>laser:move</code> events continuously. Student canvas renders an amber circle at those coordinates with a short fade trail (CSS animation, 300ms). No persistence — ephemeral only. Deactivating emits <code>laser:end</code> which removes the indicator. Laser state is not shown on the teacher's own screen — only on students'.</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--amber)"></div>Activity cards as canvas objects</div>
+      <div class="fc-body">Activity cards are <code>BoardObject</code> with <code>object_type = 'activity'</code> and <code>content.activity_id</code>. The card renders in two states: collapsed (chip showing type + title) and expanded (full interactive activity). Expanding calls <code>GET /v1/activities/:id</code> from the REST API — the RT server is never involved in activity content. Submitted answers call <code>POST /v1/progress/activities/:id/attempt</code> normally. The card can be locked to prevent accidental movement during active completion.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 3 — ASSESSMENT SYSTEM
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--amber-glow);border:0.5px solid rgba(192,123,58,0.28);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="2" width="9" height="9" rx="2" stroke="var(--amber-lt)" stroke-width="1.1"/><path d="M4.5 6.5l1.5 1.5 3-3" stroke="var(--amber-lt)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    Part 3 — Assessment system
+  </div>
+  <div class="section-sub">Four assessment types in Phase 2. Auto-graded types extend the existing activity validator registry. Teacher-graded and listening types introduce new submission and review flows.</div>
+
+  <div class="ib amber">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3h3l-2.5 2 1 3L6 7.5 3 9l1-3L1.5 4h3L6 1z" stroke="var(--amber-lt)" stroke-width="1.1" stroke-linejoin="round"/></svg></div>
+      <div><div class="ib-title">Auto-graded types — extended</div><div class="ib-sub">MCQ, cloze, matching, ordering — Phase 1 validators plus ordering</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Ordering:</strong> student drags items into correct sequence. <code>content.items</code> contains the shuffled list; <code>answer_key.order</code> contains correct indices. Validator compares index arrays — partial scoring gives credit for each correctly placed item relative to its neighbours.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Matching:</strong> two columns, drag left items to match right items. <code>answer_key.pairs</code> is an array of <code>[leftIndex, rightIndex]</code> tuples. Partial scoring: each correct pair = 1/N of total score.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--amber)"></div><div><strong>Near-match cloze:</strong> add a <code>scoring_rules.accept_near_match: boolean</code> field. When true, the validator uses Levenshtein distance ≤2 for single-word answers to accept minor spelling errors without marking wrong.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ib purple">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 9V4a2 2 0 014 0v5" stroke="var(--purple)" stroke-width="1.1" stroke-linecap="round"/><path d="M6 9V6a2 2 0 014 0v3" stroke="var(--purple)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">Teacher-graded open writing</div><div class="ib-sub">Rubric optional at creation, always editable at grading</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Submission flow:</strong> student types response in a rich text area → submits → <code>ActivityAttempt</code> created with <code>status = 'pending_review'</code> and <code>response.text</code>. Teacher is notified via event bus (<code>submission.pending</code>).</div></div>
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Rubric structure:</strong> stored in <code>activities.scoring_rules.rubric</code> as an array of criteria: <code>[{criterion: "Grammar accuracy", max_points: 5}, {criterion: "Vocabulary range", max_points: 5}]</code>. Optional — if null, teacher grades with a single score and comments only.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Grading flow:</strong> teacher opens <code>GET /v1/submissions/pending</code> → sees all unreviewed submissions → selects one → edits rubric criteria scores inline → adds text annotations → submits via <code>POST /v1/submissions/:id/grade</code>. Student is notified via event bus (<code>submission.graded</code>).</div></div>
+        <div class="ri"><div class="rd" style="background:var(--purple)"></div><div><strong>Rubric editability:</strong> even if a rubric was pre-defined on the activity, the teacher can adjust criteria scores and add/remove criteria at grading time. The final grade is what was submitted at review, not the pre-defined rubric.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ib orange">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="var(--orange)" stroke-width="1.1"/><path d="M4.5 4.5L6 6l1.5-1.5" stroke="var(--orange)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">Listening assessment — audio prompt + audio response</div><div class="ib-sub">Student hears audio, records spoken response in-app</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Activity structure:</strong> <code>type = 'listening'</code>. <code>content.audio_asset_id</code> references a <code>media_assets</code> record. <code>content.prompt_text</code> is an optional written prompt shown below the audio player. <code>content.response_type</code> is <code>'audio'</code> (always in Phase 2 — typed-only option is Phase 3).</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Recording flow:</strong> student presses record → browser <code>MediaRecorder API</code> captures microphone → audio chunked into WebM/Opus blobs → on stop, blobs assembled → uploaded to S3 via <code>POST /v1/media/upload</code> → <code>ActivityAttempt.response.audio_asset_id</code> set → attempt submitted with <code>status = 'pending_review'</code>.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Teacher review:</strong> same grading flow as open writing. Teacher plays the student's recording inline, scores with rubric or single score, adds text feedback. Phase 4 will add ASR auto-scoring as an AI layer on top of this flow — the data model already supports it.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>iOS:</strong> uses <code>AVAudioRecorder</code> to capture audio. Uploads the M4A file to the same <code>POST /v1/media/upload</code> endpoint. The server normalises to WebM/Opus via FFmpeg before storing — client format is irrelevant to the API.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 4 — MEDIA PIPELINE
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--orange-bg);border:0.5px solid var(--orange-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3" width="10" height="7.5" rx="2" stroke="var(--orange)" stroke-width="1.1"/><path d="M5 6l3 1.5-3 1.5V6z" fill="var(--orange)"/></svg>
+    </div>
+    Part 4 — Media pipeline
+  </div>
+  <div class="section-sub">Five asset types. All uploads go through a single <code>POST /v1/media/upload</code> endpoint that validates, processes, and stores. Assets are never served directly from S3 — always via signed URLs with short TTLs.</div>
+
+  <div class="ib orange">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3 6l3 3 3-3" stroke="var(--orange)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.5 10h9" stroke="var(--orange)" stroke-width="1.1" stroke-linecap="round"/></svg></div>
+      <div><div class="ib-title">Upload pipeline — every asset type</div><div class="ib-sub">Single endpoint, type-aware processing, storage-limit checked before accept</div></div>
+    </div>
+    <div class="ib-body">
+      <div class="rules">
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Images (JPEG/PNG/WebP):</strong> client uploads → server checks storage limit → Sharp resizes to max 2048px on longest side, strips EXIF, converts to WebP → stores to S3 at <code>media/{tenantId}/{uuid}.webp</code>. Thumbnail generated at 400px for previews. <code>media_assets</code> record created with <code>asset_type = 'image'</code>.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>PDFs:</strong> stored as-is after virus scan (ClamAV or VirusTotal API). First page rendered to WebP thumbnail via <code>pdf-thumbnail</code>. <code>asset_type = 'pdf'</code>. Client renders using PDF.js — S3 signed URL passed directly. No server-side PDF rendering during lesson delivery.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Audio (uploaded):</strong> FFmpeg normalises to WebM/Opus regardless of input format (MP3, M4A, WAV). Waveform data extracted and stored in <code>metadata.waveform</code> jsonb for client visualisation. <code>asset_type = 'audio'</code>.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Audio (teacher records in-app):</strong> <code>MediaRecorder API</code> captures directly as WebM/Opus — no transcoding needed. Uploaded via the same endpoint. Indistinguishable from uploaded audio after storage.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Video embeds (YouTube/Vimeo):</strong> not uploaded — stored as <code>asset_type = 'video_embed'</code> with <code>metadata.embed_url</code> and <code>metadata.provider</code>. The server fetches the oEmbed endpoint to validate the URL and store the thumbnail. No video bytes ever touch Lexis servers. Counts zero bytes against storage quota.</div></div>
+        <div class="ri"><div class="rd" style="background:var(--orange)"></div><div><strong>Signed URL delivery:</strong> <code>GET /v1/media/:id/url</code> returns a signed S3 URL valid for 1 hour. Clients never store permanent S3 URLs — they request fresh signed URLs on each render. This means you can revoke access to any asset by soft-deleting the <code>media_assets</code> record.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 5 — SRS DELIVERY MODES
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--green-bg);border:0.5px solid var(--green-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="var(--sage)" stroke-width="1.1"/><path d="M6.5 4v2.5l2 1.5" stroke="var(--sage)" stroke-width="1.1" stroke-linecap="round"/></svg>
+    </div>
+    Part 5 — Spaced review delivery modes
+  </div>
+  <div class="section-sub">Teacher assigns review mode per SRS item. Two modes available. Mode stored on the SRS item, not globally. Students see a mixed queue rendered according to each item's assigned mode.</div>
+
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--sage)"></div>Flashcard mode</div>
+      <div class="fc-body">One item at a time. Front shows the prompt (e.g. grammar structure, vocabulary word, sentence fragment). Student taps to reveal the answer. Then rates quality: Again (0) / Hard (2) / Good (4) / Easy (5) — mapped to SM-2 quality values. Swipe gestures available on mobile. Item moves to next in queue. No correct/incorrect — purely self-assessed. Best for vocabulary and grammar rules.</div>
+    </div>
+    <div class="feat-card">
+      <div class="fc-title"><div class="feat-dot" style="background:var(--amber)"></div>Mini-lesson mode</div>
+      <div class="fc-body">3–5 items grouped into a short auto-graded exercise. Same activity types as lessons (cloze, MCQ). Automatically graded — SM-2 quality derived from score: 100% = quality 5, 80%+ = quality 4, 60%+ = quality 3, below = quality 1. Student gets a summary at the end showing which items need more work. Best for grammar forms and structured practice.</div>
+    </div>
+  </div>
+
+  <div class="ib green">
+    <div class="ib-hdr">
+      <div class="ib-ico"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="ib-title">How the teacher assigns review mode</div><div class="ib-sub">Per activity, at creation time or after</div></div>
+    </div>
+    <div class="ib-body">When creating or editing an activity, the teacher sees a "Spaced review" toggle with a mode selector: <strong>Flashcard</strong> or <strong>Mini-lesson</strong>. This sets <code>activities.srs_mode</code> enum. When a student completes the activity and it enters their SRS queue, the <code>srs_items</code> record inherits <code>srs_mode</code> from the activity at creation time. Teachers can change the mode on the activity — existing SRS items are updated on next review load via the same version-check mechanism as content changes.
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 6 — DATA MODEL
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--purple-bg);border:0.5px solid var(--purple-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><ellipse cx="6.5" cy="4" rx="5" ry="2" stroke="var(--purple)" stroke-width="1.1"/><path d="M1.5 4v5c0 1.1 2.2 2 5 2s5-.9 5-2V4" stroke="var(--purple)" stroke-width="1.1"/><path d="M1.5 6.5c0 1.1 2.2 2 5 2s5-.9 5-2" stroke="var(--purple)" stroke-width="1.1"/></svg>
+    </div>
+    Part 6 — Phase 2 data model additions
+  </div>
+  <div class="section-sub">12 new entities. No changes to Phase 1 entities except additive columns.</div>
+
+  <div class="entity-grid">
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">media_assets</span><span class="ec-badge badge-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="fr"><span class="fn fk">tenant_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn fk">uploader_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn">asset_type</span><span class="ft">enum</span><span class="fnt">image·pdf·audio·video_embed</span></div>
+        <div class="fr"><span class="fn">s3_key</span><span class="ft">string?</span><span class="fnt">null for embeds</span></div>
+        <div class="fr"><span class="fn">size_bytes</span><span class="ft">bigint</span></div>
+        <div class="fr"><span class="fn">metadata</span><span class="ft">jsonb</span><span class="fnt">waveform·thumbnail·embed_url</span></div>
+        <div class="fr"><span class="fn">deleted_at</span><span class="ft">timestamp?</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">submissions</span><span class="ec-badge badge-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="fr"><span class="fn fk">tenant_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn fk">activity_attempt_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn fk">student_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn">status</span><span class="ft">enum</span><span class="fnt">pending·graded·returned</span></div>
+        <div class="fr"><span class="fn">response</span><span class="ft">jsonb</span><span class="fnt">text or audio_asset_id</span></div>
+        <div class="fr"><span class="fn">submitted_at</span><span class="ft">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">grades</span><span class="ec-badge badge-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="fr"><span class="fn fk">submission_id</span><span class="ft">uuid FK unique</span></div>
+        <div class="fr"><span class="fn fk">graded_by</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn">score</span><span class="ft">float</span></div>
+        <div class="fr"><span class="fn">rubric_scores</span><span class="ft">jsonb?</span><span class="fnt">per-criterion scores</span></div>
+        <div class="fr"><span class="fn">feedback_text</span><span class="ft">text?</span></div>
+        <div class="fr"><span class="fn">graded_at</span><span class="ft">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">rubric_templates</span><span class="ec-badge badge-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="fr"><span class="fn fk">tenant_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn">name</span><span class="ft">string</span><span class="fnt">"B1 Writing Rubric"</span></div>
+        <div class="fr"><span class="fn">criteria</span><span class="ft">jsonb</span><span class="fnt">array of criterion objects</span></div>
+        <div class="fr"><span class="fn">visibility</span><span class="ft">enum</span><span class="fnt">private·public_template</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">board_objects (Phase 2 fields)</span><span class="ec-badge badge-new">Additive</span></div>
+      <div class="fl">
+        <div class="fr fn-new"><span class="fn">locked</span><span class="ft">boolean</span><span class="fnt">default false</span></div>
+        <div class="fr fn-new"><span class="fn">z_index</span><span class="ft">int</span><span class="fnt">layer order</span></div>
+        <div class="fr fn-new"><span class="fn">connector_from</span><span class="ft">uuid?</span><span class="fnt">source object id</span></div>
+        <div class="fr fn-new"><span class="fn">connector_to</span><span class="ft">uuid?</span><span class="fnt">target object id</span></div>
+        <div class="fr fn-new"><span class="fn">connector_anchors</span><span class="ft">jsonb?</span><span class="fnt">{from: 'right', to: 'left'}</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">board_pages (Phase 2 fields)</span><span class="ec-badge badge-new">Additive</span></div>
+      <div class="fl">
+        <div class="fr fn-new"><span class="fn">pattern</span><span class="ft">enum</span><span class="fnt">blank·dotted·squared</span></div>
+        <div class="fr fn-new"><span class="fn">background_color</span><span class="ft">string?</span><span class="fnt">hex, default null</span></div>
+        <div class="fr fn-new"><span class="fn">ruler_interval</span><span class="ft">int?</span><span class="fnt">snap grid size px</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">activities (Phase 2 fields)</span><span class="ec-badge badge-new">Additive</span></div>
+      <div class="fl">
+        <div class="fr fn-new"><span class="fn">srs_mode</span><span class="ft">enum?</span><span class="fnt">flashcard·mini_lesson</span></div>
+        <div class="fr fn-new"><span class="fn">media_asset_id</span><span class="ft">uuid FK?</span><span class="fnt">replaces image_url</span></div>
+        <div class="fr fn-new"><span class="fn">rubric_template_id</span><span class="ft">uuid FK?</span><span class="fnt">optional pre-defined rubric</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card ne">
+      <div class="ec-header"><span class="ec-name">follow_sessions</span><span class="ec-badge badge-new">New</span></div>
+      <div class="fl">
+        <div class="fr"><span class="fn pk">id</span><span class="ft">uuid PK</span></div>
+        <div class="fr"><span class="fn fk">session_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn fk">teacher_id</span><span class="ft">uuid FK</span></div>
+        <div class="fr"><span class="fn">started_at</span><span class="ft">timestamp</span></div>
+        <div class="fr"><span class="fn">ended_at</span><span class="ft">timestamp?</span></div>
+        <div class="fr"><span class="fn">breaks_count</span><span class="ft">int</span><span class="fnt">times student broke free</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+
+
+<!-- ══════════════════════════
+     PART 7 — BUILD PLAN
+══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <div class="s-icon" style="background:var(--green-bg);border:0.5px solid var(--green-bd);">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 10.5l2-7 2.5 4 2-3 2 4" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    Part 7 — Phase 2 build plan
+  </div>
+  <div class="section-sub">9 weeks, 45 days. Interleaved with the SaaS build days from Step 2. RT server first — everything else depends on it.</div>
+
+  <!-- Week 1: RT Server -->
+  <div class="week-hdr open" onclick="toggleWeek(this)">
+    <span class="wn">Week 1</span>
+    <span class="wt">Real-time server — Socket.IO + Redis pub/sub</span>
+    <span class="wpill p-rt">Real-time</span>
+    <span class="wr">Days 1–5</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body open">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D1</span><span class="dname">apps/realtime — Socket.IO server scaffold</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Create <code>apps/realtime</code> in monorepo — Node.js + TypeScript + Socket.IO v4. Configure CORS for web, iOS, Android origins.</div>
+        <div class="ti p"><div class="td"></div>Implement JWT verification middleware on <code>io.use()</code> — extract <code>tenantId</code>, <code>userId</code>, <code>role</code>. Reject connections with invalid tokens immediately.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>board:join</code> handler — verify tenant owns the board page via Redis lookup (populated by REST API on board load), join Socket.IO room <code>board:{pageId}</code>.</div>
+        <div class="ti"><div class="td"></div>Implement <code>board:state</code> — on join, fetch current object list from PostgreSQL via <code>packages/db</code>, fetch presence list from Redis, emit to joining socket only.</div>
+        <div class="ti"><div class="td"></div>Redis pub/sub setup — RT server subscribes to <code>board:*</code> wildcard channel. Publishes received events back to all room members.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">RT server accepts connections, verifies JWT, joins rooms, broadcasts board state</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D2</span><span class="dname">Stroke pipeline — draw, buffer, flush</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Implement <code>stroke:delta</code> and <code>stroke:end</code> handlers — append to Redis buffer <code>strokes:{pageId}:buffer</code>, broadcast to room.</div>
+        <div class="ti p"><div class="td"></div>BullMQ worker: every 60 seconds, for each active board page, flush Redis stroke buffer → serialise to MessagePack binary → upload to S3 → update <code>board_strokes.strokes_url</code>.</div>
+        <div class="ti"><div class="td"></div>Implement eraser: client sends <code>stroke:erase</code> with a bounding box → server marks intersecting stroke IDs as erased in buffer. On flush, erased strokes excluded from binary.</div>
+        <div class="ti"><div class="td"></div>On session end (<code>session:end</code> event), force-flush stroke buffer immediately rather than waiting for cron.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Strokes flow, persist to S3 every 60s, eraser works</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D3</span><span class="dname">Object sync — create, update, delete, lock</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Implement <code>object:create</code>, <code>object:update</code>, <code>object:delete</code> handlers. Each: validate tenant ownership → persist to PostgreSQL → broadcast to room.</div>
+        <div class="ti p"><div class="td"></div>Lock enforcement: on <code>object:update</code> and <code>object:delete</code>, check <code>content.locked</code> from DB. If locked, reject with <code>error:locked</code> event to the requesting client only.</div>
+        <div class="ti"><div class="td"></div>Cursor sync: <code>cursor:move</code> — relay to room, never persist. Presence: <code>presence:update</code> stored in Redis hash <code>presence:{pageId}</code> with 5s TTL, auto-expire on disconnect.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">All object operations sync in real time, locking prevents position changes</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D4</span><span class="dname">Follow mode + laser pointer</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Implement <code>follow:start</code> — only teacher role can emit. Server stores <code>follow_sessions</code> record, broadcasts initial viewport to all students in room.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>follow:viewport</code> — relay teacher's pan/zoom to students at up to 30fps (throttle on server). Students' <code>follow:break</code> increments <code>breaks_count</code> in DB, sends notification to teacher.</div>
+        <div class="ti p"><div class="td"></div>Implement <code>follow:end</code> — update <code>follow_sessions.ended_at</code>, broadcast freedom to students.</div>
+        <div class="ti"><div class="td"></div>Implement <code>laser:move</code> and <code>laser:end</code> — relay only, never persist. Rate-limited to 60fps on server.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Follow mode locks students to teacher viewport, laser pointer renders on student screen</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D5</span><span class="dname">RT server tests + load testing</span>
+        <span class="dtag d-rt">RT</span><span class="d-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Unit tests for all event handlers — valid events, auth failures, locked object rejection, follow mode state machine.</div>
+        <div class="ti p"><div class="td"></div>Load test with Artillery: simulate 20 concurrent connections on same board page, 10 strokes/second each. Measure broadcast latency (target: p99 &lt;100ms on same region).</div>
+        <div class="ti"><div class="td"></div>Deploy RT server to Railway alongside API. Configure Redis pub/sub channel between the two services.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">RT server deployed, load tested, p99 latency &lt;100ms under 20 concurrent users</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Week 1 milestone — real-time backbone live</div><div class="md">Two students and a teacher can draw on the same infinite canvas simultaneously. Follow mode works. Laser pointer visible. Strokes persist. The most technically complex infrastructure piece is done.</div></div>
+    </div>
+  </div>
+
+  <!-- Week 2: Whiteboard canvas UI -->
+  <div class="week-hdr" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="wn">Week 2</span>
+    <span class="wt">Whiteboard canvas — web client implementation</span>
+    <span class="wpill p-wb">Whiteboard</span>
+    <span class="wr">Days 6–10</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D6</span><span class="dname">Canvas foundation — pan, zoom, grid, layers</span>
+        <span class="dtag d-wb">Canvas</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Build the canvas container: three overlapping layers — (1) pattern background (CSS), (2) stroke canvas (HTML5 Canvas, 2D context), (3) object layer (SVG or DOM positioned elements). Layers never mix.</div>
+        <div class="ti p"><div class="td"></div>Pan with middle-mouse or two-finger trackpad — transform <code>translateX/Y</code>. Zoom with ctrl+scroll or pinch — transform <code>scale</code>. Both applied as CSS transforms on the stage div.</div>
+        <div class="ti p"><div class="td"></div>Board pattern: render blank/dotted/squared as CSS <code>background-image</code>. Pattern selector in toolbar. Calls <code>PATCH /v1/board/pages/:id</code> to persist.</div>
+        <div class="ti"><div class="td"></div>Mini-map: SVG thumbnail of object positions. Viewport indicator rectangle. Click to pan to that area.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Infinite canvas pans/zooms smoothly, pattern switches instantly, mini-map tracks viewport</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D7</span><span class="dname">Drawing tools — pen, highlighter, eraser, shapes</span>
+        <span class="dtag d-wb">Canvas</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Pen tool: <code>pointerdown</code> → start stroke → <code>pointermove</code> → append points → apply Catmull-Rom spline smoothing → render to canvas 2D context → <code>pointerup</code> → emit <code>stroke:end</code>.</div>
+        <div class="ti p"><div class="td"></div>Highlighter: same flow, <code>globalAlpha = 0.4</code>, wider default width. Rendered on a separate canvas layer so highlight strokes don't darken where they overlap each other.</div>
+        <div class="ti p"><div class="td"></div>Shapes: click-drag to draw rectangle, ellipse, line, arrow. Shift key constrains to square/circle/45° angles. Shape rendered as SVG element in the object layer, persisted as <code>object_type = 'shape'</code>.</div>
+        <div class="ti"><div class="td"></div>Eraser: circle cursor, on move remove stroke segments within radius. Emit <code>stroke:erase</code> with bounding box to RT server.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">All drawing tools work, strokes smooth, shapes render correctly, eraser removes strokes</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D8</span><span class="dname">Objects — stickies, text boxes, lock, snap, z-order</span>
+        <span class="dtag d-wb">Canvas</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Sticky notes: click to create, inline edit, colour selector (5 presets), drag to move, resize handle. Emit <code>object:create</code> / <code>object:update</code>.</div>
+        <div class="ti p"><div class="td"></div>Text boxes: double-click canvas to create, contenteditable div, auto-resize to content. Font size, bold/italic from toolbar.</div>
+        <div class="ti p"><div class="td"></div>Magnetic snap: while dragging any object, compute snap guides to nearby object edges and canvas centre. Render thin amber guide lines. On release, snap to nearest guide within 8px threshold.</div>
+        <div class="ti"><div class="td"></div>Lock toggle: right-click → context menu → Lock/Unlock. Locked objects show lock icon, reject drag/resize. Text inside locked objects still editable.</div>
+        <div class="ti"><div class="td"></div>Z-order: right-click → Bring forward / Send back. Updates <code>z_index</code> on object, re-renders layer order.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Stickies and text boxes work, snap guides show, locking prevents movement</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D9</span><span class="dname">Activity cards + PDF/image drop + session toolbar</span>
+        <span class="dtag d-wb">Canvas</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Activity cards: drag from lesson panel sidebar onto canvas → creates <code>object_type = 'activity'</code> object. Collapsed state: type badge + title. Expand button zooms card and reveals full interactive activity (wired to REST API, not RT server).</div>
+        <div class="ti p"><div class="td"></div>PDF drop: drag PDF from asset library or file system → upload via media module → render as a card with PDF.js first-page preview thumbnail. Click to expand to full PDF viewer overlay.</div>
+        <div class="ti p"><div class="td"></div>Image drop: drag image file onto canvas → upload → render as resizable image object. Drag-and-drop file handling via browser <code>DataTransfer</code> API.</div>
+        <div class="ti"><div class="td"></div>Session HUD: follow mode button (teacher only), laser pointer toggle, participant avatars with presence indicator, session timer, end session button.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Full whiteboard usable end-to-end: all objects, PDFs, activity cards, session controls</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D10</span><span class="dname">Sessions drawer + page management + async mode</span>
+        <span class="dtag d-wb">Canvas</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Sessions drawer (left slide-in): list of all board pages for this student/classroom — session pages, freeform pages, grouped by unit. Add new page button.</div>
+        <div class="ti p"><div class="td"></div>Async mode: board accessible outside sessions via direct URL. RT server connects but shows no presence indicators, no session timer. Edit behaviour identical to live mode.</div>
+        <div class="ti"><div class="td"></div>Homework indicator: if a board page has pending activity cards with <code>status = 'pending_review'</code>, show an amber badge on the page in the sessions drawer.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Students access board for homework, pages navigable, async mode works without session context</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Week 2 milestone — whiteboard ships</div><div class="md">The full whiteboard is usable on web: draw, shape, sticky, text, PDF, activity card, follow mode, laser, lock, snap, async access. The flagship feature of Lexis is live.</div></div>
+    </div>
+  </div>
+
+  <!-- Week 3: Media pipeline -->
+  <div class="week-hdr" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="wn">Week 3</span>
+    <span class="wt">Media pipeline — upload, process, deliver</span>
+    <span class="wpill p-me">Media</span>
+    <span class="wr">Days 11–14</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D11</span><span class="dname">Upload endpoint + image + PDF processing</span>
+        <span class="dtag d-me">Media</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Build <code>media</code> module. <code>POST /v1/media/upload</code>: check storage limit → validate MIME type → route to processor → store to S3 → create <code>media_assets</code> record → update <code>usage_snapshots</code> running total in Redis.</div>
+        <div class="ti p"><div class="td"></div>Image processor: Sharp — resize to max 2048px, strip EXIF, convert to WebP, generate 400px thumbnail. Two S3 objects per image.</div>
+        <div class="ti"><div class="td"></div>PDF processor: <code>pdf-thumbnail</code> generates first-page WebP preview. Store PDF as-is, store thumbnail separately. <code>GET /v1/media/:id/url</code> returns signed URLs for both.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Images and PDFs upload, process, and serve signed URLs correctly</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D12</span><span class="dname">Audio upload + in-app recording + video embed</span>
+        <span class="dtag d-me">Media</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Audio processor: FFmpeg transcodes any input to WebM/Opus, extracts waveform data (amplitude per 100ms segment) stored in <code>metadata.waveform</code> array. Waveform used to render a visualiser bar chart in the audio player.</div>
+        <div class="ti p"><div class="td"></div>In-app recording: web component using <code>MediaRecorder API</code>. Record button → animated waveform visualiser while recording → stop → upload to same <code>POST /v1/media/upload</code> endpoint. Max recording length: 10 minutes (configurable in subscription feature flags).</div>
+        <div class="ti"><div class="td"></div>Video embed: <code>POST /v1/media/embed</code> — accept YouTube/Vimeo URL → fetch oEmbed data → validate → store as <code>asset_type = 'video_embed'</code>. No bytes stored, zero quota cost.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">All media types upload correctly, waveform rendered, video embeds validated</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D13</span><span class="dname">Media library UI + activity media picker</span>
+        <span class="dtag d-web">Web</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Build media library page <code>/library</code>: grid of all tenant assets, filterable by type, searchable by filename. Upload dropzone. Delete with soft-delete confirmation.</div>
+        <div class="ti p"><div class="td"></div>Media picker component: embedded in activity editor — search/browse tenant media, select to attach. Replaces the Phase 1 <code>image_url</code> text field with a proper asset reference.</div>
+        <div class="ti"><div class="td"></div>Audio player component: waveform visualiser bar chart, play/pause, time scrubber. Used in lesson view and submission review.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Teacher uploads media, attaches to activities, audio plays with waveform</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D14</span><span class="dname">Listening activity type — full flow</span>
+        <span class="dtag d-as">Assessment</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Add <code>listening</code> to activity type registry. Content schema: <code>{audio_asset_id, prompt_text?, response_type: 'audio'}</code>.</div>
+        <div class="ti p"><div class="td"></div>Student lesson view: audio player with play/pause → recording component below → record response → submit. Creates <code>submissions</code> record with <code>response.audio_asset_id</code>.</div>
+        <div class="ti"><div class="td"></div>Teacher grading view: plays student's recording inline, single score or rubric, text feedback. Calls <code>POST /v1/submissions/:id/grade</code>. Student notified via event bus.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Full listening assessment flow: audio prompt → student records → teacher grades</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Week 3 milestone — rich media in lessons</div><div class="md">Teachers can upload images, PDFs, audio, record directly in app, and embed videos. Listening activities work end-to-end with in-app recording and teacher review. All media served via signed URLs.</div></div>
+    </div>
+  </div>
+
+  <!-- Week 4: Assessments -->
+  <div class="week-hdr" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="wn">Week 4</span>
+    <span class="wt">Assessment system — writing rubrics + ordering + SRS modes</span>
+    <span class="wpill p-as">Assessment</span>
+    <span class="wr">Days 15–19</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D15</span><span class="dname">Open writing activity + submission flow</span>
+        <span class="dtag d-as">Assessment</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Add <code>open_writing</code> to activity registry. Content schema: <code>{prompt, min_words?, max_words?, rubric_template_id?}</code>.</div>
+        <div class="ti p"><div class="td"></div>Student view: rich text area (bold/italic/lists supported), word count live, submit button. Creates <code>submissions</code> record, marks <code>activity_attempt</code> as <code>pending_review</code>.</div>
+        <div class="ti"><div class="td"></div>Teacher notification: event bus emits <code>submission.pending</code> → teacher sees amber badge on student roster and <code>GET /v1/submissions/pending</code> list.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Students submit writing, teacher sees pending queue, submissions retrievable</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D16</span><span class="dname">Rubric builder + grading interface</span>
+        <span class="dtag d-as">Assessment</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Rubric builder: add/remove criteria rows, set max points per criterion, name criterion. Save as template <code>POST /v1/rubric-templates</code> or apply directly to activity.</div>
+        <div class="ti p"><div class="td"></div>Grading interface: shows student submission, criteria rows with point inputs (editable even if pre-defined), text feedback field. Running total score shown. Submit calls <code>POST /v1/submissions/:id/grade</code>.</div>
+        <div class="ti"><div class="td"></div>Rubric templates library: browse and apply existing rubric templates (own or public) when creating an activity. Clones the template into <code>activities.scoring_rules.rubric</code>.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Teacher grades writing with rubric, criteria editable at grading time, score computed</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D17</span><span class="dname">Ordering activity type + near-match cloze</span>
+        <span class="dtag d-as">Assessment</span><span class="d-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Add <code>ordering</code> to activity registry. Builder: list of items, drag to set correct order. Student view: drag-and-drop reorder. Partial scoring validator.</div>
+        <div class="ti p"><div class="td"></div>Near-match cloze: add <code>accept_near_match: boolean</code> to cloze <code>scoring_rules</code>. Validator uses Levenshtein distance ≤2 check before marking incorrect. Show "almost correct" feedback variant.</div>
+        <div class="ti"><div class="td"></div>Drag-and-drop: use native HTML5 drag API on web, UIKit drag on iOS.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Ordering activities work with partial scoring, near-match cloze accepts minor spelling errors</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D18</span><span class="dname">SRS delivery modes — flashcard + mini-lesson</span>
+        <span class="dtag d-sr">SRS</span><span class="d-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Add <code>srs_mode</code> field to activity editor — enum selector: flashcard / mini-lesson. Propagates to <code>srs_items.srs_mode</code> on creation.</div>
+        <div class="ti p"><div class="td"></div>Flashcard renderer: front/back card flip animation. Quality rating buttons (Again / Hard / Good / Easy). Swipe gestures on mobile. Calls <code>POST /v1/srs/review/:id</code>.</div>
+        <div class="ti p"><div class="td"></div>Mini-lesson renderer: groups 3–5 items with matching <code>srs_mode = 'mini_lesson'</code> into one timed exercise. Auto-grades, maps score to SM-2 quality, submits all reviews in one batch call.</div>
+        <div class="ti"><div class="td"></div>Review session summary: items reviewed, correct percentage, next review dates, streak update animation.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Both SRS modes work, quality ratings update SM-2 intervals, summary shown after session</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D19</span><span class="dname">iOS whiteboard — SwiftUI canvas + Socket.IO</span>
+        <span class="dtag d-wb">iOS</span><span class="d-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Build SwiftUI whiteboard view with <code>Canvas</code> view for stroke rendering. Gesture recognisers for pan, zoom, draw. <code>PKCanvasView</code> (PencilKit) as the drawing input layer — Apple Pencil pressure and tilt handled natively.</div>
+        <div class="ti p"><div class="td"></div>Socket.IO iOS client (<code>socket.io-client-swift</code>) — connect to RT server, implement all events. Stroke points from PencilKit emitted as <code>stroke:delta</code>.</div>
+        <div class="ti"><div class="td"></div>Objects rendered as SwiftUI views positioned on a ZStack over the canvas. Follow mode: when <code>follow:viewport</code> received, animate camera to teacher's position.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">iOS whiteboard draws with Apple Pencil, syncs in real time with web, follow mode works</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Week 4 milestone — Phase 2 feature-complete</div><div class="md">Full whiteboard on web and iOS with real-time sync, follow mode, and laser. Rich assessments including writing with rubrics, listening with recording, ordering, and near-match cloze. Media pipeline complete. SRS delivers in two modes. Phase 2 is done.</div></div>
+    </div>
+  </div>
+
+  <!-- Week 5: QA + integration -->
+  <div class="week-hdr" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="wn">Week 5</span>
+    <span class="wt">Integration testing + pilot + Phase 2 sign-off</span>
+    <span class="wpill p-qa">QA</span>
+    <span class="wr">Days 20–23</span>
+    <svg class="wchev" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D20</span><span class="dname">Real session walkthrough — teacher + student together</span>
+        <span class="dtag d-qa">QA</span><span class="d-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Run a full live session with a real student on staging: teacher uses web, student uses iOS. Draw on board, drop activity card, student completes cloze, teacher activates follow mode, student submits writing, teacher grades with rubric.</div>
+        <div class="ti p"><div class="td"></div>Test async: student accesses board next day for homework. Teacher corrects on web. Verify changes sync when both connect simultaneously.</div>
+        <div class="ti"><div class="td"></div>Measure actual stroke latency between web and iOS. Target &lt;100ms on WiFi, &lt;300ms on LTE.</div>
+        <div class="ti"><div class="td"></div>Document all bugs as GitHub issues, prioritise P0/P1.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Full Phase 2 session walkthrough complete, latency measured, bug list documented</span></div>
+    </div>
+
+    <div class="day-card">
+      <div class="day-hdr" onclick="toggleDay(this)">
+        <span class="dn">P2 · D21–23</span><span class="dname">Bug fixes + polish + production deploy</span>
+        <span class="dtag d-qa">QA</span><span class="d-hrs">6–7 hrs each</span>
+      </div>
+      <div class="task-list">
+        <div class="ti p"><div class="td"></div>Fix all P0 and P1 bugs from D20. Re-run session walkthrough after fixes.</div>
+        <div class="ti p"><div class="td"></div>Deploy RT server to production Railway environment alongside API. Configure Redis pub/sub on production Upstash.</div>
+        <div class="ti"><div class="td"></div>Set up RT server monitoring: Socket.IO admin dashboard, connection count metric, Redis memory usage alert.</div>
+        <div class="ti"><div class="td"></div>Tag git commit as <code>v0.2.0-phase2</code>. Write Phase 2 retrospective.</div>
+      </div>
+      <div class="day-footer"><span class="dl">Deliverable</span><span class="dt">Phase 2 in production, RT server monitored, all P0/P1 bugs resolved</span></div>
+    </div>
+
+    <div class="milestone">
+      <div class="mi"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5l3 3 6-6" stroke="var(--sage)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="mt">Phase 2 complete — v0.2.0</div><div class="md">Lexis is now a complete teaching platform: real-time collaborative whiteboard with follow mode, laser, and locking; rich assessments with rubrics and audio recording; full media pipeline; SRS with teacher-assigned delivery modes. Ready for Phase 3: AI generation and advanced analytics.</div></div>
+    </div>
+  </div>
+
+</div><!-- /section -->
+
+<script>
+  function toggleWeek(h) {
+    h.classList.toggle('open');
+    h.nextElementSibling.classList.toggle('open');
+  }
+  function toggleDay(h) {
+    const t = h.nextElementSibling;
+    t.style.display = t.style.display === 'none' ? 'flex' : 'none';
+  }
+  document.querySelectorAll('.task-list').forEach(t => t.style.display = 'flex');
+  document.querySelectorAll('.week-hdr.open').forEach(h => h.nextElementSibling.classList.add('open'));
+</script>
+</body>
+</html>

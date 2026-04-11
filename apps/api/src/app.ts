@@ -6,6 +6,14 @@ import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import { tenantContext } from '@lexis/db'
 import { authRoutes } from './modules/auth/auth.routes.js'
+import { usersRoutes } from './modules/users/users.routes.js'
+import { placementRoutes } from './modules/placement/placement.routes.js'
+import { coursesRoutes, templateRoutes } from './modules/courses/courses.routes.js'
+import { lessonActivitiesRoutes, activitiesRoutes } from './modules/activities/activities.routes.js'
+import { classroomsRoutes, sessionsRoutes } from './modules/enrollments/enrollments.routes.js'
+import { progressRoutes } from './modules/progress/progress.routes.js'
+import { srsRoutes } from './modules/srs/srs.routes.js'
+import { initSrsListeners } from './modules/srs/srs.service.js'
 
 export async function buildApp() {
   const app = Fastify({
@@ -23,7 +31,9 @@ export async function buildApp() {
   await app.register(helmet)
 
   await app.register(rateLimit, {
-    max: 100,
+    // Raise the cap significantly in test environments so integration test
+    // suites (which fire many requests in a short window) never trip the limiter.
+    max: process.env.NODE_ENV === 'test' ? 10_000 : 100,
     timeWindow: '1 minute',
   })
 
@@ -69,6 +79,18 @@ export async function buildApp() {
   })
 
   await app.register(authRoutes, { prefix: '/v1/auth' })
+  await app.register(usersRoutes, { prefix: '/v1/users' })
+  await app.register(placementRoutes, { prefix: '/v1/placement' })
+  await app.register(coursesRoutes, { prefix: '/v1/courses' })
+  await app.register(templateRoutes, { prefix: '/v1/templates' })
+  await app.register(lessonActivitiesRoutes, { prefix: '/v1/lessons' })
+  await app.register(activitiesRoutes, { prefix: '/v1/activities' })
+  await app.register(classroomsRoutes, { prefix: '/v1/classrooms' })
+  await app.register(sessionsRoutes, { prefix: '/v1/sessions' })
+  await app.register(progressRoutes, { prefix: '/v1/progress' })
+  await app.register(srsRoutes, { prefix: '/v1/srs' })
+
+  initSrsListeners()
 
   return app
 }

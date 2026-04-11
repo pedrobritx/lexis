@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Teacher Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:    #111820;
+  --bg-surface: #17202B;
+  --bg-raised:  #1E2A3A;
+  --bg-hover:   #243040;
+  --bg-active:  #2A3850;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.12);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+
+  --text-1: #EDE8DF;
+  --text-2: #8A95A3;
+  --text-3: #4D5A68;
+
+  --font: 'DM Sans', sans-serif;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-w: 220px;
+  --sidebar-collapsed-w: 52px;
+  --sidebar-transition: width 0.22s var(--ease);
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-base);
+  color: var(--text-1);
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-surface);
+  border-right: 0.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: var(--sidebar-transition), min-width 0.22s var(--ease);
+  position: relative;
+  flex-shrink: 0;
+  z-index: 20;
+}
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-w);
+  min-width: var(--sidebar-collapsed-w);
+}
+/* Hover-expand when not locked */
+.sidebar.collapsed:not(.locked):hover {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+}
+
+/* Logo row */
+.sidebar-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px 0 16px;
+  height: 60px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sidebar-logo {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.logo-word {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--parchment);
+  line-height: 1;
+  transition: opacity 0.15s, max-width 0.22s var(--ease);
+  max-width: 80px;
+  overflow: hidden;
+}
+.logo-blob {
+  margin-left: 2px;
+  padding-bottom: 1px;
+  display: inline-flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.sidebar-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.toggle-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: 0.5px solid var(--border-mid);
+  background: transparent;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+.toggle-btn:hover { color: var(--text-1); background: var(--bg-hover); }
+.toggle-btn.lock-btn.locked { color: var(--amber-lt); border-color: rgba(192,123,58,0.35); background: var(--amber-glow); }
+
+/* Hide lock btn when collapsed+locked (no need to show it) */
+.sidebar.collapsed.locked .lock-btn { opacity: 0; pointer-events: none; }
+/* Hide lock btn when collapsed+unlocked (hover shows it) */
+.sidebar.collapsed:not(:hover) .lock-btn { opacity: 0; pointer-events: none; }
+
+/* Collapsed state: hide text labels */
+.sidebar.collapsed:not(:hover) .logo-word { max-width: 0; opacity: 0; margin: 0; }
+.sidebar.collapsed:not(:hover) .nav-label { opacity: 0; }
+.sidebar.collapsed:not(:hover) .nav-text { opacity: 0; max-width: 0; overflow: hidden; }
+.sidebar.collapsed:not(:hover) .nav-badge { opacity: 0; }
+.sidebar.collapsed:not(:hover) .teacher-info { opacity: 0; max-width: 0; overflow: hidden; }
+.sidebar.collapsed:not(:hover) .teacher-chip { padding: 12px 9px; }
+
+/* Teacher chip */
+.teacher-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: padding 0.22s var(--ease);
+}
+.teacher-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--amber), var(--sage));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--bg-base);
+  flex-shrink: 0;
+}
+.teacher-info {
+  overflow: hidden;
+  transition: opacity 0.15s, max-width 0.22s var(--ease);
+  max-width: 140px;
+  white-space: nowrap;
+}
+.teacher-name { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.teacher-role { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+/* Nav */
+.nav-section {
+  padding: 16px 0 6px;
+  flex-shrink: 0;
+}
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 0 16px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px;
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+}
+.nav-item:hover { background: var(--bg-hover); color: var(--text-1); }
+.nav-item.active {
+  background: var(--bg-active);
+  color: var(--parchment);
+  border-right: 2px solid var(--amber);
+}
+.nav-item svg { flex-shrink: 0; opacity: 0.7; width: 15px; height: 15px; }
+.nav-item.active svg { opacity: 1; }
+.nav-text {
+  transition: opacity 0.15s, max-width 0.22s var(--ease);
+  max-width: 140px;
+  overflow: hidden;
+}
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 500;
+  background: var(--amber-glow);
+  color: var(--amber-lt);
+  border: 0.5px solid rgba(192,123,58,0.3);
+  border-radius: 99px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+/* Tooltip for collapsed state */
+.sidebar.collapsed:not(:hover) .nav-item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(var(--sidebar-collapsed-w) + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-raised);
+  border: 0.5px solid var(--border-mid);
+  color: var(--text-1);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+.sidebar.collapsed:not(:hover) .nav-item:hover::after { opacity: 1; }
+
+.sidebar-bottom {
+  margin-top: auto;
+  border-top: 0.5px solid var(--border);
+  padding: 10px 0 8px;
+}
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Topbar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 60px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg-surface);
+  flex-shrink: 0;
+}
+.page-title { font-size: 15px; font-weight: 500; color: var(--text-1); }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.btn {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  letter-spacing: 0.01em;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 0.5px solid var(--border-mid);
+}
+.btn-ghost:hover { color: var(--text-1); border-color: rgba(255,255,255,0.25); }
+.btn-primary {
+  background: var(--parchment);
+  color: var(--bg-base);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary:hover { background: #F5ECD7; }
+.notif-btn {
+  position: relative;
+  width: 32px; height: 32px;
+  border-radius: 7px;
+  background: var(--bg-raised);
+  border: 0.5px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-2);
+  transition: color 0.15s, background 0.15s;
+}
+.notif-btn:hover { color: var(--text-1); background: var(--bg-hover); }
+.notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Stats */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.stat-card {
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+.stat-label { font-size: 11px; color: var(--text-3); margin-bottom: 7px; }
+.stat-value { font-size: 24px; font-weight: 500; color: var(--text-1); letter-spacing: -0.02em; line-height: 1; }
+.stat-delta { font-size: 11px; color: var(--sage); margin-top: 5px; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  width: fit-content;
+}
+.tab {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text-2); }
+.tab.active { background: var(--bg-active); color: var(--text-1); }
+
+/* Grid panels */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 18px;
+  align-items: start;
+}
+.panel-left { display: flex; flex-direction: column; gap: 18px; }
+.panel-right { display: flex; flex-direction: column; gap: 18px; }
+
+.panel {
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 0.5px solid var(--border);
+}
+.panel-title { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.panel-action {
+  font-size: 12px; color: var(--text-3);
+  cursor: pointer; transition: color 0.15s;
+  background: none; border: none; font-family: var(--font); padding: 0;
+}
+.panel-action:hover { color: var(--amber-lt); }
+
+/* Student rows */
+.student-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 18px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.student-row:last-child { border-bottom: none; }
+.student-row:hover { background: var(--bg-hover); }
+.s-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500; flex-shrink: 0;
+}
+.s-info { flex: 1; min-width: 0; }
+.s-name { font-size: 13px; font-weight: 500; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.s-meta { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+.s-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.level-pill {
+  font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 4px; border: 0.5px solid;
+}
+.pill-a1 { background: rgba(141,181,160,0.1); color: #8DB5A0; border-color: rgba(141,181,160,0.3); }
+.pill-a2 { background: rgba(141,181,160,0.15); color: #7DC4A0; border-color: rgba(141,181,160,0.4); }
+.pill-b1 { background: rgba(192,123,58,0.12); color: var(--amber-lt); border-color: rgba(192,123,58,0.3); }
+.pill-b2 { background: rgba(192,123,58,0.18); color: #E8A060; border-color: rgba(192,123,58,0.4); }
+.pill-c1 { background: rgba(122,170,212,0.12); color: #7AAAD4; border-color: rgba(122,170,212,0.3); }
+.mini-bar { width: 64px; height: 3px; background: var(--border-mid); border-radius: 99px; overflow: hidden; }
+.mini-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--amber), var(--sage)); }
+.pct { font-size: 10px; color: var(--text-3); }
+
+/* Classroom rows */
+.classroom-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.classroom-row:last-child { border-bottom: none; }
+.classroom-row:hover { background: var(--bg-hover); }
+.classroom-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.cr-info { flex: 1; min-width: 0; }
+.cr-name { font-size: 13px; font-weight: 500; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.cr-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.cr-students {
+  font-size: 11px; color: var(--text-2);
+  display: flex; align-items: center; gap: 4px;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* Course rows */
+.course-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.course-row:last-child { border-bottom: none; }
+.course-row:hover { background: var(--bg-hover); }
+.course-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--text-2);
+  background: var(--bg-raised); border: 0.5px solid var(--border-mid);
+}
+.co-info { flex: 1; min-width: 0; }
+.co-name { font-size: 13px; font-weight: 500; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.co-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.co-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.tag {
+  font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: 4px;
+  background: var(--bg-raised); color: var(--text-2);
+  border: 0.5px solid var(--border-mid); white-space: nowrap;
+}
+
+/* Sessions */
+.session-item {
+  padding: 12px 18px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer; transition: background 0.15s;
+}
+.session-item:last-child { border-bottom: none; }
+.session-item:hover { background: var(--bg-hover); }
+.session-time { font-size: 11px; color: var(--text-3); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.session-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot-now    { background: var(--amber); }
+.dot-today  { background: #E8A060; }
+.dot-soon   { background: var(--sage); }
+.dot-later  { background: var(--text-3); }
+.session-student { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.session-topic { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.session-cta {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 7px; font-size: 11px; font-weight: 500; color: var(--amber-lt);
+  cursor: pointer; background: none; border: none; font-family: var(--font); padding: 0;
+  transition: color 0.15s;
+}
+.session-cta:hover { color: var(--parchment); }
+
+/* Activity feed */
+.activity-item {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 11px 18px;
+  border-bottom: 0.5px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+.act-dot-col { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+.act-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.act-line { width: 1px; flex: 1; background: var(--border); margin-top: 4px; min-height: 14px; }
+.act-body { flex: 1; min-width: 0; }
+.act-text { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+.act-text strong { color: var(--text-1); font-weight: 500; }
+.act-time { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar" id="sidebar">
+
+  <div class="sidebar-logo-row">
+    <a class="sidebar-logo" href="#">
+      <span class="logo-word">lexis</span>
+      <span class="logo-blob">
+        <svg width="9" height="11" viewBox="0 0 18 22" fill="none">
+          <defs>
+            <linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#D4924F"/>
+              <stop offset="100%" stop-color="#A8CCBB"/>
+            </linearGradient>
+          </defs>
+          <path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/>
+        </svg>
+      </span>
+    </a>
+    <div class="sidebar-toggle-row">
+      <!-- Lock btn -->
+      <button class="toggle-btn lock-btn" id="lockBtn" title="Lock sidebar open">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+          <rect x="2" y="4.5" width="7" height="5.5" rx="1" stroke="currentColor" stroke-width="1.1"/>
+          <path d="M3.5 4.5V3a2 2 0 014 0v1.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <!-- Collapse btn -->
+      <button class="toggle-btn" id="collapseBtn" title="Collapse sidebar">
+        <svg id="collapseIcon" width="11" height="11" viewBox="0 0 11 11" fill="none">
+          <path d="M7 2L4 5.5L7 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="teacher-chip">
+    <div class="teacher-avatar">P</div>
+    <div class="teacher-info">
+      <div class="teacher-name">Pedro</div>
+      <div class="teacher-role">Teacher</div>
+    </div>
+  </div>
+
+  <nav class="nav-section">
+    <div class="nav-label">Workspace</div>
+    <a class="nav-item active" href="#" data-tooltip="Dashboard">
+      <svg viewBox="0 0 15 15" fill="none"><rect x="1" y="1" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="nav-text">Dashboard</span>
+    </a>
+    <a class="nav-item" href="#" data-tooltip="Students">
+      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M2 13c0-2.5 2.5-4 5.5-4s5.5 1.5 5.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-text">Students</span>
+      <span class="nav-badge">8</span>
+    </a>
+    <a class="nav-item" href="#" data-tooltip="Classrooms">
+      <svg viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 3V2M10 3V2M1 7h13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="5" cy="10" r="1" fill="currentColor"/><circle cx="7.5" cy="10" r="1" fill="currentColor"/><circle cx="10" cy="10" r="1" fill="currentColor"/></svg>
+      <span class="nav-text">Classrooms</span>
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" href="#" data-tooltip="Schedule">
+      <svg viewBox="0 0 15 15" fill="none"><rect x="1.5" y="2.5" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 2.5V1M10 2.5V1M1.5 6h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-text">Schedule</span>
+    </a>
+  </nav>
+
+  <nav class="nav-section">
+    <div class="nav-label">Content</div>
+    <a class="nav-item" href="#" data-tooltip="Courses">
+      <svg viewBox="0 0 15 15" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h8A1.5 1.5 0 0113 3.5v9a.5.5 0 01-.8.4L7.5 10 3.3 12.9a.5.5 0 01-.8-.4v-9z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+      <span class="nav-text">Courses</span>
+    </a>
+    <a class="nav-item" href="#" data-tooltip="Lessons">
+      <svg viewBox="0 0 15 15" fill="none"><path d="M2 3h11M2 7.5h11M2 12h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-text">Lessons</span>
+    </a>
+    <a class="nav-item" href="#" data-tooltip="Library">
+      <svg viewBox="0 0 15 15" fill="none"><rect x="1.5" y="1.5" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 5.5h5M5 8h5M5 10.5h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+      <span class="nav-text">Library</span>
+    </a>
+    <a class="nav-item" href="#" data-tooltip="Spaced review">
+      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 4v3.5l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-text">Spaced review</span>
+    </a>
+    <a class="nav-item" href="#" data-tooltip="Achievements">
+      <svg viewBox="0 0 15 15" fill="none"><path d="M7.5 1L9.18 5.27L13.5 5.27L10.16 7.73L11.34 12L7.5 9.54L3.66 12L4.84 7.73L1.5 5.27L5.82 5.27Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+      <span class="nav-text">Achievements</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <a class="nav-item" href="#" data-tooltip="Settings">
+      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M7.5 1v1.5M7.5 12.5V14M14 7.5h-1.5M2.5 7.5H1M11.7 3.3l-1.1 1.1M4.4 10.6l-1.1 1.1M11.7 11.7l-1.1-1.1M4.4 4.4L3.3 3.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <span class="nav-text">Settings</span>
+    </a>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <header class="topbar">
+    <span class="page-title">Dashboard</span>
+    <div class="topbar-actions">
+      <button class="notif-btn">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5a4.5 4.5 0 014.5 4.5c0 2.5.5 4 1.5 5H2c1-1 1.5-2.5 1.5-5A4.5 4.5 0 017.5 1.5z" stroke="currentColor" stroke-width="1.2"/><path d="M6 12.5a1.5 1.5 0 003 0" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="btn btn-ghost">Import</button>
+      <button class="btn btn-primary">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        New
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">Active students</div>
+        <div class="stat-value">8</div>
+        <div class="stat-delta">↑ 2 this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Classrooms</div>
+        <div class="stat-value">3</div>
+        <div class="stat-delta">↑ 1 this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active courses</div>
+        <div class="stat-value">5</div>
+        <div class="stat-delta">2 in progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg. completion</div>
+        <div class="stat-value">74%</div>
+        <div class="stat-delta">↑ 6% this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sessions today</div>
+        <div class="stat-value">3</div>
+        <div class="stat-delta" style="color:var(--amber-lt);">Next in 40 min</div>
+      </div>
+    </div>
+
+    <!-- Main panels -->
+    <div class="panels">
+
+      <div class="panel-left">
+
+        <!-- Tabs: Students / Classrooms / Courses -->
+        <div>
+          <div class="tabs" id="mainTabs">
+            <button class="tab active" onclick="switchTab('students')">Students</button>
+            <button class="tab" onclick="switchTab('classrooms')">Classrooms</button>
+            <button class="tab" onclick="switchTab('courses')">Courses</button>
+          </div>
+        </div>
+
+        <!-- Students panel -->
+        <div class="panel" id="tab-students">
+          <div class="panel-header">
+            <span class="panel-title">Student roster</span>
+            <button class="panel-action">View all →</button>
+          </div>
+          <div class="student-row">
+            <div class="s-avatar" style="background:rgba(122,170,212,0.2);color:#7AAAD4;">AM</div>
+            <div class="s-info"><div class="s-name">Ana Martins</div><div class="s-meta">Last active 2h ago · 5-day streak</div></div>
+            <div class="s-right"><span class="level-pill pill-b2">B2</span><div class="mini-bar"><div class="mini-bar-fill" style="width:82%"></div></div><span class="pct">82%</span></div>
+          </div>
+          <div class="student-row">
+            <div class="s-avatar" style="background:rgba(192,123,58,0.15);color:var(--amber-lt);">JL</div>
+            <div class="s-info"><div class="s-name">João Lima</div><div class="s-meta">Last active yesterday · 2-day streak</div></div>
+            <div class="s-right"><span class="level-pill pill-b1">B1</span><div class="mini-bar"><div class="mini-bar-fill" style="width:55%"></div></div><span class="pct">55%</span></div>
+          </div>
+          <div class="student-row">
+            <div class="s-avatar" style="background:rgba(141,181,160,0.15);color:var(--sage);">CS</div>
+            <div class="s-info"><div class="s-name">Clara Silva</div><div class="s-meta">Last active 3d ago · Review due</div></div>
+            <div class="s-right"><span class="level-pill pill-a2">A2</span><div class="mini-bar"><div class="mini-bar-fill" style="width:38%"></div></div><span class="pct">38%</span></div>
+          </div>
+          <div class="student-row">
+            <div class="s-avatar" style="background:rgba(192,123,58,0.1);color:#E8A060;">RO</div>
+            <div class="s-info"><div class="s-name">Rafael Oliveira</div><div class="s-meta">Last active today · 12-day streak</div></div>
+            <div class="s-right"><span class="level-pill pill-c1">C1</span><div class="mini-bar"><div class="mini-bar-fill" style="width:91%"></div></div><span class="pct">91%</span></div>
+          </div>
+          <div class="student-row">
+            <div class="s-avatar" style="background:rgba(180,120,200,0.15);color:#C08AE0;">BF</div>
+            <div class="s-info"><div class="s-name">Beatriz Ferreira</div><div class="s-meta">Last active 1h ago · 8-day streak</div></div>
+            <div class="s-right"><span class="level-pill pill-b1">B1</span><div class="mini-bar"><div class="mini-bar-fill" style="width:63%"></div></div><span class="pct">63%</span></div>
+          </div>
+        </div>
+
+        <!-- Classrooms panel -->
+        <div class="panel" id="tab-classrooms" style="display:none;">
+          <div class="panel-header">
+            <span class="panel-title">Classrooms</span>
+            <button class="panel-action">View all →</button>
+          </div>
+          <div class="classroom-row">
+            <div class="classroom-icon" style="background:rgba(122,170,212,0.12);border:0.5px solid rgba(122,170,212,0.2);">
+              <svg width="18" height="18" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="9" rx="1.5" stroke="#7AAAD4" stroke-width="1.2"/><path d="M5 3V2M10 3V2" stroke="#7AAAD4" stroke-width="1.2" stroke-linecap="round"/><circle cx="5" cy="10" r="1" fill="#7AAAD4"/><circle cx="7.5" cy="10" r="1" fill="#7AAAD4"/><circle cx="10" cy="10" r="1" fill="#7AAAD4"/></svg>
+            </div>
+            <div class="cr-info">
+              <div class="cr-name">B2 Conversation Group</div>
+              <div class="cr-meta">Course: Advanced English · 3 students</div>
+            </div>
+            <div class="cr-right">
+              <span class="level-pill pill-b2">B2</span>
+              <div class="cr-students"><span class="status-dot" style="background:var(--sage);"></span>Active</div>
+            </div>
+          </div>
+          <div class="classroom-row">
+            <div class="classroom-icon" style="background:rgba(192,123,58,0.1);border:0.5px solid rgba(192,123,58,0.2);">
+              <svg width="18" height="18" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="9" rx="1.5" stroke="#D4924F" stroke-width="1.2"/><path d="M5 3V2M10 3V2" stroke="#D4924F" stroke-width="1.2" stroke-linecap="round"/><circle cx="5" cy="10" r="1" fill="#D4924F"/><circle cx="7.5" cy="10" r="1" fill="#D4924F"/><circle cx="10" cy="10" r="1" fill="#D4924F"/></svg>
+            </div>
+            <div class="cr-info">
+              <div class="cr-name">B1 Grammar Intensive</div>
+              <div class="cr-meta">Course: Intermediate Grammar · 2 students</div>
+            </div>
+            <div class="cr-right">
+              <span class="level-pill pill-b1">B1</span>
+              <div class="cr-students"><span class="status-dot" style="background:var(--sage);"></span>Active</div>
+            </div>
+          </div>
+          <div class="classroom-row">
+            <div class="classroom-icon" style="background:rgba(141,181,160,0.1);border:0.5px solid rgba(141,181,160,0.2);">
+              <svg width="18" height="18" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="9" rx="1.5" stroke="#8DB5A0" stroke-width="1.2"/><path d="M5 3V2M10 3V2" stroke="#8DB5A0" stroke-width="1.2" stroke-linecap="round"/><circle cx="5" cy="10" r="1" fill="#8DB5A0"/><circle cx="7.5" cy="10" r="1" fill="#8DB5A0"/><circle cx="10" cy="10" r="1" fill="#8DB5A0"/></svg>
+            </div>
+            <div class="cr-info">
+              <div class="cr-name">A2 Foundations</div>
+              <div class="cr-meta">Course: Elementary English · 1 student</div>
+            </div>
+            <div class="cr-right">
+              <span class="level-pill pill-a2">A2</span>
+              <div class="cr-students"><span class="status-dot" style="background:var(--text-3);"></span>Paused</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Courses panel -->
+        <div class="panel" id="tab-courses" style="display:none;">
+          <div class="panel-header">
+            <span class="panel-title">Courses</span>
+            <button class="panel-action">View all →</button>
+          </div>
+          <div class="course-row">
+            <div class="course-icon"><svg width="16" height="16" viewBox="0 0 15 15" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h8A1.5 1.5 0 0113 3.5v9a.5.5 0 01-.8.4L7.5 10 3.3 12.9a.5.5 0 01-.8-.4v-9z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+            <div class="co-info">
+              <div class="co-name">Advanced English — C1 Track</div>
+              <div class="co-meta">C1 · 12 units · 2 classrooms enrolled</div>
+            </div>
+            <div class="co-right"><span class="level-pill pill-c1">C1</span><span class="tag">Active</span></div>
+          </div>
+          <div class="course-row">
+            <div class="course-icon"><svg width="16" height="16" viewBox="0 0 15 15" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h8A1.5 1.5 0 0113 3.5v9a.5.5 0 01-.8.4L7.5 10 3.3 12.9a.5.5 0 01-.8-.4v-9z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+            <div class="co-info">
+              <div class="co-name">Intermediate Grammar — B1</div>
+              <div class="co-meta">B1 · 10 units · 1 classroom enrolled</div>
+            </div>
+            <div class="co-right"><span class="level-pill pill-b1">B1</span><span class="tag">Active</span></div>
+          </div>
+          <div class="course-row">
+            <div class="course-icon"><svg width="16" height="16" viewBox="0 0 15 15" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h8A1.5 1.5 0 0113 3.5v9a.5.5 0 01-.8.4L7.5 10 3.3 12.9a.5.5 0 01-.8-.4v-9z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+            <div class="co-info">
+              <div class="co-name">Upper-Intermediate — B2</div>
+              <div class="co-meta">B2 · 11 units · 1 classroom enrolled</div>
+            </div>
+            <div class="co-right"><span class="level-pill pill-b2">B2</span><span class="tag">Active</span></div>
+          </div>
+          <div class="course-row">
+            <div class="course-icon"><svg width="16" height="16" viewBox="0 0 15 15" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h8A1.5 1.5 0 0113 3.5v9a.5.5 0 01-.8.4L7.5 10 3.3 12.9a.5.5 0 01-.8-.4v-9z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+            <div class="co-info">
+              <div class="co-name">Elementary English — A2</div>
+              <div class="co-meta">A2 · 8 units · 1 classroom enrolled</div>
+            </div>
+            <div class="co-right"><span class="level-pill pill-a2">A2</span><span class="tag">Draft</span></div>
+          </div>
+          <div class="course-row">
+            <div class="course-icon"><svg width="16" height="16" viewBox="0 0 15 15" fill="none"><path d="M2 3.5A1.5 1.5 0 013.5 2h8A1.5 1.5 0 0113 3.5v9a.5.5 0 01-.8.4L7.5 10 3.3 12.9a.5.5 0 01-.8-.4v-9z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div>
+            <div class="co-info">
+              <div class="co-name">Exam Prep — Cambridge B2 First</div>
+              <div class="co-meta">B2 · 14 units · 0 classrooms</div>
+            </div>
+            <div class="co-right"><span class="level-pill pill-b2">B2</span><span class="tag">Draft</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right column -->
+      <div class="panel-right">
+
+        <!-- Sessions -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Upcoming sessions</span>
+            <button class="panel-action">Calendar →</button>
+          </div>
+          <div class="session-item">
+            <div class="session-time"><span class="session-dot dot-now"></span>Today · 14:00</div>
+            <div class="session-student">João Lima</div>
+            <div class="session-topic">Second conditional · B1 Unit 3</div>
+            <button class="session-cta">Start session →</button>
+          </div>
+          <div class="session-item">
+            <div class="session-time"><span class="session-dot dot-today"></span>Today · 16:30</div>
+            <div class="session-student">Beatriz Ferreira</div>
+            <div class="session-topic">Passive voice · B1 Unit 5</div>
+            <button class="session-cta">Prepare →</button>
+          </div>
+          <div class="session-item">
+            <div class="session-time"><span class="session-dot dot-soon"></span>Tomorrow · 10:00</div>
+            <div class="session-student">B2 Conversation Group</div>
+            <div class="session-topic">Phrasal verbs · B2 Unit 2</div>
+            <button class="session-cta">Prepare →</button>
+          </div>
+          <div class="session-item">
+            <div class="session-time"><span class="session-dot dot-later"></span>Thu · 15:00</div>
+            <div class="session-student">Clara Silva</div>
+            <div class="session-topic">Simple past review · A2 Unit 4</div>
+            <button class="session-cta">Prepare →</button>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="panel">
+          <div class="panel-header"><span class="panel-title">Recent activity</span></div>
+          <div class="activity-item">
+            <div class="act-dot-col"><div class="act-dot" style="background:var(--sage);"></div><div class="act-line"></div></div>
+            <div class="act-body"><div class="act-text"><strong>Rafael Oliveira</strong> completed Unit 6 · 96% accuracy</div><div class="act-time">12 min ago</div></div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot-col"><div class="act-dot" style="background:var(--amber);"></div><div class="act-line"></div></div>
+            <div class="act-body"><div class="act-text"><strong>Beatriz Ferreira</strong> has a spaced review due today</div><div class="act-time">1h ago</div></div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot-col"><div class="act-dot" style="background:var(--sage);"></div><div class="act-line"></div></div>
+            <div class="act-body"><div class="act-text"><strong>B2 Group</strong> — Ana Martins earned Grammar Master badge</div><div class="act-time">2h ago</div></div>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot-col"><div class="act-dot" style="background:var(--text-3);"></div></div>
+            <div class="act-body"><div class="act-text"><strong>João Lima</strong> missed yesterday's review session</div><div class="act-time">Yesterday</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const sidebar   = document.getElementById('sidebar');
+  const lockBtn   = document.getElementById('lockBtn');
+  const collapseBtn = document.getElementById('collapseBtn');
+  const collapseIcon = document.getElementById('collapseIcon');
+
+  let collapsed = false;
+  let locked    = false;
+
+  function updateCollapseIcon() {
+    if (collapsed) {
+      collapseIcon.innerHTML = '<path d="M4 2l3 3.5L4 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
+    } else {
+      collapseIcon.innerHTML = '<path d="M7 2L4 5.5L7 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+  }
+
+  collapseBtn.addEventListener('click', () => {
+    collapsed = !collapsed;
+    sidebar.classList.toggle('collapsed', collapsed);
+    if (collapsed) {
+      locked = false;
+      sidebar.classList.remove('locked');
+      lockBtn.classList.remove('locked');
+    }
+    updateCollapseIcon();
+  });
+
+  lockBtn.addEventListener('click', () => {
+    if (collapsed) return;
+    locked = !locked;
+    sidebar.classList.toggle('locked', locked);
+    lockBtn.classList.toggle('locked', locked);
+    lockBtn.title = locked ? 'Unlock sidebar' : 'Lock sidebar open';
+  });
+
+  /* Tab switching */
+  function switchTab(name) {
+    ['students','classrooms','courses'].forEach(t => {
+      document.getElementById('tab-' + t).style.display = t === name ? '' : 'none';
+    });
+    document.querySelectorAll('.tab').forEach((btn, i) => {
+      btn.classList.toggle('active', ['students','classrooms','courses'][i] === name);
+    });
+  }
+</script>
+</body>
+</html>

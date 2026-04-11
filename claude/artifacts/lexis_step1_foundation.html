@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lexis — Revised Foundation Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #0F1620;
+  --surface:    #16202C;
+  --raised:     #1D2A3A;
+  --hover:      #223040;
+  --border:     rgba(255,255,255,0.07);
+  --border-mid: rgba(255,255,255,0.12);
+  --amber:      #C07B3A;
+  --amber-lt:   #D4924F;
+  --amber-glow: rgba(192,123,58,0.13);
+  --sage:       #8DB5A0;
+  --sage-dk:    #6A9A85;
+  --parchment:  #F0E4CC;
+  --text-1:     #EDE8DF;
+  --text-2:     #8A95A3;
+  --text-3:     #4A5768;
+  --red:        #E07070;
+  --red-bg:     rgba(224,112,112,0.08);
+  --red-bd:     rgba(224,112,112,0.22);
+  --green-bg:   rgba(141,181,160,0.08);
+  --green-bd:   rgba(141,181,160,0.22);
+  --blue:       #7AAAD4;
+  --blue-bg:    rgba(122,170,212,0.08);
+  --blue-bd:    rgba(122,170,212,0.22);
+  --purple:     #B8A8D8;
+  --purple-bg:  rgba(184,168,216,0.08);
+  --purple-bd:  rgba(184,168,216,0.2);
+  --font:       'DM Sans', sans-serif;
+  --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  padding: 48px 32px 80px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.doc-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 24px;
+  margin-bottom: 36px; padding-bottom: 24px;
+  border-bottom: 0.5px solid var(--border-mid);
+}
+.doc-logo { display: flex; align-items: flex-end; }
+.logo-word { font-size: 22px; font-weight: 500; letter-spacing: -0.03em; color: var(--parchment); }
+.logo-blob { margin-left: 2px; padding-bottom: 2px; display: inline-flex; align-items: flex-end; }
+.doc-meta { text-align: right; }
+.doc-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.doc-sub   { font-size: 11px; color: var(--text-3); }
+
+/* ── Change summary ── */
+.change-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 10px; margin-bottom: 36px;
+}
+.change-card {
+  border-radius: 10px; padding: 14px 16px;
+  border: 0.5px solid;
+}
+.change-card.fixed   { background: var(--green-bg); border-color: var(--green-bd); }
+.change-card.new     { background: var(--blue-bg);  border-color: var(--blue-bd); }
+.change-card.revised { background: var(--amber-glow); border-color: rgba(192,123,58,0.28); }
+.change-card.removed { background: var(--red-bg);  border-color: var(--red-bd); }
+.cc-val { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+.cc-lab { font-size: 10px; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.fixed   .cc-val { color: var(--sage); }   .fixed   .cc-lab { color: var(--sage-dk); }
+.new     .cc-val { color: var(--blue); }   .new     .cc-lab { color: var(--blue); }
+.revised .cc-val { color: var(--amber-lt); } .revised .cc-lab { color: var(--amber); }
+.removed .cc-val { color: var(--red); }    .removed .cc-lab { color: var(--red); }
+
+/* ── Section ── */
+.section { margin-bottom: 40px; }
+.section-title {
+  font-size: 16px; font-weight: 500; color: var(--text-1);
+  margin-bottom: 6px; letter-spacing: -0.01em;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-sub { font-size: 12px; color: var(--text-3); margin-bottom: 20px; line-height: 1.5; }
+.section-divider { height: 0.5px; background: var(--border-mid); margin: 32px 0; }
+
+/* ── Entity cards ── */
+.entity-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.entity-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 12px; overflow: hidden;
+}
+.entity-card.new-entity   { border-color: var(--blue-bd); }
+.entity-card.changed      { border-color: rgba(192,123,58,0.28); }
+.entity-card.unchanged    { opacity: 0.7; }
+
+.entity-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px;
+  border-bottom: 0.5px solid var(--border);
+}
+.entity-name { font-size: 13px; font-weight: 500; color: var(--text-1); font-family: 'SF Mono', 'Fira Code', monospace; }
+.entity-badge {
+  font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px;
+  border: 0.5px solid; white-space: nowrap; margin-left: auto;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.badge-new     { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.badge-changed { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.badge-removed { background: var(--red-bg); color: var(--red); border-color: var(--red-bd); }
+.badge-unchanged { background: var(--raised); color: var(--text-3); border-color: var(--border-mid); }
+
+.field-list { padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; }
+.field-row {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 11px; line-height: 1.5; padding: 3px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.field-row:last-child { border-bottom: none; }
+.field-name  { font-family: 'SF Mono', 'Fira Code', monospace; color: var(--parchment); font-size: 11px; min-width: 140px; }
+.field-type  { color: var(--blue); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 10px; }
+.field-note  { color: var(--text-3); font-size: 10px; margin-left: auto; }
+.field-new   { background: rgba(122,170,212,0.06); border-radius: 4px; padding: 3px 6px; margin: -3px -6px; }
+.field-gone  { text-decoration: line-through; opacity: 0.4; }
+.field-pk    { color: var(--amber-lt); }
+.field-fk    { color: var(--sage); }
+
+/* ── Decision boxes ── */
+.decision-box {
+  border-radius: 10px; padding: 16px 18px;
+  margin-bottom: 12px; border: 0.5px solid;
+}
+.decision-box.auth    { background: var(--purple-bg); border-color: var(--purple-bd); }
+.decision-box.billing { background: var(--amber-glow); border-color: rgba(192,123,58,0.28); }
+.decision-box.security { background: var(--green-bg); border-color: var(--green-bd); }
+.decision-box.content { background: var(--blue-bg); border-color: var(--blue-bd); }
+
+.db-header { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.db-icon {
+  width: 26px; height: 26px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.auth     .db-icon { background: var(--purple-bg); border: 0.5px solid var(--purple-bd); }
+.billing  .db-icon { background: var(--amber-glow); border: 0.5px solid rgba(192,123,58,0.28); }
+.security .db-icon { background: var(--green-bg); border: 0.5px solid var(--green-bd); }
+.content  .db-icon { background: var(--blue-bg); border: 0.5px solid var(--blue-bd); }
+
+.db-title { font-size: 13px; font-weight: 500; color: var(--text-1); }
+.db-sub   { font-size: 11px; margin-top: 2px; }
+.auth     .db-sub { color: var(--purple); }
+.billing  .db-sub { color: var(--amber-lt); }
+.security .db-sub { color: var(--sage); }
+.content  .db-sub { color: var(--blue); }
+
+.db-body  { font-size: 12px; color: var(--text-2); line-height: 1.65; }
+.db-body strong { color: var(--text-1); font-weight: 500; }
+.db-body code {
+  font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+
+/* ── Rule list ── */
+.rule-list { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.rule-item { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.rule-dot  { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.rule-item strong { color: var(--text-1); font-weight: 500; }
+.rule-item code {
+  font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+
+/* ── Day card ── */
+.week-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; background: var(--surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 10px; margin-bottom: 10px;
+  cursor: pointer; user-select: none; transition: background 0.15s;
+}
+.week-header:hover { background: var(--hover); }
+.week-num   { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); min-width: 52px; }
+.week-title { font-size: 14px; font-weight: 500; color: var(--text-1); flex: 1; }
+.week-range { font-size: 11px; color: var(--text-3); }
+.week-chevron { color: var(--text-3); transition: transform 0.2s; }
+.week-header.open .week-chevron { transform: rotate(90deg); }
+.week-pill {
+  font-size: 9px; font-weight: 500; padding: 2px 8px;
+  border-radius: 4px; border: 0.5px solid; white-space: nowrap;
+}
+.week-body { display: none; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.week-body.open { display: flex; }
+
+.day-card {
+  background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.day-card.modified { border-color: rgba(192,123,58,0.28); }
+.day-card.new-day  { border-color: var(--blue-bd); }
+
+.day-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; cursor: pointer; transition: background 0.15s;
+}
+.day-header:hover { background: var(--hover); }
+.day-num  { font-size: 11px; color: var(--text-3); min-width: 44px; }
+.day-name { font-size: 13px; font-weight: 500; color: var(--text-1); flex: 1; }
+.day-tag  {
+  font-size: 9px; font-weight: 500; padding: 2px 7px;
+  border-radius: 4px; border: 0.5px solid; white-space: nowrap;
+}
+.tag-setup   { background: var(--purple-bg); color: var(--purple); border-color: var(--purple-bd); }
+.tag-backend { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.tag-db      { background: var(--green-bg); color: var(--sage); border-color: var(--green-bd); }
+.tag-web     { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.28); }
+.tag-ios     { background: var(--purple-bg); color: #C8A8F8; border-color: var(--purple-bd); }
+.tag-qa      { background: var(--red-bg); color: var(--red); border-color: var(--red-bd); }
+.tag-modified { background: var(--amber-glow); color: var(--amber-lt); border-color: rgba(192,123,58,0.3); }
+.tag-new      { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-bd); }
+.day-hrs { font-size: 10px; color: var(--text-3); }
+
+.task-list { padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; border-top: 0.5px solid var(--border); }
+.task-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--text-2); line-height: 1.55; }
+.t-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.task-item.primary { color: var(--text-1); }
+.task-item.primary .t-dot { background: var(--amber); }
+.task-item .t-dot { background: var(--text-3); }
+.task-item.added { color: var(--blue); }
+.task-item.added .t-dot { background: var(--blue); }
+.task-item code {
+  font-size: 11px; font-family: 'SF Mono', 'Fira Code', monospace;
+  background: var(--raised); padding: 1px 5px; border-radius: 3px;
+  color: var(--parchment); border: 0.5px solid var(--border-mid);
+}
+.task-item del { opacity: 0.4; }
+
+.day-footer {
+  padding: 8px 16px; border-top: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.del-label { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
+.del-text  { font-size: 11px; color: var(--sage); }
+
+/* ── Plan legend ── */
+.legend {
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap; margin-bottom: 16px;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-3); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="doc-header">
+  <div class="doc-logo">
+    <span class="logo-word">lexis</span>
+    <span class="logo-blob">
+      <svg width="10" height="13" viewBox="0 0 18 22" fill="none">
+        <defs><linearGradient id="lb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#D4924F"/><stop offset="100%" stop-color="#A8CCBB"/></linearGradient></defs>
+        <path d="M2 11 C1.5 6.5, 4 2, 8.5 1.5 C13 1, 16.5 4.5, 16.5 9.5 C16.5 14.5, 13.5 18.5, 9 19.5 C4.5 20.5, 2 16, 2 11 Z" fill="url(#lb)"/>
+      </svg>
+    </span>
+  </div>
+  <div class="doc-meta">
+    <div class="doc-title">Step 1 — Revised foundation document</div>
+    <div class="doc-sub">Auth · Multi-tenancy · Billing · Security · Data model · Phase 1 build plan</div>
+  </div>
+</div>
+
+<!-- Change summary -->
+<div class="change-grid">
+  <div class="change-card fixed">
+    <div class="cc-val">10</div>
+    <div class="cc-lab">Issues fixed</div>
+  </div>
+  <div class="change-card new">
+    <div class="cc-val">7</div>
+    <div class="cc-lab">New entities</div>
+  </div>
+  <div class="change-card revised">
+    <div class="cc-val">9</div>
+    <div class="cc-lab">Entities revised</div>
+  </div>
+  <div class="change-card removed">
+    <div class="cc-val">1</div>
+    <div class="cc-lab">Columns removed</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════
+     PART 1 — ARCHITECTURAL DECISIONS
+═══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3" stroke="var(--amber-lt)" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="var(--amber-lt)" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Part 1 — Architectural decisions
+  </div>
+  <div class="section-sub">All decisions made before writing the first migration. These shape every table, every API route, and every client.</div>
+
+  <!-- Auth -->
+  <div class="decision-box auth">
+    <div class="db-header">
+      <div class="db-icon">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="3" y="5.5" width="7" height="6" rx="1.2" stroke="var(--purple)" stroke-width="1.1"/><path d="M4.5 5.5V4a2 2 0 014 0v1.5" stroke="var(--purple)" stroke-width="1.1" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="db-title">Authentication — Passkeys + magic link, no passwords</div>
+        <div class="db-sub">WebAuthn (Apple/Google) · Email OTP fallback · Zero credential storage</div>
+      </div>
+    </div>
+    <div class="db-body">
+      <strong>How it works:</strong> Users register with their Apple ID, Google account, or an email address. No password is ever created or stored. Authentication happens via two paths:
+    </div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="rule-dot" style="background:var(--purple)"></div><div><strong>Passkey (primary):</strong> Uses the WebAuthn API — the device biometric (Face ID, Touch ID, Windows Hello) signs a challenge. The server verifies the signature against the stored public key. The private key never leaves the device. Works natively on iOS via <code>ASAuthorizationController</code>, on Android via Credential Manager, and on web via <code>navigator.credentials</code>.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--purple)"></div><div><strong>Magic link (fallback):</strong> User enters their email → server generates a 6-digit OTP stored in Redis with a 10-minute TTL → email sent via Resend → user enters the code → server issues JWT. No link to click, just a code. Works on any device without a passkey.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--purple)"></div><div><strong>JWT issuance:</strong> After either auth path succeeds, the server issues a short-lived access token (15 min) and a long-lived refresh token (30 days, stored in Redis, rotated on use). Same JWT flow as before — auth method changes, token mechanics stay identical.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--purple)"></div><div><strong>Data model change:</strong> <code>hashed_password</code> removed from <code>users</code>. New table: <code>passkey_credentials</code> (stores <code>credential_id</code>, <code>public_key</code>, <code>sign_count</code>, device label). One user can have multiple passkeys (phone + laptop + tablet).</div></div>
+    </div>
+  </div>
+
+  <!-- Multi-tenancy -->
+  <div class="decision-box security">
+    <div class="db-header">
+      <div class="db-icon">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5L11 4v4c0 2-2 4-4.5 4.5C4 12 2 10 2 8V4L6.5 1.5z" stroke="var(--sage)" stroke-width="1.1" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="db-title">Multi-tenancy — shared DB, tenant_id on every mutable table</div>
+        <div class="db-sub">One PostgreSQL instance · Row-level isolation · tenant_id from JWT only</div>
+      </div>
+    </div>
+    <div class="db-body">
+      <strong>The rule:</strong> every table that holds teacher or student data has a <code>tenant_id UUID FK</code> referencing the <code>tenants</code> table. Every API query appends <code>WHERE tenant_id = req.user.tenantId</code>. The <code>tenantId</code> is extracted from the JWT — never from the request body or query parameters. A client cannot forge their tenant context.
+    </div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="rule-dot" style="background:var(--sage)"></div><div><strong>Tenant creation:</strong> when a teacher registers, a <code>tenants</code> record is auto-created with a free-tier <code>subscription</code>. The teacher's user record gets <code>tenant_id</code> set. Students are invited into a tenant by their teacher — they never create tenants.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--sage)"></div><div><strong>Cross-tenant read prevention:</strong> a Prisma middleware layer appends <code>tenant_id</code> to every query automatically. If a route handler forgets to scope by tenant, the middleware catches it. This is the primary security layer.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--sage)"></div><div><strong>Tables exempt from tenant_id:</strong> <code>users</code> (auth only), <code>passkey_credentials</code> (tied to user, not tenant), <code>magic_link_tokens</code> (ephemeral), <code>badges</code> catalogue (global), and <code>public templates</code> (see content policy below).</div></div>
+    </div>
+  </div>
+
+  <!-- Billing -->
+  <div class="decision-box billing">
+    <div class="db-header">
+      <div class="db-icon">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3" width="10" height="7.5" rx="1.5" stroke="var(--amber-lt)" stroke-width="1.1"/><path d="M1.5 6h10" stroke="var(--amber-lt)" stroke-width="1.1"/><path d="M4 8.5h2" stroke="var(--amber-lt)" stroke-width="1.1" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="db-title">Billing — Freemium with feature flags · Stripe</div>
+        <div class="db-sub">Free: 3 students, 5 lesson plans · Pro: unlimited · Flags control all gates</div>
+      </div>
+    </div>
+    <div class="db-body">
+      <strong>Free tier limits:</strong> a teacher can enroll up to <strong>3 students</strong> and create up to <strong>5 lesson plans</strong> (courses). All other features — activities, classrooms, spaced review, sessions — are unrestricted on free. The limits are enforced by checking <code>subscription.student_limit</code> and <code>subscription.lesson_plan_limit</code> before the relevant create operations.
+    </div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="rule-dot" style="background:var(--amber)"></div><div><strong>Feature flags:</strong> <code>subscriptions.feature_flags: jsonb</code> controls access to future features (AI generation, analytics dashboard, whiteboard recording, priority support). Adding a new gated feature means adding one key to the flags JSON — never touching application code for existing tiers.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--amber)"></div><div><strong>Enforcement point:</strong> limit checks live in the enrollments module (<code>POST /v1/classrooms/:id/enroll</code>) and the courses module (<code>POST /v1/courses</code>). Both return <code>402 Payment Required</code> with a structured error when a limit is hit, so the client can show an upgrade prompt.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--amber)"></div><div><strong>Stripe integration:</strong> <code>tenants.stripe_customer_id</code> is null on free. When a teacher upgrades, a Stripe customer is created, a subscription is attached, and a webhook updates <code>subscriptions.plan_slug</code> and raises the limits. The webhook is the only place that can change a subscription — never a direct API call from the client.</div></div>
+    </div>
+  </div>
+
+  <!-- Public content -->
+  <div class="decision-box content">
+    <div class="db-header">
+      <div class="db-icon">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="var(--blue)" stroke-width="1.1"/><path d="M4 6.5h5M6.5 4v5" stroke="var(--blue)" stroke-width="1.1" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="db-title">Content visibility — private by default, public templates opt-in</div>
+        <div class="db-sub">visibility enum · Templates readable by all · Writable by owner only</div>
+      </div>
+    </div>
+    <div class="db-body">
+      <strong>Visibility model:</strong> <code>Course</code>, <code>Lesson</code>, and <code>Activity</code> each get a <code>visibility</code> enum: <code>private</code> (default, tenant-only) or <code>public_template</code> (readable by any authenticated user, writable only by the owning tenant). A teacher can mark their course as a public template, making it discoverable in a shared template library.
+    </div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="rule-dot" style="background:var(--blue)"></div><div><strong>Template reads bypass tenant_id filter:</strong> <code>GET /v1/templates</code> queries courses where <code>visibility = 'public_template'</code> with no tenant scoping. A teacher can browse and clone any public template into their own tenant — cloning copies all units, lessons, and activities and sets <code>tenant_id</code> to the cloner's tenant.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--blue)"></div><div><strong>Write protection:</strong> even though a template is publicly readable, all mutating operations (<code>PATCH</code>, <code>DELETE</code>) still check <code>tenant_id</code>. You can read anyone's template, clone it, but never edit the original.</div></div>
+      <div class="rule-item"><div class="rule-dot" style="background:var(--blue)"></div><div><strong>Lexis-curated templates:</strong> a special <code>system</code> tenant (seeded at setup) owns the official CEFR-aligned templates. No teacher can edit system templates. This is the content seed that replaces the "no content at launch" critical issue.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════
+     PART 2 — REVISED DATA MODEL
+═══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="3" stroke="var(--sage)" stroke-width="1.2"/><path d="M4 6h8M4 9.5h5" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Part 2 — Revised data model
+  </div>
+  <div class="section-sub">All critical fixes applied. New entities shown in blue. Changed entities in amber. All changes are additive where possible — no destructive migrations.</div>
+
+  <!-- NEW entities -->
+  <div style="margin-bottom:8px;font-size:11px;font-weight:500;color:var(--text-3);letter-spacing:0.06em;text-transform:uppercase;">New entities</div>
+  <div class="entity-grid" style="margin-bottom:20px;">
+
+    <div class="entity-card new-entity">
+      <div class="entity-header">
+        <span class="entity-name">tenants</span>
+        <span class="entity-badge badge-new">New</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name">name</span><span class="field-type">string</span><span class="field-note">teacher's brand name</span></div>
+        <div class="field-row"><span class="field-name">slug</span><span class="field-type">string unique</span><span class="field-note">url-safe identifier</span></div>
+        <div class="field-row"><span class="field-name">stripe_customer_id</span><span class="field-type">string?</span><span class="field-note">null on free</span></div>
+        <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-entity">
+      <div class="entity-header">
+        <span class="entity-name">subscriptions</span>
+        <span class="entity-badge badge-new">New</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name field-fk">tenant_id</span><span class="field-type">uuid FK</span><span class="field-note">unique</span></div>
+        <div class="field-row"><span class="field-name">plan_slug</span><span class="field-type">enum</span><span class="field-note">free · pro · growth</span></div>
+        <div class="field-row"><span class="field-name">student_limit</span><span class="field-type">int</span><span class="field-note">3 on free</span></div>
+        <div class="field-row"><span class="field-name">lesson_plan_limit</span><span class="field-type">int</span><span class="field-note">5 on free</span></div>
+        <div class="field-row"><span class="field-name">feature_flags</span><span class="field-type">jsonb</span><span class="field-note">ai · analytics · etc</span></div>
+        <div class="field-row"><span class="field-name">renews_at</span><span class="field-type">date?</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-entity">
+      <div class="entity-header">
+        <span class="entity-name">passkey_credentials</span>
+        <span class="entity-badge badge-new">New</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name field-fk">user_id</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row"><span class="field-name">credential_id</span><span class="field-type">bytes unique</span><span class="field-note">WebAuthn credential ID</span></div>
+        <div class="field-row"><span class="field-name">public_key</span><span class="field-type">bytes</span><span class="field-note">COSE-encoded</span></div>
+        <div class="field-row"><span class="field-name">sign_count</span><span class="field-type">int</span><span class="field-note">replay attack prevention</span></div>
+        <div class="field-row"><span class="field-name">device_label</span><span class="field-type">string?</span><span class="field-note">"iPhone 15", "MacBook"</span></div>
+        <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamp</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-entity">
+      <div class="entity-header">
+        <span class="entity-name">session_participants</span>
+        <span class="entity-badge badge-new">New · fixes C1</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name field-fk">session_id</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row"><span class="field-name field-fk">student_id</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row"><span class="field-name">joined_at</span><span class="field-type">timestamp?</span></div>
+        <div class="field-row"><span class="field-name">left_at</span><span class="field-type">timestamp?</span></div>
+        <div class="field-row"><span class="field-name">status</span><span class="field-type">enum</span><span class="field-note">invited·joined·absent</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-entity">
+      <div class="entity-header">
+        <span class="entity-name">board_strokes</span>
+        <span class="entity-badge badge-new">New · fixes C4</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name field-fk">page_id</span><span class="field-type">uuid FK</span><span class="field-note">unique per page</span></div>
+        <div class="field-row"><span class="field-name">strokes_url</span><span class="field-type">string?</span><span class="field-note">S3 binary blob URL</span></div>
+        <div class="field-row"><span class="field-name">redis_key</span><span class="field-type">string?</span><span class="field-note">live buffer key</span></div>
+        <div class="field-row"><span class="field-name">last_flushed_at</span><span class="field-type">timestamp?</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-entity">
+      <div class="entity-header">
+        <span class="entity-name">consent_records</span>
+        <span class="entity-badge badge-new">New · GDPR/LGPD</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name field-fk">user_id</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row"><span class="field-name">accepted_at</span><span class="field-type">timestamp</span></div>
+        <div class="field-row"><span class="field-name">policy_version</span><span class="field-type">string</span><span class="field-note">"1.0", "1.1", etc.</span></div>
+        <div class="field-row"><span class="field-name">ip_address</span><span class="field-type">string</span><span class="field-note">hashed</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card new-entity">
+      <div class="entity-header">
+        <span class="entity-name">template_clones</span>
+        <span class="entity-badge badge-new">New · templates</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name field-fk">source_course_id</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row"><span class="field-name field-fk">cloned_course_id</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row"><span class="field-name field-fk">cloned_by_tenant</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row"><span class="field-name">cloned_at</span><span class="field-type">timestamp</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CHANGED entities -->
+  <div style="margin-bottom:8px;font-size:11px;font-weight:500;color:var(--text-3);letter-spacing:0.06em;text-transform:uppercase;">Changed entities — key fields only</div>
+  <div class="entity-grid">
+
+    <div class="entity-card changed">
+      <div class="entity-header">
+        <span class="entity-name">users</span>
+        <span class="entity-badge badge-changed">Changed</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row"><span class="field-name">email</span><span class="field-type">string unique</span></div>
+        <div class="field-row field-gone"><span class="field-name">hashed_password</span><span class="field-type">string</span><span class="field-note">removed</span></div>
+        <div class="field-row field-new"><span class="field-name field-fk">tenant_id</span><span class="field-type">uuid FK?</span><span class="field-note">+ added</span></div>
+        <div class="field-row field-new"><span class="field-name">age_group</span><span class="field-type">enum?</span><span class="field-note">+ adult · minor</span></div>
+        <div class="field-row field-new"><span class="field-name">deleted_at</span><span class="field-type">timestamp?</span><span class="field-note">+ soft delete (GDPR)</span></div>
+        <div class="field-row"><span class="field-name">role</span><span class="field-type">enum</span><span class="field-note">teacher · student · system</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card changed">
+      <div class="entity-header">
+        <span class="entity-name">sessions</span>
+        <span class="entity-badge badge-changed">Changed · fixes C1</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row"><span class="field-name field-pk">id</span><span class="field-type">uuid PK</span></div>
+        <div class="field-row field-new"><span class="field-name field-fk">tenant_id</span><span class="field-type">uuid FK</span><span class="field-note">+ added</span></div>
+        <div class="field-row"><span class="field-name field-fk">teacher_id</span><span class="field-type">uuid FK</span></div>
+        <div class="field-row field-gone"><span class="field-name">student_id</span><span class="field-type">uuid FK</span><span class="field-note">moved to participants</span></div>
+        <div class="field-row field-new"><span class="field-name field-fk">student_id</span><span class="field-type">uuid FK?</span><span class="field-note">+ nullable, 1-on-1 only</span></div>
+        <div class="field-row field-new"><span class="field-name field-fk">classroom_id</span><span class="field-type">uuid FK?</span><span class="field-note">+ nullable, group only</span></div>
+        <div class="field-row"><span class="field-name">status</span><span class="field-type">enum</span><span class="field-note">constraint: one of student/classroom non-null</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card changed">
+      <div class="entity-header">
+        <span class="entity-name">courses</span>
+        <span class="entity-badge badge-changed">Changed</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row field-new"><span class="field-name field-fk">tenant_id</span><span class="field-type">uuid FK</span><span class="field-note">+ added</span></div>
+        <div class="field-row field-new"><span class="field-name">visibility</span><span class="field-type">enum</span><span class="field-note">+ private · public_template</span></div>
+        <div class="field-row field-new"><span class="field-name">deleted_at</span><span class="field-type">timestamp?</span><span class="field-note">+ soft delete</span></div>
+        <div class="field-row"><span class="field-name">status</span><span class="field-type">enum</span><span class="field-note">draft · active · archived</span></div>
+        <div class="field-row"><span class="field-name">version</span><span class="field-type">int</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card changed">
+      <div class="entity-header">
+        <span class="entity-name">srs_items</span>
+        <span class="entity-badge badge-changed">Changed · fixes M2</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row field-new"><span class="field-name field-fk">tenant_id</span><span class="field-type">uuid FK</span><span class="field-note">+ added</span></div>
+        <div class="field-row field-new"><span class="field-name">activity_version</span><span class="field-type">int</span><span class="field-note">+ snapshot at creation</span></div>
+        <div class="field-row"><span class="field-name">ease_factor</span><span class="field-type">float</span></div>
+        <div class="field-row"><span class="field-name">interval_days</span><span class="field-type">int</span></div>
+        <div class="field-row"><span class="field-name">next_review</span><span class="field-type">date</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card changed">
+      <div class="entity-header">
+        <span class="entity-name">activities</span>
+        <span class="entity-badge badge-changed">Changed</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row field-new"><span class="field-name field-fk">tenant_id</span><span class="field-type">uuid FK</span><span class="field-note">+ added</span></div>
+        <div class="field-row field-new"><span class="field-name">visibility</span><span class="field-type">enum</span><span class="field-note">+ private · public_template</span></div>
+        <div class="field-row field-new"><span class="field-name">deleted_at</span><span class="field-type">timestamp?</span><span class="field-note">+ soft delete</span></div>
+        <div class="field-row field-new"><span class="field-name">image_url</span><span class="field-type">string?</span><span class="field-note">+ Phase 1 image shortcut</span></div>
+        <div class="field-row"><span class="field-name">type</span><span class="field-type">enum</span></div>
+        <div class="field-row"><span class="field-name">content</span><span class="field-type">jsonb</span></div>
+      </div>
+    </div>
+
+    <div class="entity-card changed">
+      <div class="entity-header">
+        <span class="entity-name">placement_tests</span>
+        <span class="entity-badge badge-changed">Changed · fixes m2</span>
+      </div>
+      <div class="field-list">
+        <div class="field-row field-new"><span class="field-name field-fk">tenant_id</span><span class="field-type">uuid FK</span><span class="field-note">+ added</span></div>
+        <div class="field-row"><span class="field-name field-fk">student_id</span><span class="field-type">uuid FK</span><span class="field-note">no unique — retakeable</span></div>
+        <div class="field-row"><span class="field-name">score</span><span class="field-type">int</span></div>
+        <div class="field-row"><span class="field-name">result_level</span><span class="field-type">enum</span></div>
+        <div class="field-row"><span class="field-name">question_versions</span><span class="field-type">jsonb</span><span class="field-note">snapshot of question IDs used</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+
+<!-- ═══════════════════════════
+     PART 3 — REVISED PHASE 1 BUILD PLAN
+═══════════════════════════ -->
+<div class="section">
+  <div class="section-title">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h10M3 12h6" stroke="var(--amber-lt)" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Part 3 — Revised Phase 1 build plan
+  </div>
+  <div class="section-sub">All critical and major fixes incorporated. Modified days shown in amber, new days in blue. Android formally deferred to Phase 2.</div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Modified day</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>New day added</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--sage-dk)"></div>Unchanged day</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Removed task</div>
+  </div>
+
+  <!-- Week 1 -->
+  <div class="week-header open" onclick="toggleWeek(this)">
+    <span class="week-num">Week 1</span>
+    <span class="week-title">Project foundations & infrastructure</span>
+    <span class="week-pill tag-setup">Setup</span>
+    <span class="week-range">Days 1–5</span>
+    <svg class="week-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body open">
+
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 1</span>
+        <span class="day-name">Monorepo setup + tooling + CI</span>
+        <span class="day-tag tag-setup">Setup</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Initialise <code>pnpm</code> monorepo — <code>apps/api</code>, <code>apps/web</code>, <code>packages/types</code>, <code>packages/db</code>, <code>packages/events</code>, <code>packages/cache</code></div>
+        <div class="task-item primary"><div class="t-dot"></div>Configure TypeScript strict mode, shared <code>tsconfig.base.json</code>, ESLint, Prettier</div>
+        <div class="task-item primary"><div class="t-dot"></div>Set up <code>husky</code> pre-commit hooks (lint + type-check)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> create <code>.github/workflows/ci.yml</code> — on push to <code>main</code> and PRs: type-check + lint + unit tests across all workspaces (fixes M3)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> create <code>.github/workflows/deploy.yml</code> — on push to <code>main</code> if CI passes: auto-deploy API to Railway staging + web to Vercel preview (fixes M6)</div>
+        <div class="task-item"><div class="t-dot"></div>Configure <code>dotenv</code>, <code>.env.example</code> for all apps with staging + production env var groups</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Monorepo boots, CI pipeline runs on first push, staging deploy pipeline configured</span></div>
+    </div>
+
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 2</span>
+        <span class="day-name">Full revised schema + Prisma + seed</span>
+        <span class="day-tag tag-db">Database</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Spin up PostgreSQL + Redis via Docker Compose. Configure <code>DATABASE_URL</code>.</div>
+        <div class="task-item primary"><div class="t-dot"></div>Write <strong>complete</strong> <code>schema.prisma</code> incorporating all revised entities from Part 2 — including all 7 new tables and all 9 changed tables in one go</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> add <code>tenants</code>, <code>subscriptions</code>, <code>passkey_credentials</code>, <code>session_participants</code>, <code>board_strokes</code>, <code>consent_records</code>, <code>template_clones</code></div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> add <code>deleted_at</code> to Course, Unit, Lesson, Activity. Add <code>visibility</code> enum to Course, Lesson, Activity. Add <code>tenant_id</code> to all mutable tables</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> generate migration SQL with <code>--create-only</code>, review manually before applying — catches FK issues before they compound (fixes m4)</div>
+        <div class="task-item primary"><div class="t-dot"></div>Run <code>prisma migrate dev --name init</code>. Verify all tables created.</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> write seed with: (1) <code>system</code> tenant + free subscription, (2) teacher Pedro + tenant, (3) 2 students, (4) one complete B1 Unit 3 course with 2 lessons × 5 activities as a <code>public_template</code> (fixes C3)</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Full schema migrated in one clean migration, seed populates system templates, Prisma Studio shows all tables</span></div>
+    </div>
+
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 3</span>
+        <span class="day-name">API skeleton + shared types + tenant middleware</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Bootstrap Fastify with <code>cors</code>, <code>helmet</code>, <code>rate-limit</code>. Set up module folder structure.</div>
+        <div class="task-item primary"><div class="t-dot"></div>Write all shared TypeScript types in <code>packages/types</code> — DTOs for all entities including new ones</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> write Prisma middleware in <code>packages/db</code> — automatically appends <code>WHERE tenant_id = ctx.tenantId</code> on all find/update/delete operations. Exempt tables: <code>users</code>, <code>passkey_credentials</code>, <code>consent_records</code>, courses with <code>visibility = public_template</code> (fixes security M4 tenant isolation)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> write soft-delete Prisma middleware — appends <code>WHERE deleted_at IS NULL</code> on all find operations. Add <code>softDelete(id)</code> helper that sets <code>deleted_at = now()</code> instead of hard deleting (fixes M4 soft delete)</div>
+        <div class="task-item"><div class="t-dot"></div>Set up Zod validation, global error handler, standardised response shape. Set up <code>@fastify/swagger</code>.</div>
+        <div class="task-item"><div class="t-dot"></div>Wire Redis client in <code>packages/cache</code> using Upstash Redis (fixes minor Redis SPOF issue). Add PostgreSQL fallback for SRS queue.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">API server runs, tenant + soft-delete middleware tested, Swagger UI at /docs</span></div>
+    </div>
+
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 4</span>
+        <span class="day-name">Auth module — Passkeys + magic link</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-tag tag-modified">Modified (replaces password auth)</span>
+        <span class="day-hrs">8 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div><strong>Passkey registration:</strong> <code>POST /v1/auth/passkey/register/begin</code> — generate WebAuthn challenge. <code>POST /v1/auth/passkey/register/complete</code> — verify attestation, store <code>passkey_credentials</code> record. Use <code>@simplewebauthn/server</code>.</div>
+        <div class="task-item primary"><div class="t-dot"></div><strong>Passkey authentication:</strong> <code>POST /v1/auth/passkey/login/begin</code> — generate assertion challenge. <code>POST /v1/auth/passkey/login/complete</code> — verify assertion, check <code>sign_count</code> (replay prevention), issue JWT pair.</div>
+        <div class="task-item primary"><div class="t-dot"></div><strong>Magic link (OTP):</strong> <code>POST /v1/auth/magic/request</code> — generate 6-digit code, store in Redis with 10-min TTL, send via Resend. <code>POST /v1/auth/magic/verify</code> — validate code, consume from Redis, issue JWT pair.</div>
+        <div class="task-item"><div class="t-dot"></div>Implement <code>POST /v1/auth/refresh</code> — rotate refresh token. <code>POST /v1/auth/logout</code> — invalidate refresh token in Redis.</div>
+        <div class="task-item"><div class="t-dot"></div>Write <code>authenticate</code> Fastify hook — verify JWT, attach <code>req.user</code> with <code>userId</code>, <code>tenantId</code>, <code>role</code>.</div>
+        <div class="task-item"><div class="t-dot"></div>Write <code>requireRole</code> guard. Write unit tests for both auth paths.</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> on first auth (registration), auto-create <code>tenants</code> record + free <code>subscriptions</code> record for teacher role. Students get <code>tenant_id</code> set when teacher enrolls them.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Passkey and OTP auth both work end-to-end, JWT issued, tenant created on teacher registration</span></div>
+    </div>
+
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 5</span>
+        <span class="day-name">Users module + consent + billing gates</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Implement <code>POST /v1/users/student-profile</code>, <code>POST /v1/users/teacher-profile</code>, <code>GET /v1/users/me</code>, <code>PATCH /v1/users/me</code></div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> <code>DELETE /v1/users/me</code> — soft-delete user, cascade soft-delete all personal data (GDPR right to erasure). Returns confirmation receipt (fixes minor GDPR issue)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> <code>POST /v1/auth/consent</code> — record consent acceptance during onboarding. Required before profile creation can proceed. Stores <code>consent_records</code> row with policy version and hashed IP.</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> write <code>checkSubscriptionLimit</code> middleware helper — given a tenant and a limit type (<code>students</code> | <code>lesson_plans</code>), queries <code>subscriptions</code> and current count, throws <code>402</code> if exceeded. Used by enrollments and courses modules.</div>
+        <div class="task-item"><div class="t-dot"></div>Implement <code>GET /v1/teacher/students</code> — scoped to <code>tenant_id</code>. Integration test: register → consent → profile → fetch /me.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Consent recorded on registration, GDPR delete works, billing limit helper tested</span></div>
+    </div>
+
+  </div><!-- /week 1 body -->
+
+  <!-- Week 2 -->
+  <div class="week-header" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="week-num">Week 2</span>
+    <span class="week-title">Placement test + curriculum backbone</span>
+    <span class="week-pill tag-backend">Backend</span>
+    <span class="week-range">Days 6–10</span>
+    <svg class="week-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 6</span>
+        <span class="day-name">Placement test — improved scoring + retake support</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Write question bank with <strong>CEFR-tagged questions</strong>: 2 MCQ + 1 cloze per level (A1–C1 = 5 levels × 3 = 15 questions). No unique student constraint — retakes supported from day one (fixes M5 + minor m2)</div>
+        <div class="task-item primary"><div class="t-dot"></div>Improved scoring: level = highest CEFR where both MCQs answered correctly + cloze non-empty. Eliminates lucky-guessing across non-adjacent levels.</div>
+        <div class="task-item"><div class="t-dot"></div><code>GET /v1/placement/test</code>, <code>POST /v1/placement/submit</code>, <code>POST /v1/placement/skip</code> (teacher-only), <code>GET /v1/placement/history</code></div>
+        <div class="task-item"><div class="t-dot"></div>Store <code>question_versions</code> jsonb snapshot with question IDs used in this test — future-proofs question bank edits.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Improved placement scoring, retakes work, history endpoint returns all past tests</span></div>
+    </div>
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 7</span>
+        <span class="day-name">Courses module — CRUD + soft delete + billing gate</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Full CRUD for <code>Course</code>, <code>Unit</code>, <code>Lesson</code> — all scoped to <code>tenant_id</code></div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> <code>POST /v1/courses</code> checks <code>checkSubscriptionLimit('lesson_plans')</code> before creating — returns <code>402</code> with upgrade prompt if at limit (fixes freemium gate)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> all DELETE operations use <code>softDelete()</code> helper — no hard deletes. Guard: cannot soft-delete course with active enrollments (fixes M4 soft delete)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> <code>GET /v1/templates</code> — returns all courses where <code>visibility = public_template</code>, no tenant scope. <code>POST /v1/templates/:id/clone</code> — deep-clones course + units + lessons + activities into requesting tenant, records <code>template_clones</code> row.</div>
+        <div class="task-item"><div class="t-dot"></div>Status machine: draft → active → archived. Version auto-increment on update.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Courses gated by subscription, soft-deleted, templates browseable and cloneable</span></div>
+    </div>
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 8</span>
+        <span class="day-name">Activities module — type registry + image URL shortcut</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Activity CRUD scoped to <code>tenant_id</code>. Type registry: cloze, mcq, matching, ordering, open.</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> accept optional <code>image_url</code> in activity <code>content</code> schema — external URL only for Phase 1, rendered by client as-is (fixes minor media issue)</div>
+        <div class="task-item"><div class="t-dot"></div>Answer validation endpoint: <code>POST /v1/activities/:id/validate</code>. Validators + unit tests for all types.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">All activity types validate, image URL accepted, activities tenant-scoped</span></div>
+    </div>
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 9</span>
+        <span class="day-name">Enrollments — student limit gate + group session fix</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Classroom CRUD scoped to <code>tenant_id</code>. Enrollment create/delete.</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> <code>POST /v1/classrooms/:id/enroll</code> checks <code>checkSubscriptionLimit('students')</code> — counts all enrolled students across all classrooms for this tenant (fixes freemium 3-student gate)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> sessions module updated — <code>POST /v1/sessions</code> accepts either <code>studentId</code> (1-on-1) or <code>classroomId</code> (group), never both. Auto-populates <code>session_participants</code> from classroom enrollment on group session creation (fixes C1)</div>
+        <div class="task-item"><div class="t-dot"></div>Roster endpoint, student classrooms endpoint, duplicate enrollment guard.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">3-student free limit enforced, group sessions create participant records correctly</span></div>
+    </div>
+    <div class="day-card">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 10</span>
+        <span class="day-name">Progress module + XP + event bus</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Lesson progress + activity attempt logging, all <code>tenant_id</code> scoped.</div>
+        <div class="task-item primary"><div class="t-dot"></div>Auto-complete lesson, emit <code>lesson.completed</code> event on bus.</div>
+        <div class="task-item"><div class="t-dot"></div>XP award, progress summary endpoint. Integration test: full lesson flow.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Full lesson completion flow works, XP awarded, events emitted correctly</span></div>
+    </div>
+  </div><!-- /week 2 body -->
+
+  <!-- Weeks 3–6 condensed -->
+  <div class="week-header" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="week-num">Week 3</span>
+    <span class="week-title">Lesson engine + SRS + gamification + sessions</span>
+    <span class="week-pill tag-backend">Backend</span>
+    <span class="week-range">Days 11–15 · largely unchanged</span>
+    <svg class="week-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 12</span>
+        <span class="day-name">SRS module — SM-2 with activity_version check</span>
+        <span class="day-tag tag-backend">Backend</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>SM-2 algorithm, SRS queue, review logging — unchanged from original plan</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> when loading SRS queue, compare <code>srs_items.activity_version</code> with <code>activities.version</code>. If stale, reset interval to 1 and add <code>content_changed: true</code> flag in response. UI shows "This item was updated." (fixes M2)</div>
+        <div class="task-item"><div class="t-dot"></div>Streak logic, unit tests for SM-2.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">SRS detects stale activity content and resets intervals correctly</span></div>
+    </div>
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 15</span>
+        <span class="day-name">API e2e tests + OpenAPI export + staging deploy</span>
+        <span class="day-tag tag-qa">QA</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Full e2e integration test including passkey/OTP auth, tenant creation, subscription limits, template cloning</div>
+        <div class="task-item primary"><div class="t-dot"></div>Export OpenAPI spec. Verify Swift client generates. Verify Kotlin client generates (Android deferred but client must compile — fixes C2).</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> deploy API to Railway <strong>staging</strong> environment, run migrations against staging DB, seed staging data (fixes M6 — pilot will run on staging, not local)</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> verify all environment variables are correctly set in staging. Test auth flow against staging URL from a real device.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Backend live on staging URL, both native clients generate cleanly, e2e tests pass</span></div>
+    </div>
+  </div>
+
+  <div class="week-header" onclick="toggleWeek(this)" style="margin-top:12px;">
+    <span class="week-num">Weeks 4–6</span>
+    <span class="week-title">Web frontend + iOS + QA + production deploy</span>
+    <span class="week-pill tag-web">Web + iOS</span>
+    <span class="week-range">Days 16–30 · minor auth changes only</span>
+    <svg class="week-chevron" width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4.5 2.5l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="week-body">
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 16</span>
+        <span class="day-name">Web setup — passkey + magic link auth pages</span>
+        <span class="day-tag tag-web">Web</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Design system setup, component library — unchanged</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>Modified auth flow:</strong> replace email/password login form with two-path login: (1) "Sign in with passkey" button — calls <code>navigator.credentials.get()</code> via WebAuthn browser API, (2) "Send me a code" — email input + OTP entry form. No password field exists anywhere.</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>New:</strong> consent screen on first registration — checkbox + link to privacy policy. Calls <code>POST /v1/auth/consent</code> before profile creation is allowed.</div>
+        <div class="task-item"><div class="t-dot"></div>JWT session storage, protected route middleware — unchanged</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Passwordless login works in browser via passkey and OTP, consent screen recorded</span></div>
+    </div>
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 21</span>
+        <span class="day-name">iOS setup — passkey via ASAuthorizationController</span>
+        <span class="day-tag tag-ios">iOS</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">7 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Xcode project setup, Swift OpenAPI client generation — unchanged</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>Modified auth:</strong> use <code>ASAuthorizationController</code> with <code>ASAuthorizationPlatformPublicKeyCredentialProvider</code> for passkey auth. This is native iOS 16+ — Face ID / Touch ID triggers the WebAuthn flow natively. No third-party library needed.</div>
+        <div class="task-item added"><div class="t-dot"></div><strong>Magic link fallback:</strong> "Use email code instead" — email text field + 6-digit OTP input view. Same API endpoint as web.</div>
+        <div class="task-item"><div class="t-dot"></div>Design token system, component library, navigation structure — unchanged</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Face ID passkey auth works on iPad, OTP fallback works, tokens stored in Keychain</span></div>
+    </div>
+    <div class="day-card modified">
+      <div class="day-header" onclick="toggleDay(this)">
+        <span class="day-num">Day 28</span>
+        <span class="day-name">First real student pilot — on staging</span>
+        <span class="day-tag tag-qa">QA</span>
+        <span class="day-tag tag-modified">Modified</span>
+        <span class="day-hrs">6 hrs</span>
+      </div>
+      <div class="task-list">
+        <div class="task-item primary"><div class="t-dot"></div>Pilot runs against <strong>staging URL</strong>, not localhost (fixes M6)</div>
+        <div class="task-item primary"><div class="t-dot"></div>Student uses system template content from seed (fixes C3 — no hand-building required before pilot)</div>
+        <div class="task-item primary"><div class="t-dot"></div>Verify freemium limit: try to enroll a 4th student — confirm <code>402</code> is shown correctly as upgrade prompt</div>
+        <div class="task-item"><div class="t-dot"></div>Watch student use passkey or OTP to register. Collect all other feedback as before.</div>
+      </div>
+      <div class="day-footer"><span class="del-label">Deliverable</span><span class="del-text">Real student completes onboarding on staging, freemium gate tested, feedback collected</span></div>
+    </div>
+  </div>
+
+</div><!-- /section -->
+
+<script>
+  function toggleWeek(h) {
+    h.classList.toggle('open');
+    h.nextElementSibling.classList.toggle('open');
+  }
+  function toggleDay(h) {
+    const tasks = h.nextElementSibling;
+    tasks.style.display = tasks.style.display === 'none' ? 'flex' : 'none';
+  }
+  // Open all task lists by default
+  document.querySelectorAll('.task-list').forEach(t => t.style.display = 'flex');
+  // Open week 1
+  document.querySelector('.week-header').classList.add('open');
+  document.querySelector('.week-body').classList.add('open');
+</script>
+</body>
+</html>

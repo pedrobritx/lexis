@@ -1,6 +1,6 @@
 # docker-compose.yml — Development environment
 # Run: docker compose up -d
-# PostgreSQL on 5432, Redis on 6379
+# PostgreSQL on 5433 (5432 may be used by other projects), Redis on 6379
 
 services:
   postgres:
@@ -8,7 +8,7 @@ services:
     container_name: lexis-postgres-dev
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: lexis_dev
       POSTGRES_USER: lexis
