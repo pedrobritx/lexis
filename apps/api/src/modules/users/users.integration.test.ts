@@ -40,13 +40,8 @@ async function registerTeacher(request: ReturnType<typeof supertest>) {
   const email = testEmail()
   await request.post('/v1/auth/magic/request').send({ email })
 
-  const code = await prisma.user
+  await prisma.user
     .findUnique({ where: { email } })
-    .then(() => {
-      // Pull code from Redis via the cache client directly
-      const { redis } = require('@lexis/cache')
-      return redis.get(`otp:${email}`)
-    })
     .catch(() => null)
 
   // Fallback: directly read OTP from Redis in test
@@ -91,7 +86,7 @@ afterEach(async () => {
 
 describe('POST /v1/auth/consent', () => {
   it('records consent and returns {consented: true}', async () => {
-    const { userId, tenantId, accessToken } = await registerTeacher(request)
+    const { userId, accessToken } = await registerTeacher(request)
 
     const res = await request
       .post('/v1/auth/consent')
@@ -164,7 +159,7 @@ describe('GET /v1/users/me', () => {
 
 describe('PATCH /v1/users/me', () => {
   it('creates teacher profile on first patch', async () => {
-    const { userId, accessToken } = await registerTeacher(request)
+    const { accessToken } = await registerTeacher(request)
 
     const res = await request
       .patch('/v1/users/me')

@@ -385,6 +385,7 @@ model Activity {
   tenantId         String       @map("tenant_id")
   type             ActivityType
   title            String
+  position         Int          @default(0)
   content          Json
   scoringRules     Json?        @map("scoring_rules")
   skillTags        String[]     @map("skill_tags")
