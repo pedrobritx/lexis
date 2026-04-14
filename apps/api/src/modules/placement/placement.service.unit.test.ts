@@ -32,7 +32,7 @@ function answersUpToLevel(maxLevel: 'a1' | 'a2' | 'b1' | 'b2' | 'c1') {
   const cutoff = order.indexOf(maxLevel)
   return Object.fromEntries(
     Object.entries(ALL_CORRECT).filter(([id]) => {
-      const qLevel = id.split('_')[0]
+      const qLevel = id.split('_')[0] ?? ''
       return order.indexOf(qLevel) <= cutoff
     }),
   )

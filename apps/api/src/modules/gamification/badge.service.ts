@@ -1,88 +1,113 @@
-/**
- * Badge award service.
- *
- * `checkAndAwardBadges` is the main entry point — called from event listeners.
- * It finds all badges for the given trigger type, skips already-awarded ones,
- * runs each evaluator, and persists the award when criteria are met.
- */
 import { prisma } from '@lexis/db'
 import { logger } from '@lexis/logger'
-import { BADGE_CATALOGUE } from './badge.catalogue.js'
-import { getEvaluator } from './badge.evaluator.js'
+import {
+  evalLessonCompleted,
+  evalActivityCorrect,
+  evalSrsReviewed,
+  evalStreakMilestone,
+  type TriggerCriteria,
+} from './badge.evaluators.js'
 
 const log = logger('badge-service')
 
-// ── Award ─────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────
 
-/**
- * Create the student_badge row and increment xp_total.
- * Both writes are wrapped in a transaction so XP is never granted without the badge.
- */
-async function awardBadge(
-  studentId: string,
-  tenantId: string,
-  badgeId: string,
-  xpReward: number,
-): Promise<void> {
-  await prisma.$transaction([
-    prisma.studentBadge.create({
-      data: { studentId, badgeId, tenantId },
-    }),
-    prisma.studentProfile.updateMany({
-      where: { userId: studentId, tenantId },
-      data: { xpTotal: { increment: xpReward } },
-    }),
-  ])
+export interface AwardedBadge {
+  badgeId: string
+  slug: string
+  name: string
+  xpReward: number
+  rarity: string
 }
 
-// ── Check + Award ─────────────────────────────────────────
+// ─── Award flow ───────────────────────────────────────────
 
 /**
- * Evaluate all badges belonging to `triggerType` for this student.
+ * Check and award all badges for a given trigger type.
  *
- * Steps per badge:
- *   1. Look up badge row in DB (must be seeded — skip if missing)
- *   2. Skip if student already has the badge
- *   3. Run evaluator — skip if criteria not met
- *   4. Award badge + XP
- *
- * Individual failures are caught and logged without halting other badges.
+ * 1. Load all badges matching triggerType.
+ * 2. Skip badges the student already has.
+ * 3. Run the evaluator for each remaining badge.
+ * 4. If evaluator returns true, insert student_badge + award XP.
+ * 5. Return the list of newly awarded badges.
  */
 export async function checkAndAwardBadges(
+  triggerType: string,
   studentId: string,
   tenantId: string,
-  triggerType: string,
-): Promise<void> {
-  const definitions = BADGE_CATALOGUE.filter((b) => b.triggerType === triggerType)
+  extraPayload?: Record<string, unknown>, // e.g. { days: 7 } for streak
+): Promise<AwardedBadge[]> {
+  // Load all badges for this trigger type
+  const badges = await prisma.badge.findMany({
+    where: { triggerType, visibleToStudent: true },
+  })
+  if (badges.length === 0) return []
 
-  for (const def of definitions) {
-    const evaluator = getEvaluator(def.slug)
-    if (!evaluator) continue
+  // Load badges already held by this student
+  const existing = await prisma.studentBadge.findMany({
+    where: { studentId, badgeId: { in: badges.map(b => b.id) } },
+    select: { badgeId: true },
+  })
+  const alreadyHeld = new Set(existing.map(e => e.badgeId))
+
+  const awarded: AwardedBadge[] = []
+
+  for (const badge of badges) {
+    if (alreadyHeld.has(badge.id)) continue
+
+    const criteria = badge.triggerCriteria as TriggerCriteria
+    let qualifies = false
 
     try {
-      // Fetch the seeded badge row
-      const badge = await prisma.badge.findUnique({ where: { slug: def.slug } })
-      if (!badge) {
-        log.warn({ slug: def.slug }, 'Badge not found in DB — run db:seed')
-        continue
+      if (triggerType === 'lesson.completed') {
+        qualifies = await evalLessonCompleted(studentId, tenantId, criteria)
+      } else if (triggerType === 'activity.correct') {
+        qualifies = await evalActivityCorrect(studentId, tenantId, criteria)
+      } else if (triggerType === 'srs.reviewed') {
+        qualifies = await evalSrsReviewed(studentId, tenantId, criteria)
+      } else if (triggerType === 'streak.milestone') {
+        const days = (extraPayload?.days as number) ?? 0
+        qualifies = evalStreakMilestone(days, criteria)
       }
+    } catch (err) {
+      log.error({ err, badgeSlug: badge.slug, studentId }, 'Badge evaluator threw')
+      continue
+    }
 
-      // Skip if already awarded
-      const existing = await prisma.studentBadge.findUnique({
-        where: { studentId_badgeId: { studentId, badgeId: badge.id } },
+    if (!qualifies) continue
+
+    // Award the badge
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.studentBadge.create({
+          data: { studentId, badgeId: badge.id, tenantId },
+        })
+        if (badge.xpReward > 0) {
+          await tx.studentProfile.updateMany({
+            where: { userId: studentId, tenantId },
+            data: { xpTotal: { increment: badge.xpReward } },
+          })
+        }
       })
-      if (existing) continue
 
-      // Evaluate criteria
-      const earned = await evaluator(studentId, tenantId)
-      if (!earned) continue
+      awarded.push({
+        badgeId: badge.id,
+        slug: badge.slug,
+        name: badge.name,
+        xpReward: badge.xpReward,
+        rarity: badge.rarity,
+      })
 
-      // Award
-      await awardBadge(studentId, tenantId, badge.id, badge.xpReward)
-
-      log.info({ slug: def.slug, studentId, xpReward: badge.xpReward }, 'Badge awarded')
+      log.info({ studentId, badgeSlug: badge.slug, xpReward: badge.xpReward }, 'Badge awarded')
     } catch (err: unknown) {
-      log.error({ err, slug: def.slug, studentId }, 'Badge evaluation error')
+      // Unique constraint means another process awarded it simultaneously — ignore
+      const isUniqueViolation =
+        err instanceof Error && err.message.includes('Unique constraint')
+      if (!isUniqueViolation) {
+        log.error({ err, badgeSlug: badge.slug, studentId }, 'Failed to award badge')
+      }
     }
   }
+
+  return awarded
 }

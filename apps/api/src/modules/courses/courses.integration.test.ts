@@ -302,7 +302,7 @@ describe('PATCH /v1/courses/:courseId', () => {
 
 describe('DELETE /v1/courses/:courseId', () => {
   it('soft-deletes the course (with its units and lessons)', async () => {
-    const { accessToken, tenantId, userId } = await registerTeacher(request)
+    const { accessToken } = await registerTeacher(request)
 
     const create = await request
       .post('/v1/courses')
@@ -595,7 +595,7 @@ describe('GET /v1/templates', () => {
 
 describe('POST /v1/templates/:id/clone', () => {
   it('deep-clones a template into the caller\'s tenant', async () => {
-    const { accessToken: teacherToken, tenantId, userId } = await registerTeacher(request)
+    const { tenantId, userId } = await registerTeacher(request)
 
     // Seed a template with units + lessons directly
     const template = await prisma.course.create({
@@ -637,9 +637,9 @@ describe('POST /v1/templates/:id/clone', () => {
       include: { lessons: { where: { deletedAt: null } } },
     })
     expect(units).toHaveLength(1)
-    expect(units[0].title).toBe('Template Unit')
-    expect(units[0].lessons).toHaveLength(1)
-    expect(units[0].lessons[0].title).toBe('Template Lesson')
+    expect(units[0]!.title).toBe('Template Unit')
+    expect(units[0]!.lessons).toHaveLength(1)
+    expect(units[0]!.lessons[0]!.title).toBe('Template Lesson')
 
     // Verify template_clone lineage record
     const clone = await prisma.templateClone.findFirst({
@@ -659,7 +659,7 @@ describe('POST /v1/templates/:id/clone', () => {
   })
 
   it('returns 402 when lesson_plan limit reached before clone', async () => {
-    const { accessToken, tenantId, userId } = await registerTeacher(request)
+    const { tenantId, userId } = await registerTeacher(request)
 
     // Seed a template
     const template = await prisma.course.create({
