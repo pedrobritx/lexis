@@ -1,12 +1,34 @@
-/**
- * Progress module — Phase 1 Day 10
- *
- * Lesson progress tracking, activity attempt logging, XP award.
- * Emits lesson.completed + activity.correct events for SRS and gamification.
- * Stubs registered here so app.ts compiles cleanly from Day 1.
- */
 import type { FastifyInstance } from 'fastify'
+import { authenticate } from '../../plugins/authenticate.js'
+import { logAttempt, getLessonProgress } from './progress.service.js'
 
-export async function progressRoutes(_fastify: FastifyInstance): Promise<void> {
-  // Day 10 — POST /v1/progress/activities/:id/attempt, lesson auto-complete
+export async function progressRoutes(app: FastifyInstance): Promise<void> {
+  // POST /v1/progress/activities/:id/attempt
+  app.post<{
+    Params: { id: string }
+    Body: { correct: boolean; score?: number; response?: unknown }
+  }>(
+    '/activities/:id/attempt',
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const result = await logAttempt(
+        req.params.id,
+        req.user.userId,
+        req.user.tenantId,
+        req.body,
+      )
+      return reply.code(201).send(result)
+    },
+  )
+
+  // GET /v1/progress/lessons/:id
+  app.get<{ Params: { id: string } }>(
+    '/lessons/:id',
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const progress = await getLessonProgress(req.params.id, req.user.userId)
+      if (!progress) return reply.code(404).send({ error: 'No progress record found' })
+      return progress
+    },
+  )
 }

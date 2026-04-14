@@ -188,8 +188,20 @@ export async function logReview(
     data: { streakDays: newStreakDays },
   })
 
-  // ── Emit event ────────────────────────────────────────
+  // ── Emit events ───────────────────────────────────────
   eventBus.emit('srs.reviewed', { studentId, srsItemId, tenantId, quality })
+
+  // Emit streak.milestone when the student crosses a tracked threshold.
+  // Only emit if the NEW streak value is a milestone and the PREVIOUS was below it,
+  // so the event fires exactly once per milestone (not on every subsequent review).
+  const STREAK_MILESTONES = [3, 7, 30] as const
+  const prevStreak = studentProfile?.streakDays ?? 0
+  for (const milestone of STREAK_MILESTONES) {
+    if (newStreakDays >= milestone && prevStreak < milestone) {
+      eventBus.emit('streak.milestone', { studentId, tenantId, days: newStreakDays })
+      break // Only the highest new milestone fires per review
+    }
+  }
 
   log.info(
     {

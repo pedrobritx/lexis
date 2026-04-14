@@ -1,43 +1,47 @@
-/**
- * Gamification event listeners.
- *
- * Wires the event bus to badge evaluation on every relevant event.
- * Call `initGamificationListeners()` once at app startup, after `buildApp()`.
- *
- * Covered events:
- *   lesson.completed  → lesson-count badges + course-conqueror
- *   activity.correct  → streak/accuracy/variety badges
- *   srs.reviewed      → SRS-count badges
- *   streak.milestone  → streak-day badges
- */
-import { eventBus } from '@lexis/events'
 import { logger } from '@lexis/logger'
+import { eventBus } from '@lexis/events'
 import { checkAndAwardBadges } from './badge.service.js'
 
 const log = logger('gamification-listeners')
 
+/**
+ * Wire up event bus listeners for badge evaluation.
+ * Call once at app startup (after buildApp).
+ *
+ * Events handled:
+ *   lesson.completed  → check lesson count + course_conqueror badges
+ *   activity.correct  → check consecutive, type variety, grammar accuracy badges
+ *   srs.reviewed      → check SRS review count badges
+ *   streak.milestone  → check streak day badges
+ */
 export function initGamificationListeners(): void {
+  // ── lesson.completed ─────────────────────────────────
   eventBus.on('lesson.completed', ({ studentId, tenantId }) => {
-    checkAndAwardBadges(studentId, tenantId, 'lesson.completed').catch((err: unknown) => {
-      log.error({ err, studentId }, 'Gamification error on lesson.completed')
+    checkAndAwardBadges('lesson.completed', studentId, tenantId).catch((err: unknown) => {
+      log.error({ err, studentId }, 'Gamification: lesson.completed handler failed')
     })
   })
 
+  // ── activity.correct ─────────────────────────────────
   eventBus.on('activity.correct', ({ studentId, tenantId }) => {
-    checkAndAwardBadges(studentId, tenantId, 'activity.correct').catch((err: unknown) => {
-      log.error({ err, studentId }, 'Gamification error on activity.correct')
+    checkAndAwardBadges('activity.correct', studentId, tenantId).catch((err: unknown) => {
+      log.error({ err, studentId }, 'Gamification: activity.correct handler failed')
     })
   })
 
+  // ── srs.reviewed ─────────────────────────────────────
   eventBus.on('srs.reviewed', ({ studentId, tenantId }) => {
-    checkAndAwardBadges(studentId, tenantId, 'srs.reviewed').catch((err: unknown) => {
-      log.error({ err, studentId }, 'Gamification error on srs.reviewed')
+    checkAndAwardBadges('srs.reviewed', studentId, tenantId).catch((err: unknown) => {
+      log.error({ err, studentId }, 'Gamification: srs.reviewed handler failed')
     })
   })
 
-  eventBus.on('streak.milestone', ({ studentId, tenantId }) => {
-    checkAndAwardBadges(studentId, tenantId, 'streak.milestone').catch((err: unknown) => {
-      log.error({ err, studentId }, 'Gamification error on streak.milestone')
+  // ── streak.milestone ─────────────────────────────────
+  eventBus.on('streak.milestone', ({ studentId, tenantId, days }) => {
+    checkAndAwardBadges('streak.milestone', studentId, tenantId, { days }).catch((err: unknown) => {
+      log.error({ err, studentId, days }, 'Gamification: streak.milestone handler failed')
     })
   })
+
+  log.info('Gamification listeners registered')
 }
