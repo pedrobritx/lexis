@@ -14,6 +14,7 @@ import { classroomsRoutes, sessionsRoutes } from './modules/enrollments/enrollme
 import { progressRoutes } from './modules/progress/progress.routes.js'
 import { srsRoutes } from './modules/srs/srs.routes.js'
 import { initSrsListeners } from './modules/srs/srs.service.js'
+import { initGamificationListeners } from './modules/gamification/gamification.listeners.js'
 
 export async function buildApp() {
   const app = Fastify({
@@ -91,6 +92,7 @@ export async function buildApp() {
   await app.register(srsRoutes, { prefix: '/v1/srs' })
 
   initSrsListeners()
+  initGamificationListeners()
 
   return app
 }
