@@ -1,15 +1,8 @@
-/**
- * Enrollments module — Phase 1 Day 9
- *
- * Classroom CRUD, enrollment create/delete, session management.
- * Stubs registered here so app.ts compiles cleanly from Day 1.
- */
+// Day 9 stub — full implementation pending (classroom CRUD, enrollment, sessions)
 import type { FastifyInstance } from 'fastify'
 
-export async function classroomsRoutes(_fastify: FastifyInstance): Promise<void> {
-  // Day 9 — Classroom CRUD, POST /v1/classrooms/:id/enroll
-}
+/** Routes mounted at /v1/classrooms */
+export async function classroomsRoutes(_app: FastifyInstance): Promise<void> {}
 
-export async function sessionsRoutes(_fastify: FastifyInstance): Promise<void> {
-  // Day 9 — Session CRUD, auto-populate session_participants
-}
+/** Routes mounted at /v1/sessions */
+export async function sessionsRoutes(_app: FastifyInstance): Promise<void> {}
