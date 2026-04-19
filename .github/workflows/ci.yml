@@ -52,6 +52,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
+      - run: pnpm -r --filter "./packages/**" build
       - run: pnpm test:unit
 
   integration-tests:
@@ -101,6 +102,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
+      - run: pnpm -r --filter "./packages/**" build
       - run: pnpm test:integration
 
   realtime-tests:
@@ -134,4 +136,5 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm -r --filter "./packages/**" build
       - run: pnpm test:realtime
