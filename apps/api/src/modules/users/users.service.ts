@@ -106,15 +106,35 @@ export async function patchMe(
 export async function deleteMe(userId: string): Promise<Date> {
   const effectiveAt = new Date()
 
-  // Soft-delete user
-  await prisma.user.update({
-    where: { id: userId },
-    data: { deletedAt: effectiveAt },
-  })
+  // Soft-delete user + anonymize profile PII in a single transaction
+  await prisma.$transaction([
+    // Anonymize teacher profile if present
+    prisma.teacherProfile.updateMany({
+      where: { userId },
+      data: {
+        displayName: '[deleted]',
+        bio: null,
+        teacherLanguage: null,
+      },
+    }),
+    // Anonymize student profile if present
+    prisma.studentProfile.updateMany({
+      where: { userId },
+      data: {
+        displayName: '[deleted]',
+        timezone: 'UTC',
+      },
+    }),
+    // Soft-delete the user record last
+    prisma.user.update({
+      where: { id: userId },
+      data: { deletedAt: effectiveAt },
+    }),
+  ])
 
-  // Revoke all refresh tokens from Redis
+  // Revoke all refresh tokens from Redis (outside transaction — Redis is not transactional)
   await invalidateAllTokensForUser(userId)
 
-  log.info({ userId }, 'User soft-deleted (GDPR)')
+  log.info({ userId }, 'User soft-deleted and PII anonymized (GDPR)')
   return effectiveAt
 }
