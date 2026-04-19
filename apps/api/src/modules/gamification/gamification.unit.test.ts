@@ -10,6 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockPrisma = {
   lessonProgress: {
     count: vi.fn(),
+    findMany: vi.fn(),
   },
   activityAttempt: {
     findMany: vi.fn(),
@@ -26,10 +27,10 @@ const mockPrisma = {
     findMany: vi.fn(),
   },
   badge: {
-    findUnique: vi.fn(),
+    findMany: vi.fn(),
   },
   studentBadge: {
-    findUnique: vi.fn(),
+    findMany: vi.fn(),
     create: vi.fn(),
   },
   $transaction: vi.fn(),
@@ -49,9 +50,12 @@ const T = 'tenant-1'
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockPrisma.$transaction.mockImplementation(async (ops: unknown[]) => {
-    for (const op of ops) await op
-    return []
+  mockPrisma.$transaction.mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
+    const tx = {
+      studentBadge: { create: vi.fn().mockResolvedValue({}) },
+      studentProfile: { updateMany: vi.fn().mockResolvedValue({}) },
+    }
+    return fn(tx)
   })
 })
 
@@ -243,55 +247,55 @@ describe('month-streak evaluator', () => {
 
 describe('checkAndAwardBadges', () => {
   it('awards a badge when evaluator returns true and badge not yet awarded', async () => {
-    const badge = {
-      id: 'badge-uuid-1',
-      slug: 'first-steps',
-      xpReward: 25,
-    }
-    mockPrisma.badge.findUnique.mockResolvedValue(badge)
-    mockPrisma.studentBadge.findUnique.mockResolvedValue(null) // not awarded yet
-    mockPrisma.lessonProgress.count.mockResolvedValue(1) // evaluator passes
+    const badge = { id: 'badge-uuid-1', slug: 'first-steps', xpReward: 25, rarity: 'common', triggerCriteria: { type: 'count', threshold: 1 } }
+    mockPrisma.badge.findMany.mockResolvedValue([badge])
+    mockPrisma.studentBadge.findMany.mockResolvedValue([]) // not awarded yet
+    mockPrisma.lessonProgress.count.mockResolvedValue(1)   // evaluator passes
 
-    await checkAndAwardBadges(S, T, 'lesson.completed')
+    await checkAndAwardBadges('lesson.completed', S, T)
 
     expect(mockPrisma.$transaction).toHaveBeenCalled()
   })
 
   it('skips when badge already awarded', async () => {
-    mockPrisma.badge.findUnique.mockResolvedValue({ id: 'badge-uuid-1', slug: 'first-steps', xpReward: 25 })
-    mockPrisma.studentBadge.findUnique.mockResolvedValue({ id: 'existing' }) // already awarded
+    const badge = { id: 'badge-uuid-1', slug: 'first-steps', xpReward: 25, rarity: 'common', triggerCriteria: { type: 'count', threshold: 1 } }
+    mockPrisma.badge.findMany.mockResolvedValue([badge])
+    mockPrisma.studentBadge.findMany.mockResolvedValue([{ badgeId: 'badge-uuid-1' }]) // already held
     mockPrisma.lessonProgress.count.mockResolvedValue(5)
 
-    await checkAndAwardBadges(S, T, 'lesson.completed')
+    await checkAndAwardBadges('lesson.completed', S, T)
 
     expect(mockPrisma.$transaction).not.toHaveBeenCalled()
   })
 
   it('skips when evaluator returns false', async () => {
-    mockPrisma.badge.findUnique.mockResolvedValue({ id: 'badge-uuid-1', slug: 'first-steps', xpReward: 25 })
-    mockPrisma.studentBadge.findUnique.mockResolvedValue(null)
+    const badge = { id: 'badge-uuid-1', slug: 'first-steps', xpReward: 25, rarity: 'common', triggerCriteria: { type: 'count', threshold: 1 } }
+    mockPrisma.badge.findMany.mockResolvedValue([badge])
+    mockPrisma.studentBadge.findMany.mockResolvedValue([])
     mockPrisma.lessonProgress.count.mockResolvedValue(0) // evaluator fails
 
-    await checkAndAwardBadges(S, T, 'lesson.completed')
+    await checkAndAwardBadges('lesson.completed', S, T)
 
     expect(mockPrisma.$transaction).not.toHaveBeenCalled()
   })
 
-  it('skips gracefully when badge not seeded in DB', async () => {
-    mockPrisma.badge.findUnique.mockResolvedValue(null) // badge missing from DB
+  it('returns empty array when no badges match trigger type', async () => {
+    mockPrisma.badge.findMany.mockResolvedValue([])
 
-    await expect(checkAndAwardBadges(S, T, 'lesson.completed')).resolves.toBeUndefined()
+    await expect(checkAndAwardBadges('lesson.completed', S, T)).resolves.toEqual([])
     expect(mockPrisma.$transaction).not.toHaveBeenCalled()
   })
 
-  it('continues evaluating other badges when one throws', async () => {
-    // first-steps throws, bookworm succeeds
-    mockPrisma.badge.findUnique
-      .mockResolvedValueOnce(null) // first-steps not in DB → skip
-      .mockResolvedValue({ id: 'badge-uuid-3', slug: 'bookworm', xpReward: 50 })
-    mockPrisma.studentBadge.findUnique.mockResolvedValue(null)
-    mockPrisma.lessonProgress.count.mockResolvedValue(10)
+  it('continues evaluating other badges when one evaluator throws', async () => {
+    const badge1 = { id: 'badge-uuid-1', slug: 'first-steps', xpReward: 25, rarity: 'common', triggerCriteria: { type: 'count', threshold: 1 } }
+    const badge2 = { id: 'badge-uuid-3', slug: 'bookworm', xpReward: 50, rarity: 'rare', triggerCriteria: { type: 'count', threshold: 10 } }
+    mockPrisma.badge.findMany.mockResolvedValue([badge1, badge2])
+    mockPrisma.studentBadge.findMany.mockResolvedValue([])
+    mockPrisma.lessonProgress.count
+      .mockRejectedValueOnce(new Error('DB error')) // badge1 evaluator throws
+      .mockResolvedValue(10)                         // badge2 evaluator succeeds
 
-    await expect(checkAndAwardBadges(S, T, 'lesson.completed')).resolves.toBeUndefined()
+    await expect(checkAndAwardBadges('lesson.completed', S, T)).resolves.toBeDefined()
+    expect(mockPrisma.$transaction).toHaveBeenCalledTimes(1) // only badge2 awarded
   })
 })

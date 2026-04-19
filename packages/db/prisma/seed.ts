@@ -485,7 +485,6 @@ async function main() {
   console.log('  → Badge catalogue (12 badges)')
 
   type BadgeSeed = {
-    id: string
     slug: string
     name: string
     description: string
@@ -499,7 +498,6 @@ async function main() {
   const badges: BadgeSeed[] = [
     // ── Common ───────────────────────────────────────────────────────────────
     {
-      id: 'badge000-0000-0000-0000-000000000001',
       slug: 'first-steps',
       name: 'First Steps',
       description: 'Complete your very first lesson.',
@@ -510,7 +508,6 @@ async function main() {
       xpReward: 25,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000002',
       slug: 'on-a-roll',
       name: 'On a Roll',
       description: 'Maintain a 3-day study streak.',
@@ -521,7 +518,6 @@ async function main() {
       xpReward: 25,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000003',
       slug: 'bookworm',
       name: 'Bookworm',
       description: 'Complete 10 lessons.',
@@ -532,7 +528,6 @@ async function main() {
       xpReward: 50,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000004',
       slug: 'sharp-eye',
       name: 'Sharp Eye',
       description: 'Answer 10 activities correctly in a row.',
@@ -543,7 +538,6 @@ async function main() {
       xpReward: 50,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000005',
       slug: 'review-rookie',
       name: 'Review Rookie',
       description: 'Complete your first spaced-review session.',
@@ -554,7 +548,6 @@ async function main() {
       xpReward: 25,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000006',
       slug: 'dedicated-learner',
       name: 'Dedicated Learner',
       description: 'Complete 50 spaced-review sessions.',
@@ -565,7 +558,6 @@ async function main() {
       xpReward: 50,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000007',
       slug: 'well-rounded',
       name: 'Well-Rounded',
       description: 'Answer correctly in 3 or more different activity types.',
@@ -577,7 +569,6 @@ async function main() {
     },
     // ── Rare ─────────────────────────────────────────────────────────────────
     {
-      id: 'badge000-0000-0000-0000-000000000008',
       slug: 'week-warrior',
       name: 'Week Warrior',
       description: 'Maintain a 7-day study streak.',
@@ -588,7 +579,6 @@ async function main() {
       xpReward: 100,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000009',
       slug: 'grammar-master',
       name: 'Grammar Master',
       description: 'Achieve 90%+ accuracy across 20+ grammar-tagged activities.',
@@ -599,7 +589,6 @@ async function main() {
       xpReward: 150,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000010',
       slug: 'course-conqueror',
       name: 'Course Conqueror',
       description: 'Complete every lesson in an entire course.',
@@ -611,7 +600,6 @@ async function main() {
     },
     // ── Legendary ────────────────────────────────────────────────────────────
     {
-      id: 'badge000-0000-0000-0000-000000000011',
       slug: 'month-streak',
       name: 'Unstoppable',
       description: 'Maintain a 30-day study streak.',
@@ -622,7 +610,6 @@ async function main() {
       xpReward: 300,
     },
     {
-      id: 'badge000-0000-0000-0000-000000000012',
       slug: 'century-club',
       name: 'Century Club',
       description: 'Complete 100 lessons.',
@@ -634,9 +621,11 @@ async function main() {
     },
   ]
 
+  // Upsert by slug (the natural unique key) so the seed is idempotent
+  // regardless of what IDs may exist in the database from previous runs.
   for (const badge of badges) {
     await prisma.badge.upsert({
-      where: { id: badge.id },
+      where: { slug: badge.slug },
       update: {
         name: badge.name,
         description: badge.description,

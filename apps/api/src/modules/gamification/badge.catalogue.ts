@@ -1,9 +1,17 @@
 /**
  * Badge catalogue — all 12 badges for Phase 1.
  *
- * Deterministic IDs so the seed is idempotent.
- * `triggerCriteria` is the typed JSON stored in the badges table —
- * the evaluator registry reads it to decide whether a student qualifies.
+ * IDs and triggerCriteria format must stay in sync with packages/db/prisma/seed.ts.
+ * The badge.service.ts queries the DB (seeded from seed.ts) as the source of truth;
+ * this file is the TypeScript documentation layer.
+ *
+ * triggerCriteria shapes used by badge.evaluators.ts:
+ *   { type: 'count', threshold: N }                               — lesson/srs count
+ *   { type: 'consecutive_correct', threshold: N }                  — activity streak
+ *   { type: 'type_variety', threshold: N }                         — distinct activity types
+ *   { type: 'grammar_accuracy', accuracy_pct: N, min_attempts: N, skill_tag_pattern: string }
+ *   { type: 'course_conqueror' }                                   — all lessons in a course
+ *   { type: 'streak_days', days: N }                               — streak milestone
  */
 
 export type BadgeTriggerType = 'lesson.completed' | 'activity.correct' | 'srs.reviewed' | 'streak.milestone'
@@ -27,84 +35,84 @@ export const BADGE_CATALOGUE: BadgeDefinition[] = [
   // ── Common (7) ──────────────────────────────────────────
 
   {
-    id: 'ba000001-0000-0000-0000-000000000001',
+    id: 'badge000-0000-0000-0000-000000000001',
     slug: 'first-steps',
     name: 'First Steps',
-    description: 'Complete your first lesson.',
+    description: 'Complete your very first lesson.',
     triggerType: 'lesson.completed',
-    triggerCriteria: { count: 1 },
+    triggerCriteria: { type: 'count', threshold: 1 },
     iconType: 'emoji',
     rarity: 'common',
     xpReward: 25,
     visibleToStudent: true,
   },
   {
-    id: 'ba000001-0000-0000-0000-000000000002',
+    id: 'badge000-0000-0000-0000-000000000002',
     slug: 'on-a-roll',
     name: 'On a Roll',
-    description: 'Keep a 3-day review streak.',
+    description: 'Maintain a 3-day study streak.',
     triggerType: 'streak.milestone',
-    triggerCriteria: { days: 3 },
+    triggerCriteria: { type: 'streak_days', days: 3 },
     iconType: 'emoji',
     rarity: 'common',
     xpReward: 25,
     visibleToStudent: true,
   },
   {
-    id: 'ba000001-0000-0000-0000-000000000003',
+    id: 'badge000-0000-0000-0000-000000000003',
     slug: 'bookworm',
     name: 'Bookworm',
     description: 'Complete 10 lessons.',
     triggerType: 'lesson.completed',
-    triggerCriteria: { count: 10 },
+    triggerCriteria: { type: 'count', threshold: 10 },
     iconType: 'emoji',
     rarity: 'common',
     xpReward: 50,
     visibleToStudent: true,
   },
   {
-    id: 'ba000001-0000-0000-0000-000000000004',
+    id: 'badge000-0000-0000-0000-000000000004',
     slug: 'sharp-eye',
     name: 'Sharp Eye',
-    description: 'Answer 10 activities in a row correctly.',
+    description: 'Answer 10 activities correctly in a row.',
     triggerType: 'activity.correct',
-    triggerCriteria: { streak: 10 },
+    triggerCriteria: { type: 'consecutive_correct', threshold: 10 },
     iconType: 'emoji',
     rarity: 'common',
     xpReward: 50,
     visibleToStudent: true,
   },
   {
-    id: 'ba000001-0000-0000-0000-000000000005',
+    id: 'badge000-0000-0000-0000-000000000005',
     slug: 'review-rookie',
     name: 'Review Rookie',
-    description: 'Complete your first SRS review.',
+    description: 'Complete your first spaced-review session.',
     triggerType: 'srs.reviewed',
-    triggerCriteria: { count: 1 },
+    triggerCriteria: { type: 'count', threshold: 1 },
     iconType: 'emoji',
     rarity: 'common',
     xpReward: 25,
     visibleToStudent: true,
   },
   {
-    id: 'ba000001-0000-0000-0000-000000000006',
+    id: 'badge000-0000-0000-0000-000000000006',
     slug: 'dedicated-learner',
     name: 'Dedicated Learner',
-    description: 'Complete 50 SRS reviews.',
+    description: 'Complete 50 spaced-review sessions.',
     triggerType: 'srs.reviewed',
-    triggerCriteria: { count: 50 },
+    triggerCriteria: { type: 'count', threshold: 50 },
     iconType: 'emoji',
     rarity: 'common',
     xpReward: 50,
     visibleToStudent: true,
   },
   {
-    id: 'ba000001-0000-0000-0000-000000000007',
+    id: 'badge000-0000-0000-0000-000000000007',
     slug: 'well-rounded',
     name: 'Well-Rounded',
-    description: 'Answer at least one activity correctly in 3 different activity types.',
+    description: 'Answer correctly in 3 or more different activity types.',
     triggerType: 'activity.correct',
-    triggerCriteria: { distinctTypes: 3 },
+    triggerCriteria: { type: 'type_variety', threshold: 3 },
     iconType: 'emoji',
     rarity: 'common',
     xpReward: 50,
@@ -114,36 +122,41 @@ export const BADGE_CATALOGUE: BadgeDefinition[] = [
   // ── Rare (3) ─────────────────────────────────────────────
 
   {
-    id: 'ba000002-0000-0000-0000-000000000001',
+    id: 'badge000-0000-0000-0000-000000000008',
     slug: 'week-warrior',
     name: 'Week Warrior',
-    description: 'Keep a 7-day review streak.',
+    description: 'Maintain a 7-day study streak.',
     triggerType: 'streak.milestone',
-    triggerCriteria: { days: 7 },
+    triggerCriteria: { type: 'streak_days', days: 7 },
     iconType: 'emoji',
     rarity: 'rare',
     xpReward: 100,
     visibleToStudent: true,
   },
   {
-    id: 'ba000002-0000-0000-0000-000000000002',
+    id: 'badge000-0000-0000-0000-000000000009',
     slug: 'grammar-master',
     name: 'Grammar Master',
-    description: 'Achieve 90%+ accuracy on grammar activities (minimum 20 attempts).',
+    description: 'Achieve 90%+ accuracy across 20+ grammar-tagged activities.',
     triggerType: 'activity.correct',
-    triggerCriteria: { accuracyPct: 90, minAttempts: 20, skillTagPattern: '_grammar' },
+    triggerCriteria: {
+      type: 'grammar_accuracy',
+      accuracy_pct: 90,
+      min_attempts: 20,
+      skill_tag_pattern: 'grammar',
+    },
     iconType: 'emoji',
     rarity: 'rare',
     xpReward: 150,
     visibleToStudent: true,
   },
   {
-    id: 'ba000002-0000-0000-0000-000000000003',
+    id: 'badge000-0000-0000-0000-000000000010',
     slug: 'course-conqueror',
     name: 'Course Conqueror',
-    description: 'Complete every lesson in a course.',
+    description: 'Complete every lesson in an entire course.',
     triggerType: 'lesson.completed',
-    triggerCriteria: { allLessonsInCourse: true },
+    triggerCriteria: { type: 'course_conqueror' },
     iconType: 'emoji',
     rarity: 'rare',
     xpReward: 150,
@@ -153,24 +166,24 @@ export const BADGE_CATALOGUE: BadgeDefinition[] = [
   // ── Legendary (2) ────────────────────────────────────────
 
   {
-    id: 'ba000003-0000-0000-0000-000000000001',
+    id: 'badge000-0000-0000-0000-000000000011',
     slug: 'month-streak',
     name: 'Unstoppable',
-    description: 'Keep a 30-day review streak.',
+    description: 'Maintain a 30-day study streak.',
     triggerType: 'streak.milestone',
-    triggerCriteria: { days: 30 },
+    triggerCriteria: { type: 'streak_days', days: 30 },
     iconType: 'emoji',
     rarity: 'legendary',
     xpReward: 300,
     visibleToStudent: true,
   },
   {
-    id: 'ba000003-0000-0000-0000-000000000002',
+    id: 'badge000-0000-0000-0000-000000000012',
     slug: 'century-club',
     name: 'Century Club',
     description: 'Complete 100 lessons.',
     triggerType: 'lesson.completed',
-    triggerCriteria: { count: 100 },
+    triggerCriteria: { type: 'count', threshold: 100 },
     iconType: 'emoji',
     rarity: 'legendary',
     xpReward: 500,

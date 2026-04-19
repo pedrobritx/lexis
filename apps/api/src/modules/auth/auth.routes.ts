@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
+import { prisma } from '@lexis/db'
 import { authenticate } from '../../plugins/authenticate.js'
 import * as authService from './auth.service.js'
 import type { ApiError } from '@lexis/types'
@@ -20,6 +21,9 @@ const PasskeyLoginBeginSchema = z.object({ email: z.string().email() })
 const PasskeyLoginCompleteSchema = z.object({
   email: z.string().email(),
   response: z.object({}).passthrough(), // AuthenticationResponseJSON
+})
+const ConsentSchema = z.object({
+  policyVersion: z.string().min(1),
 })
 
 // ─── Validation helper ────────────────────────────────────
@@ -113,6 +117,36 @@ export async function authRoutes(fastify: FastifyInstance) {
     if (!body) return
     await authService.logout(body.refreshToken)
     return reply.send({ message: 'Logged out' })
+  })
+
+  // ── Consent ───────────────────────────────────────────
+
+  /**
+   * POST /v1/auth/consent
+   * Record that the authenticated user has accepted the current policy version.
+   * Called once after first registration. Idempotent per policy version.
+   */
+  fastify.post('/consent', { preHandler: [authenticate] }, async (request, reply) => {
+    const body = validate(ConsentSchema, request.body, reply)
+    if (!body) return
+
+    // Only record consent once per user + policy version
+    const existing = await prisma.consentRecord.findFirst({
+      where: { userId: request.user.userId, policyVersion: body.policyVersion },
+    })
+
+    if (!existing) {
+      await prisma.consentRecord.create({
+        data: {
+          userId: request.user.userId,
+          policyVersion: body.policyVersion,
+          acceptedAt: new Date(),
+          ipAddress: request.ip ?? 'unknown',
+        },
+      })
+    }
+
+    return reply.send({ consented: true })
   })
 
   // ── Passkey management (authenticated) ────────────────

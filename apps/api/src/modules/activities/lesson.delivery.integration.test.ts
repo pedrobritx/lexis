@@ -22,6 +22,11 @@ vi.mock('resend', () => ({
   })),
 }))
 
+// ── Mock badge service so gamification XP doesn't bleed into delivery assertions ──
+vi.mock('../gamification/badge.service.js', () => ({
+  checkAndAwardBadges: vi.fn().mockResolvedValue([]),
+}))
+
 // ─── Helpers ──────────────────────────────────────────────
 
 function jwtSecret() {
